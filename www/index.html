@@ -86,28 +86,28 @@
     flex-shrink:0;
     border-bottom:1px solid var(--border);
     background:var(--topbar-bg);
-    padding:18px 24px;
-    padding-top:calc(18px + env(safe-area-inset-top, 0px));
-    padding-left:calc(24px + env(safe-area-inset-left, 0px));
-    padding-right:calc(24px + env(safe-area-inset-right, 0px));
+    padding:9px 16px;
+    padding-top:calc(9px + env(safe-area-inset-top, 0px));
+    padding-left:calc(16px + env(safe-area-inset-left, 0px));
+    padding-right:calc(16px + env(safe-area-inset-right, 0px));
     display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
   }
   .topbar, .topbar .brand-text h1{color:var(--topbar-text);}
   .topbar .eyebrow{color:var(--topbar-eyebrow);}
   .topbar .status-chip{color:var(--topbar-chip-text);border-color:var(--topbar-chip-border);}
-  .brand{display:flex;align-items:center;gap:14px;}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0;}
   .brand-mark{
-    width:42px;height:42px;border:1.5px solid var(--amber);border-radius:4px;
+    width:32px;height:32px;flex-shrink:0;border:1.5px solid var(--amber);border-radius:4px;
     display:flex;align-items:center;justify-content:center;
     font-family:var(--mono);font-weight:700;color:var(--amber);font-size:13px;
     background:rgba(255,176,32,0.06);letter-spacing:-0.5px;
   }
   .brand-text .eyebrow{
-    font-family:var(--mono);font-size:10.5px;letter-spacing:2.5px;color:var(--text-faint);
+    font-family:var(--mono);font-size:8.5px;letter-spacing:1.8px;color:var(--text-faint);
     text-transform:uppercase;margin-bottom:2px;
   }
   .brand-text h1{
-    margin:0;font-family:var(--cond);font-weight:700;font-size:20px;letter-spacing:0.3px;
+    margin:0;font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.3px;
     display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;
   }
   .version-badge{
@@ -116,8 +116,8 @@
     padding:2px 7px;
   }
   .status-chip{
-    font-family:var(--mono);font-size:11px;letter-spacing:1px;
-    border:1px solid var(--border);padding:6px 12px;border-radius:3px;
+    font-family:var(--mono);font-size:10px;letter-spacing:0.5px;
+    border:1px solid var(--border);padding:4px 8px;border-radius:3px;
     color:var(--text-dim);display:flex;align-items:center;gap:8px;
   }
   .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
@@ -194,8 +194,8 @@
   }
   .tab-btn{
     background:none;border:none;border-bottom:2px solid transparent;flex-shrink:0;
-    color:var(--text-faint);font-family:var(--cond);font-weight:700;font-size:13.5px;
-    letter-spacing:0.6px;text-transform:uppercase;padding:13px 16px 11px;cursor:pointer;
+    color:var(--text-faint);font-family:var(--cond);font-weight:700;font-size:12px;
+    letter-spacing:0.6px;text-transform:uppercase;padding:9px 13px 8px;cursor:pointer;
     transition:color .15s, border-color .15s;
   }
   .tab-btn:hover{color:var(--text-dim);}
@@ -574,9 +574,24 @@
   .quelle-tag.ro{border-color:var(--blue);color:var(--blue);}
 
   @media (max-width:820px){
+    /* Lehrgangs-Kacheln kompakter, damit mehrere gleichzeitig sichtbar sind */
+    .eintrag-grid{grid-template-columns:repeat(2, 1fr);gap:7px;}
+    .eintrag-row{padding:8px 9px;gap:5px;}
+    .eintrag-art{font-size:12.5px;line-height:1.2;}
+    .eintrag-meta{font-size:9.5px;gap:2px 8px;margin-top:3px;}
+    .eintrag-notiz{font-size:10px;margin-top:3px;}
+    .badge{font-size:8.5px;padding:1px 5px;}
+    .eintrag-actions .btn.icon{padding:5px 7px;font-size:12px;}
     .quelle-row{grid-template-columns:auto 1fr;}
     .quelle-row .list-row-actions{grid-column:1 / -1;justify-content:flex-end;}
   }
+
+  /* Kalender maximiert: Kopfzeile und Reiter ausblenden */
+  body.kal-max .topbar,
+  body.kal-max .tab-bar{display:none;}
+  body.kal-max .kal-toolbar{padding-top:calc(6px + env(safe-area-inset-top, 0px));}
+  .kal-monat{cursor:pointer;user-select:none;padding:2px 6px;border-radius:4px;}
+  .kal-monat:active{background:var(--amber-dim);}
 
   ::selection{background:var(--amber-dim);}
 
@@ -660,9 +675,11 @@
   }
 
   @media (max-width:480px){
-    .grid, .tape-wrap, .cockpit-wrap, .tab-bar, .settings-bar, footer{
-      padding-left:11px;padding-right:11px;
+    .grid, .tape-wrap, .cockpit-wrap, .tab-bar{
+      padding-left:9px;padding-right:9px;
     }
+    .eintrag-grid{grid-template-columns:repeat(2, 1fr);gap:6px;}
+    .eintrag-art{font-size:11.5px;}
     .topbar{padding-left:calc(11px + env(safe-area-inset-left, 0px));padding-right:calc(11px + env(safe-area-inset-right, 0px));}
     .brand-text h1{font-size:15.5px;}
     .version-badge{font-size:9px;}
@@ -693,35 +710,76 @@
     <div class="brand-mark">DC</div>
     <div class="brand-text">
       <div class="eyebrow">Dienstliches Cockpit</div>
-      <h1>Urlaub &middot; Überstunden &middot; Ablaufdaten <span class="version-badge" id="versionBadge">v2.3 · 07.08.2026</span></h1>
+      <h1>Dienst-Cockpit <span class="version-badge" id="versionBadge">v2.4</span></h1>
     </div>
   </div>
-  <div class="status-chip">
-    <span class="status-dot" id="topStatusDot"></span>
-    <span id="topStatusText">Ablaufregister: 0 Einträge</span>
+  <div class="kal-nav">
+    <span class="status-chip"><span id="topStatusText">—</span></span>
+    <button class="btn small" id="menueBtn" type="button" title="Menü">☰</button>
   </div>
 </div>
 
-<div class="settings-bar">
-  <div class="seg-cluster">
-    <span class="seg-label">Ansicht</span>
-    <div class="seg-group">
-      <button class="seg-btn active" data-theme-btn="dark">Dunkel</button>
-      <button class="seg-btn" data-theme-btn="light">Hell</button>
+<input type="file" id="importFile" accept="application/json" style="display:none;">
+
+<div id="menueOverlay" class="changelog-overlay" style="display:none;">
+  <div class="changelog-modal">
+    <div class="changelog-head">
+      <h2>Menü</h2>
+      <button class="btn" id="menueZu" type="button">&times; Schließen</button>
     </div>
-  </div>
-  <div class="seg-cluster">
-    <span class="seg-label">Daten</span>
-    <div class="seg-group">
-      <button class="seg-btn" id="exportBtn" type="button">&#8595; Export .json</button>
-      <button class="seg-btn" id="importBtn" type="button">&#8593; Import .json</button>
-    </div>
-    <input type="file" id="importFile" accept="application/json" style="display:none;">
-  </div>
-  <div class="seg-cluster">
-    <span class="seg-label">Info</span>
-    <div class="seg-group">
-      <button class="seg-btn" id="openChangelogBtn" type="button">&#128220; Changelog</button>
+    <div class="changelog-body">
+
+      <div class="field" style="margin-bottom:16px;">
+        <label>Ansicht</label>
+        <div class="seg-group">
+          <button class="seg-btn active" data-theme-btn="dark" type="button">Dunkel</button>
+          <button class="seg-btn" data-theme-btn="light" type="button">Hell</button>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px;">
+        <label>Sicherung</label>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn" id="exportBtn" type="button">&#8595; Export .json</button>
+          <button class="btn" id="importBtn" type="button">&#8593; Import .json</button>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px;">
+        <label>Benachrichtigungen</label>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn" id="benErlauben" type="button">Erlauben</button>
+          <button class="btn" id="benNeu" type="button">↻ Neu planen</button>
+        </div>
+        <div class="hint" id="benStatus">Status wird geprüft …</div>
+        <div class="row c2" style="margin-top:10px;">
+          <div class="field">
+            <label for="benVorlauf">Termin: Minuten vorher</label>
+            <input type="number" id="benVorlauf" min="0" step="5" value="15">
+          </div>
+          <div class="field">
+            <label for="benGanztagsZeit">Ganztägig: Vortag um</label>
+            <input type="text" id="benGanztagsZeit" placeholder="HH:MM" value="21:00">
+          </div>
+        </div>
+        <div class="hint">Gilt für selbst angelegte Termine, ablaufende Lehrgänge und fällige Aufgaben.</div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px;">
+        <label>Info</label>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn" id="openChangelogBtn" type="button">&#128220; Changelog</button>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border-soft);margin:16px 0;"></div>
+      <div class="hint" style="line-height:1.7;">
+        Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
+        Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
+        Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
+        Version 2.4 &middot; Stand 07.08.2026 &middot; Daten liegen nur auf diesem Gerät<br>
+        Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
+      </div>
     </div>
   </div>
 </div>
@@ -733,6 +791,20 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v2.4 <span class="cl-date">07.08.2026</span></div>
+        <ul>
+          <li><b>Benachrichtigungen neu:</b> bisher gab es keine. Erinnerungen jetzt für selbst angelegte Termine, ablaufende Lehrgänge und fällige Aufgaben</li>
+          <li>Termine erinnern standardmäßig 15 Minuten vorher, ganztägige Termine am Vortag um 21 Uhr — beides im Menü einstellbar</li>
+          <li>Lehrgänge melden sich 6 Monate, 3 Monate und 2 Wochen vor Ablauf; Aufgaben am Fälligkeitstag</li>
+          <li>Fußleiste entfernt, ihre Hinweise stehen jetzt im Menü — der Platz gehört den Inhalten</li>
+          <li>Einstellungsleiste durch ein Menü (☰ oben rechts) ersetzt: Ansicht, Sicherung, Benachrichtigungen und Changelog</li>
+          <li>Kopfzeile deutlich flacher</li>
+          <li>Antippen des Monatsnamens maximiert den Kalender auf das volle Display</li>
+          <li>Fehler behoben: es wurden nur zwei Termine je Tag angezeigt. Die verfügbare Höhe wurde zu früh gemessen; sie wird jetzt bei jeder Größenänderung neu bestimmt</li>
+          <li>Lehrgangs-Kacheln auf dem Handy kompakter — zwei nebeneinander, mehrere ohne Scrollen sichtbar</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v2.3 <span class="cl-date">07.08.2026</span></div>
         <ul>
@@ -1438,12 +1510,7 @@
   </div>
 </div>
 
-<footer>
-  Urlaub: berechnet Werktage Mo–Fr, gesetzliche Feiertage Baden-Württemberg automatisch ausgenommen &middot; Ablaufregister: Warnstufe „gelb" ab 6 Monate vor Ablauf &middot; Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.
-  <div style="margin-top:8px;color:var(--text-dim);">
-    Version 2.3 &middot; Stand 07.08.2026 &middot; Daten lokal im Browser gespeichert &middot; Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
-  </div>
-</footer>
+
 
 <script>
 (function(){
@@ -1538,13 +1605,24 @@
   })();
 
   /* =========================================================
-     Changelog
+     Menü und Changelog
      ========================================================= */
+  const menueOverlay = document.getElementById("menueOverlay");
   const changelogOverlay = document.getElementById("changelogOverlay");
-  document.getElementById("openChangelogBtn").addEventListener("click", () => { changelogOverlay.style.display = "flex"; });
+
+  document.getElementById("menueBtn").addEventListener("click", () => { menueOverlay.style.display = "flex"; });
+  document.getElementById("menueZu").addEventListener("click", () => { menueOverlay.style.display = "none"; });
+  menueOverlay.addEventListener("click", (e) => { if(e.target === menueOverlay) menueOverlay.style.display = "none"; });
+
+  document.getElementById("openChangelogBtn").addEventListener("click", () => {
+    menueOverlay.style.display = "none";
+    changelogOverlay.style.display = "flex";
+  });
   document.getElementById("closeChangelogBtn").addEventListener("click", () => { changelogOverlay.style.display = "none"; });
   changelogOverlay.addEventListener("click", (e) => { if(e.target === changelogOverlay) changelogOverlay.style.display = "none"; });
-  document.addEventListener("keydown", (e) => { if(e.key === "Escape") changelogOverlay.style.display = "none"; });
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape"){ changelogOverlay.style.display = "none"; menueOverlay.style.display = "none"; }
+  });
 
   /* =========================================================
      FEIERTAGE BADEN-WÜRTTEMBERG
@@ -2143,7 +2221,7 @@
 
   const listContainer = document.getElementById("listContainer");
   const emptyState = document.getElementById("emptyState");
-  const topStatusDot = document.getElementById("topStatusDot");
+  const topStatusDot = null;
   const topStatusText = document.getElementById("topStatusText");
   const cntGueltig = document.getElementById("cntGueltig");
   const cntWarnung = document.getElementById("cntWarnung");
@@ -2214,7 +2292,7 @@
       `<div class="seg abgelaufen" style="width:${(a/total)*100}%"></div>`;
 
     topStatusText.textContent = `Lehrgänge: ${eintraege.length} Eintrag${eintraege.length === 1 ? "" : "e"}`;
-    topStatusDot.className = "status-dot" + (a > 0 ? " crit" : (w > 0 ? " warn" : ""));
+    if(topStatusDot) topStatusDot.className = "status-dot" + (a > 0 ? " crit" : (w > 0 ? " warn" : ""));
   }
 
   /* =========================================================
@@ -2709,6 +2787,12 @@
 
   document.getElementById("kalPrev").addEventListener("click", () => monatWechseln(-1));
   document.getElementById("kalNext").addEventListener("click", () => monatWechseln(1));
+  kalMonatEl.title = "Antippen: Kalender maximieren";
+  kalMonatEl.addEventListener("click", () => {
+    document.body.classList.toggle("kal-max");
+    setTimeout(() => { renderKalender(); balkenKappen(); }, 30);
+  });
+
   document.getElementById("kalHeute").addEventListener("click", () => {
     const h = new Date();
     kalAnsichtJahr = h.getFullYear(); kalAnsichtMonat = h.getMonth();
@@ -2767,6 +2851,47 @@
     if(h.length < 6) return "#ffffff";
     const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
     return (r*299 + g*587 + b*114) / 1000 > 150 ? "#11151b" : "#ffffff";
+  }
+
+  // Balken ein- oder ausblenden, je nachdem wie viele in die Zeilenhöhe passen.
+  // Wird mehrfach aufgerufen, da die endgültige Höhe erst nach dem Layout feststeht.
+  function balkenKappen(){
+    kalGrid.querySelectorAll(".kal-balken-schicht").forEach(schicht => {
+      const hoehe = schicht.clientHeight;
+      if(hoehe <= 0) return;
+      const maxSpuren = Math.max(1, Math.floor(hoehe / 13));
+
+      schicht.querySelectorAll(".kal-mehr-marke").forEach(m => m.remove());
+
+      const ueberProSpalte = {};
+      schicht.querySelectorAll(".kal-balken").forEach(b => {
+        const spur = +b.getAttribute("data-spur");
+        const passt = spur < maxSpuren;
+        b.style.display = passt ? "" : "none";
+        if(!passt){
+          const vonSpalte = +b.getAttribute("data-von");
+          const bisSpalte = +b.getAttribute("data-bis");
+          for(let c = vonSpalte; c <= bisSpalte; c++){
+            ueberProSpalte[c] = (ueberProSpalte[c] || 0) + 1;
+          }
+        }
+      });
+
+      Object.keys(ueberProSpalte).forEach(spalte => {
+        const marke = document.createElement("div");
+        marke.className = "kal-mehr-marke";
+        marke.textContent = "+" + ueberProSpalte[spalte];
+        marke.style.left = "calc(" + (spalte * 100 / 7) + "% + 2px)";
+        marke.style.top = ((maxSpuren - 1) * 13 + 1) + "px";
+        schicht.appendChild(marke);
+      });
+    });
+  }
+
+  // Bei jeder Größenänderung des Rasters neu kappen
+  if(window.ResizeObserver){
+    const beobachter = new ResizeObserver(() => balkenKappen());
+    beobachter.observe(kalGrid);
   }
 
   function terminFarbe(t){
@@ -2905,6 +3030,8 @@
         balken.style.width = "calc(" + ((bisSpalte - vonSpalte + 1) * 100 / 7) + "% - 3px)";
         balken.style.top = (spur * 13) + "px";
         balken.setAttribute("data-spur", spur);
+        balken.setAttribute("data-von", vonSpalte);
+        balken.setAttribute("data-bis", bisSpalte);
         // Titel nur am tatsächlichen Beginn des sichtbaren Balkens
         balken.textContent = sp.termin.titel;
         schicht.appendChild(balken);
@@ -2914,31 +3041,9 @@
       kalGrid.appendChild(zeile);
     }
 
-    // Balken kappen, die nicht mehr in die Zeilenhöhe passen
-    requestAnimationFrame(() => {
-      kalGrid.querySelectorAll(".kal-balken-schicht").forEach(schicht => {
-        const hoehe = schicht.clientHeight;
-        const maxSpuren = Math.max(1, Math.floor(hoehe / 13));
-        const proSpalteUeber = {};
-        schicht.querySelectorAll(".kal-balken").forEach(b => {
-          const spur = +b.getAttribute("data-spur");
-          if(spur >= maxSpuren){
-            b.style.display = "none";
-            const linksProzent = parseFloat(b.style.left.replace("calc(", "")) || 0;
-            const spalte = Math.round(linksProzent / (100 / 7));
-            proSpalteUeber[spalte] = (proSpalteUeber[spalte] || 0) + 1;
-          }
-        });
-        Object.keys(proSpalteUeber).forEach(spalte => {
-          const marke = document.createElement("div");
-          marke.className = "kal-mehr-marke";
-          marke.textContent = "+" + proSpalteUeber[spalte];
-          marke.style.left = "calc(" + (spalte * 100 / 7) + "% + 2px)";
-          marke.style.top = ((maxSpuren - 1) * 13 + 1) + "px";
-          schicht.appendChild(marke);
-        });
-      });
-    });
+    balkenKappen();
+    requestAnimationFrame(balkenKappen);
+    setTimeout(balkenKappen, 120);
 
     // Tippen = Tag wählen, langes Drücken = Termin anlegen
     kalGrid.querySelectorAll("[data-tag]").forEach(el => {
@@ -3503,6 +3608,7 @@
 
     kalender.eigene.push(termin);
     saveKalender();
+    if(typeof benPlanen === "function") benPlanen();
 
     nvTitel.value = ""; nvVon.value = ""; nvBis.value = "";
     nvOrt.value = ""; nvNotiz.value = "";
@@ -3529,6 +3635,7 @@
     if(istApp && t.nativId) await nativTerminLoeschen(t.nativId);
     kalender.eigene = kalender.eigene.filter(x => x.id !== id);
     saveKalender();
+    if(typeof benPlanen === "function") benPlanen();
     renderEigene();
     if(istApp) await nativKalenderEinlesen();
     renderKalender();
@@ -3837,7 +3944,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "2.3";
+  const APP_VERSION = "2.4";
 
   document.getElementById("exportBtn").addEventListener("click", async () => {
     const payload = {
@@ -3939,6 +4046,183 @@
   });
 
   /* =========================================================
+     BENACHRICHTIGUNGEN
+     ========================================================= */
+  const BEN_KEY = "benachrichtigungen_v1";
+  let ben = loadJSON(BEN_KEY, { vorlaufMin: 15, ganztagsZeit: "21:00", erlaubt: false });
+  if(typeof ben.vorlaufMin !== "number") ben.vorlaufMin = 15;
+  if(!/^\d{1,2}:\d{2}$/.test(ben.ganztagsZeit || "")) ben.ganztagsZeit = "21:00";
+  function saveBen(){ saveJSON(BEN_KEY, ben); }
+
+  function benPlugin(){
+    return (Cap && Cap.Plugins && Cap.Plugins.LocalNotifications) || window.LocalNotifications || null;
+  }
+
+  const benStatusEl = document.getElementById("benStatus");
+  const benVorlauf = document.getElementById("benVorlauf");
+  const benGanztagsZeit = document.getElementById("benGanztagsZeit");
+  benVorlauf.value = ben.vorlaufMin;
+  benGanztagsZeit.value = ben.ganztagsZeit;
+
+  benVorlauf.addEventListener("change", () => {
+    const v = parseInt(benVorlauf.value, 10);
+    ben.vorlaufMin = (Number.isFinite(v) && v >= 0) ? v : 15;
+    benVorlauf.value = ben.vorlaufMin;
+    saveBen(); benPlanen();
+  });
+  benGanztagsZeit.addEventListener("change", () => {
+    if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(benGanztagsZeit.value.trim())){
+      alert("Bitte eine gültige Uhrzeit im Format HH:MM eingeben.");
+      benGanztagsZeit.value = ben.ganztagsZeit;
+      return;
+    }
+    ben.ganztagsZeit = benGanztagsZeit.value.trim();
+    saveBen(); benPlanen();
+  });
+
+  function benStatusZeigen(text){ if(benStatusEl) benStatusEl.textContent = text; }
+
+  async function benBerechtigung(){
+    const P = benPlugin();
+    if(!P){
+      benStatusZeigen("In dieser Ansicht nicht verfügbar — Benachrichtigungen gibt es nur in der App.");
+      return false;
+    }
+    try{
+      let st = await P.checkPermissions();
+      if(st && st.display !== "granted"){
+        st = await P.requestPermissions();
+      }
+      const ok = st && st.display === "granted";
+      ben.erlaubt = ok; saveBen();
+      benStatusZeigen(ok ? "Benachrichtigungen sind erlaubt." : "Benachrichtigungen wurden nicht erlaubt.");
+      return ok;
+    }catch(e){
+      benStatusZeigen("Berechtigung konnte nicht geprüft werden.");
+      return false;
+    }
+  }
+
+  // Stabile, kleine Zahl als Kennung je Eintrag (Android verlangt Integer)
+  function benId(text){
+    let h = 0;
+    const str = String(text);
+    for(let i = 0; i < str.length; i++){
+      h = ((h << 5) - h) + str.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h % 2000000000) + 1;
+  }
+
+  function benZeitpunktTermin(t){
+    const startD = parseDateDE(t.von);
+    if(!startD) return null;
+    if(t.ganztags){
+      // Am Vortag zur eingestellten Uhrzeit
+      const [h, m] = ben.ganztagsZeit.split(":").map(Number);
+      const d = new Date(startD.getTime());
+      d.setDate(d.getDate() - 1);
+      d.setHours(h || 21, m || 0, 0, 0);
+      return d;
+    }
+    const [sh, sm] = (t.zeitVon || "08:00").split(":").map(Number);
+    const d = new Date(startD.getTime());
+    d.setHours(sh || 0, sm || 0, 0, 0);
+    return new Date(d.getTime() - ben.vorlaufMin * 60000);
+  }
+
+  async function benPlanen(){
+    const P = benPlugin();
+    if(!P) return;
+    if(!ben.erlaubt){
+      const ok = await benBerechtigung();
+      if(!ok) return;
+    }
+
+    const jetzt = Date.now();
+    const geplant = [];
+
+    // 1) Selbst angelegte Termine
+    (kalender.eigene || []).forEach(t => {
+      const zeit = benZeitpunktTermin(t);
+      if(!zeit || zeit.getTime() <= jetzt) return;
+      geplant.push({
+        id: benId("termin:" + t.id),
+        title: t.titel,
+        body: t.ganztags
+          ? "Morgen ganztägig"
+          : "Beginnt um " + (t.zeitVon || "") + (t.ort ? " · " + t.ort : ""),
+        schedule: { at: zeit, allowWhileIdle: true }
+      });
+    });
+
+    // 2) Ablaufende Lehrgänge: 6 Monate, 3 Monate und 2 Wochen vorher
+    eintraege.forEach(e => {
+      const bis = parseDateDE(e.gueltigBis);
+      if(!bis) return;
+      [[6, "Monate"], [3, "Monate"], [0.5, "Monate"]].forEach(([wert], idx) => {
+        const d = new Date(bis.getTime());
+        d.setMonth(d.getMonth() - Math.floor(wert));
+        if(wert === 0.5){ d.setTime(bis.getTime()); d.setDate(d.getDate() - 14); }
+        d.setHours(9, 0, 0, 0);
+        if(d.getTime() <= jetzt) return;
+        geplant.push({
+          id: benId("lehrgang:" + e.id + ":" + idx),
+          title: "Lehrgang läuft ab: " + e.art,
+          body: "Gültig bis " + fmt(e.gueltigBis),
+          schedule: { at: d, allowWhileIdle: true }
+        });
+      });
+    });
+
+    // 3) Fällige Aufgaben
+    (todos.eintraege || []).forEach(t => {
+      if(t.erledigt || !t.faellig) return;
+      const d = parseDateDE(t.faellig);
+      if(!d) return;
+      d.setHours(9, 0, 0, 0);
+      if(d.getTime() <= jetzt) return;
+      geplant.push({
+        id: benId("todo:" + t.id),
+        title: "Aufgabe fällig",
+        body: t.text,
+        schedule: { at: d, allowWhileIdle: true }
+      });
+    });
+
+    try{
+      // Bisherige Planung zurücknehmen, damit nichts doppelt kommt
+      const offen = await P.getPending();
+      if(offen && offen.notifications && offen.notifications.length){
+        await P.cancel({ notifications: offen.notifications.map(n => ({ id: n.id })) });
+      }
+      if(geplant.length){
+        // Android verträgt nur begrenzt viele; die nächsten 60 genügen
+        geplant.sort((a, b) => a.schedule.at - b.schedule.at);
+        await P.schedule({ notifications: geplant.slice(0, 60) });
+      }
+      benStatusZeigen(geplant.length
+        ? geplant.length + " Erinnerung" + (geplant.length === 1 ? "" : "en") + " geplant."
+        : "Keine anstehenden Erinnerungen.");
+    }catch(e){
+      benStatusZeigen("Erinnerungen konnten nicht geplant werden: " + (e && e.message ? e.message : e));
+    }
+  }
+
+  document.getElementById("benErlauben").addEventListener("click", async () => {
+    const ok = await benBerechtigung();
+    if(ok) benPlanen();
+  });
+  document.getElementById("benNeu").addEventListener("click", benPlanen);
+
+  if(!istApp){
+    benStatusZeigen("Benachrichtigungen stehen nur in der Android-App zur Verfügung.");
+  }else{
+    benPlugin() ? benBerechtigung().then(ok => { if(ok) benPlanen(); })
+                : benStatusZeigen("Benachrichtigungs-Plugin nicht verfügbar.");
+  }
+
+  /* =========================================================
      Init
      ========================================================= */
   resetForm();
@@ -3959,6 +4243,7 @@
       const einstellungenOffen = kalEinstellungenBereich.style.display !== "none";
       if(fab) fab.style.display = (kalAktiv && !einstellungenOffen) ? "flex" : "none";
 
+      if(!kalAktiv) document.body.classList.remove("kal-max");
       const startAktiv = document.getElementById("tabStart").classList.contains("active");
       document.body.classList.toggle("zeigt-cockpit", startAktiv);
 
