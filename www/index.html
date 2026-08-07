@@ -742,7 +742,7 @@
     <div class="brand-mark">DC</div>
     <div class="brand-text">
       <div class="eyebrow">Dienstliches Cockpit</div>
-      <h1>Dienst-Cockpit <span class="version-badge" id="versionBadge">v2.6</span></h1>
+      <h1>Dienst-Cockpit <span class="version-badge" id="versionBadge">v2.7</span></h1>
     </div>
   </div>
   <div class="kal-nav">
@@ -809,7 +809,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 2.6 &middot; Stand 07.08.2026 &middot; Daten liegen nur auf diesem Gerät<br>
+        Version 2.7 &middot; Stand 07.08.2026 &middot; Daten liegen nur auf diesem Gerät<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -823,6 +823,15 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v2.7 <span class="cl-date">07.08.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Farben stimmten in der Kalenderliste, wurden im Kalender selbst aber anders dargestellt</li>
+          <li>Ursache war ein Überrest der entfernten Urlaubsverrechnung: Termine, deren Titel mit „EU", „EU?" oder „FvD" begann, wurden zwangsweise rot, blau oder amber gefärbt — unabhängig von ihrem Kalender</li>
+          <li>Termine übernehmen jetzt durchgehend die Farbe ihres Kalenders, in Balken, Tagesliste und Detailansicht</li>
+          <li>Eigene Termine erscheinen in der Farbe des Kalenders, in dem sie gespeichert wurden</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v2.6 <span class="cl-date">07.08.2026</span></div>
         <ul>
@@ -3000,10 +3009,9 @@
   }
 
   function terminFarbe(t){
-    const kl = terminKlasse(t.titel);
-    if(kl === "eu")  return "#c0392b";
-    if(kl === "eup") return "#2e6fa8";
-    if(kl === "fvd") return "#b8860b";
+    // Immer die Farbe des Kalenders verwenden, aus dem der Termin stammt.
+    // (Früher wurden Titel mit EU / EU? / FvD zwangsweise umgefärbt — Rest der
+    //  entfernten Urlaubsverrechnung; dadurch stimmten die Farben nicht mehr.)
     return farbeFuerQuelle(t.quelleId, t.farbe);
   }
 
@@ -3864,14 +3872,15 @@
     eigeneList.innerHTML = "";
 
     liste.forEach(t => {
-      const kl = terminKlasse(t.titel);
       const zeit = t.ganztags ? "Ganztägig" : (t.zeitVon + " – " + t.zeitBis);
       const spanne = t.bis && t.bis !== t.von ? fmt(t.von) + " – " + fmt(t.bis) : fmt(t.von);
       const anh = t.anhaenge ? t.anhaenge.length : 0;
 
       const row = document.createElement("div");
       row.className = "list-row";
-      row.style.borderLeftColor = kl === "eu" ? "var(--red)" : kl === "eup" ? "var(--blue)" : kl === "fvd" ? "var(--amber)" : "var(--green)";
+      // Farbe des Zielkalenders, sofern bekannt
+      const zielKal = geraeteKalender.find(x => x.id === (t.kalenderId || zielKalenderId));
+      row.style.borderLeftColor = (zielKal && zielKal.farbe) || "var(--green)";
       row.innerHTML =
         '<div class="list-row-main">' +
           '<b class="nv-titel"></b>' +
@@ -4263,7 +4272,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "2.6";
+  const APP_VERSION = "2.7";
 
   document.getElementById("exportBtn").addEventListener("click", async () => {
     const payload = {
