@@ -41,7 +41,7 @@ jobs:
             echo "FEHLER: $MANIFEST nicht gefunden."
             exit 1
           fi
-          for P in READ_CALENDAR WRITE_CALENDAR; do
+          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM USE_EXACT_ALARM RECEIVE_BOOT_COMPLETED VIBRATE; do
             if grep -q "android.permission.$P" "$MANIFEST"; then
               echo "bereits vorhanden: $P"
             else
@@ -51,7 +51,7 @@ jobs:
           done
           echo "--- AndroidManifest.xml ---"
           cat "$MANIFEST"
-          for P in READ_CALENDAR WRITE_CALENDAR; do
+          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS; do
             grep -q "android.permission.$P" "$MANIFEST" || { echo "FEHLER: $P fehlt"; exit 1; }
           done
 
