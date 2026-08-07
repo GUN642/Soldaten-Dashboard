@@ -586,6 +586,23 @@
   .quelle-tag.google{border-color:#4285f4;color:#4285f4;}
   .quelle-tag.icloud{border-color:#8e8e93;color:#a0a0a8;}
   .quelle-tag.lokal{border-color:var(--text-faint);color:var(--text-faint);}
+  .quelle-tag.abo{border-color:#b98cff;color:#b98cff;}
+
+  .gruppen-kopf{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-family:var(--mono);font-size:10px;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--text-faint);margin:16px 0 7px;padding-bottom:4px;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .gruppen-kopf:first-child{margin-top:0;}
+  .gruppen-kopf .gruppen-zahl{
+    font-size:9.5px;border:1px solid var(--border);border-radius:20px;
+    padding:1px 7px;letter-spacing:0;
+  }
+  .gruppen-kopf.konto-ro     .gruppen-name{color:var(--blue);}
+  .gruppen-kopf.konto-google .gruppen-name{color:#4285f4;}
+  .gruppen-kopf.konto-icloud .gruppen-name{color:#a0a0a8;}
+  .gruppen-kopf.konto-abo    .gruppen-name{color:#b98cff;}
   .quelle-tag.ro{border-color:var(--blue);color:var(--blue);}
 
   @media (max-width:820px){
@@ -725,7 +742,7 @@
     <div class="brand-mark">DC</div>
     <div class="brand-text">
       <div class="eyebrow">Dienstliches Cockpit</div>
-      <h1>Dienst-Cockpit <span class="version-badge" id="versionBadge">v2.5</span></h1>
+      <h1>Dienst-Cockpit <span class="version-badge" id="versionBadge">v2.6</span></h1>
     </div>
   </div>
   <div class="kal-nav">
@@ -792,7 +809,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 2.5 &middot; Stand 07.08.2026 &middot; Daten liegen nur auf diesem Gerät<br>
+        Version 2.6 &middot; Stand 07.08.2026 &middot; Daten liegen nur auf diesem Gerät<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -806,6 +823,14 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v2.6 <span class="cl-date">07.08.2026</span></div>
+        <ul>
+          <li>Gerätekalender sind jetzt nach Quelle gruppiert: Google, Outlook, iCloud, Lokal, Abonniert — mit Überschrift und Anzahl je Gruppe</li>
+          <li>Innerhalb einer Gruppe wird nach Konto und Name sortiert</li>
+          <li>Abonnierte und schreibgeschützte Kalender werden erkannt und gesondert ausgewiesen (etwa Feiertagskalender oder der freigegebene Kalender der Ehefrau)</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v2.5 <span class="cl-date">07.08.2026</span></div>
         <ul>
@@ -3886,10 +3911,35 @@
     return (Cap && Cap.Plugins && Cap.Plugins.CapacitorCalendar) || window.CapacitorCalendar || null;
   }
 
+  // Reihenfolge der Gruppen in der Liste
+  const KONTO_REIHENFOLGE = ["Google", "Outlook", "iCloud", "Lokal", "Abonniert"];
+  function kontoRang(dienst){
+    const i = KONTO_REIHENFOLGE.indexOf(dienst);
+    return i === -1 ? KONTO_REIHENFOLGE.length : i;
+  }
+  function kontoKlasse(dienst){
+    const d = String(dienst).toLowerCase();
+    if(d === "outlook")   return "ro";
+    if(d === "google")    return "google";
+    if(d === "icloud")    return "icloud";
+    if(d === "lokal")     return "lokal";
+    if(d === "abonniert") return "abo";
+    return "";
+  }
+
   // Herkunft eines Kalenders in Klartext übersetzen
   function kontoBezeichnung(k){
     const typ  = String(k.accountType || k.type || "").toLowerCase();
     const name = String(k.accountName || k.ownerAccount || k.owner || "").trim();
+
+    // Abonnierte bzw. nur lesbare Kalender gesondert ausweisen
+    const nurLesbar = (k.isWritable === false)
+      || (typeof k.accessLevel === "number" && k.accessLevel < 500);
+    const aboTyp = typ.includes("subscribed") || typ.includes("ical")
+      || typ.includes("ics") || typ.includes("webcal");
+    if(aboTyp || (nurLesbar && !typ.includes("local"))){
+      return { dienst: "Abonniert", name: name || k.title || "" };
+    }
 
     let dienst = "";
     if(typ.includes("google")) dienst = "Google";
@@ -4017,7 +4067,33 @@
     // Sichtbarkeit
     const PALETTE = ["#5fb4ff","#35d488","#ffb020","#ff5c5c","#b98cff","#ff8fc7","#4dd0c4","#8b96a5"];
     nativKalenderListe.innerHTML = "";
-    geraeteKalender.forEach(k => {
+
+    // Nach Quelle gruppieren, innerhalb der Gruppe nach Konto und Name
+    const sortiert = geraeteKalender.slice().sort((x, y) => {
+      const dx = (x.konto && x.konto.dienst) || "Sonstige";
+      const dy = (y.konto && y.konto.dienst) || "Sonstige";
+      const rx = kontoRang(dx), ry = kontoRang(dy);
+      if(rx !== ry) return rx - ry;
+      if(dx !== dy) return dx.localeCompare(dy, "de");
+      const kx = (x.konto && x.konto.name) || "", ky = (y.konto && y.konto.name) || "";
+      if(kx !== ky) return kx.localeCompare(ky, "de");
+      return String(x.title).localeCompare(String(y.title), "de");
+    });
+
+    let letzteGruppe = null;
+    sortiert.forEach(k => {
+      const gruppe = (k.konto && k.konto.dienst) || "Sonstige";
+      if(gruppe !== letzteGruppe){
+        letzteGruppe = gruppe;
+        const anzahl = sortiert.filter(x => ((x.konto && x.konto.dienst) || "Sonstige") === gruppe).length;
+        const kopf = document.createElement("div");
+        kopf.className = "gruppen-kopf konto-" + kontoKlasse(gruppe);
+        kopf.innerHTML = '<span class="gruppen-name"></span><span class="gruppen-zahl"></span>';
+        kopf.querySelector(".gruppen-name").textContent = gruppe;
+        kopf.querySelector(".gruppen-zahl").textContent = anzahl;
+        nativKalenderListe.appendChild(kopf);
+      }
+
       const row = document.createElement("div");
       row.className = "quelle-row";
       row.style.borderLeftColor = k.farbe || "var(--text-faint)";
@@ -4025,10 +4101,23 @@
         '<div class="todo-check" data-sicht="' + k.id + '">' + (k.sichtbar ? "✓" : "") + '</div>' +
         '<div style="min-width:0;">' +
           '<div class="quelle-name"></div>' +
-          '<div class="farb-reihe" data-farben="' + k.id + '"></div>' +
+          '<div class="quelle-meta"></div>' +
+          '<div class="farb-reihe"></div>' +
         '</div>' +
         '<div></div>';
-      row.querySelector(".quelle-name").textContent = k.title;
+
+      const nameEl = row.querySelector(".quelle-name");
+      nameEl.textContent = k.title;
+      if(k.konto && k.konto.dienst){
+        const tag = document.createElement("span");
+        tag.className = "quelle-tag " + kontoKlasse(k.konto.dienst);
+        tag.textContent = k.konto.dienst;
+        nameEl.appendChild(tag);
+      }
+      row.querySelector(".quelle-meta").textContent =
+        ((k.konto && k.konto.name) ? k.konto.name : "Konto unbekannt")
+        + (k.eigeneFarbe ? " · eigene Farbe" : "");
+
       const reihe = row.querySelector(".farb-reihe");
       PALETTE.forEach(f => {
         const punkt = document.createElement("div");
@@ -4038,19 +4127,18 @@
         punkt.setAttribute("data-kal", k.id);
         reihe.appendChild(punkt);
       });
+      if(k.eigeneFarbe && k.geraeteFarbe){
+        const zurueck = document.createElement("button");
+        zurueck.type = "button";
+        zurueck.className = "btn small";
+        zurueck.style.cssText = "padding:3px 8px;font-size:10px;margin-left:4px;";
+        zurueck.textContent = "↺ Gerätefarbe";
+        zurueck.setAttribute("data-farb-reset", k.id);
+        reihe.appendChild(zurueck);
+      }
       nativKalenderListe.appendChild(row);
     });
-    nativKalenderListe.querySelectorAll("[data-farbe]").forEach(el => {
-      el.addEventListener("click", () => {
-        const id = el.getAttribute("data-kal");
-        kalender.farben[id] = el.getAttribute("data-farbe");
-        const k = geraeteKalender.find(x => x.id === id);
-        if(k) k.farbe = kalender.farben[id];
-        saveKalender();
-        renderNativAuswahl();
-        renderKalender();
-      });
-    });
+
     nativKalenderListe.querySelectorAll("[data-sicht]").forEach(el => {
       el.addEventListener("click", () => {
         const id = el.getAttribute("data-sicht");
@@ -4059,6 +4147,28 @@
         k.sichtbar = !k.sichtbar;
         nativCfg.versteckt = geraeteKalender.filter(x => !x.sichtbar).map(x => x.id);
         saveNativCfg();
+        renderNativAuswahl();
+        renderKalender();
+      });
+    });
+    nativKalenderListe.querySelectorAll("[data-farbe]").forEach(el => {
+      el.addEventListener("click", () => {
+        const id = el.getAttribute("data-kal");
+        farbenEigen[id] = el.getAttribute("data-farbe");
+        saveFarben();
+        const k = geraeteKalender.find(x => x.id === id);
+        if(k){ k.farbe = farbenEigen[id]; k.eigeneFarbe = true; }
+        renderNativAuswahl();
+        renderKalender();
+      });
+    });
+    nativKalenderListe.querySelectorAll("[data-farb-reset]").forEach(el => {
+      el.addEventListener("click", () => {
+        const id = el.getAttribute("data-farb-reset");
+        delete farbenEigen[id];
+        saveFarben();
+        const k = geraeteKalender.find(x => x.id === id);
+        if(k){ k.farbe = k.geraeteFarbe || "#5fb4ff"; k.eigeneFarbe = false; }
         renderNativAuswahl();
         renderKalender();
       });
@@ -4153,7 +4263,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "2.5";
+  const APP_VERSION = "2.6";
 
   document.getElementById("exportBtn").addEventListener("click", async () => {
     const payload = {
