@@ -1,0 +1,11 @@
+{
+  "appId": "de.gun.dienstcockpit",
+  "appName": "Dienst-Cockpit",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
