@@ -35,7 +35,34 @@ jobs:
         run: npx cap add android
 
       - name: Kalenderberechtigungen eintragen
-        run: node scripts/berechtigungen.js
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          if [ ! -f "$MANIFEST" ]; then
+            echo "FEHLER: $MANIFEST nicht gefunden."
+            exit 1
+          fi
+          for P in READ_CALENDAR WRITE_CALENDAR; do
+            if grep -q "android.permission.$P" "$MANIFEST"; then
+              echo "bereits vorhanden: $P"
+            else
+              sed -i "s#</manifest>#    <uses-permission android:name=\"android.permission.$P\" />\n</manifest>#" "$MANIFEST"
+              echo "eingetragen: $P"
+            fi
+          done
+          echo "--- AndroidManifest.xml ---"
+          cat "$MANIFEST"
+          for P in READ_CALENDAR WRITE_CALENDAR; do
+            grep -q "android.permission.$P" "$MANIFEST" || { echo "FEHLER: $P fehlt"; exit 1; }
+          done
+
+      - name: App-Icon erzeugen (falls vorhanden)
+        run: |
+          if [ -f resources/icon.png ]; then
+            echo "resources/icon.png gefunden - erzeuge Android-Symbole"
+            npx @capacitor/assets generate --android --assetPath resources
+          else
+            echo "Kein resources/icon.png vorhanden - Standardsymbol wird verwendet"
+          fi
 
       - name: Web-Dateien uebernehmen
         run: npx cap sync android
