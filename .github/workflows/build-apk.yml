@@ -1,16 +1,15 @@
 name: APK bauen
 
-# Läuft bei jedem Push auf main und lässt sich zusätzlich von Hand starten
-# (Reiter "Actions" -> "APK bauen" -> "Run workflow").
-on:
+"on":
   push:
-    branches: [main]
+    branches:
+      - main
+      - master
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Projekt auschecken
         uses: actions/checkout@v4
@@ -29,7 +28,7 @@ jobs:
       - name: Android SDK einrichten
         uses: android-actions/setup-android@v3
 
-      - name: Abhängigkeiten installieren
+      - name: Abhaengigkeiten installieren
         run: npm install
 
       - name: Android-Projekt erzeugen
@@ -38,10 +37,10 @@ jobs:
       - name: Kalenderberechtigungen eintragen
         run: node scripts/berechtigungen.js
 
-      - name: Web-Dateien übernehmen
+      - name: Web-Dateien uebernehmen
         run: npx cap sync android
 
-      - name: Gradle ausführbar machen
+      - name: Gradle ausfuehrbar machen
         run: chmod +x android/gradlew
 
       - name: APK bauen
