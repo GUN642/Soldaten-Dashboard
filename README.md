@@ -20,7 +20,7 @@ Kalender (z. B. der deiner Frau) aktualisieren sich automatisch.
 2. Name z. B. `dienst-cockpit`, Sichtbarkeit **Private**, dann **Create repository**
 3. Auf der folgenden Seite auf **uploading an existing file** klicken
 4. Den **gesamten Inhalt** dieses Ordners hineinziehen — wichtig: mitsamt der
-   Unterordner `www`, `scripts` und `.github`
+   Unterordner `www`, `resources` und `.github`
 
 > Falls `.github` beim Hochladen fehlt: Der Ordner beginnt mit einem Punkt und wird
 > vom Datei-Explorer oft ausgeblendet. Unter Windows im Explorer unter
