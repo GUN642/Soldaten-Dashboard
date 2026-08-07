@@ -55,6 +55,28 @@ eine sogenannte Debug-Version. Für den Eigengebrauch ist das unproblematisch.
 
 ---
 
+## App-Icon
+
+Das Symbol liegt fertig im Ordner `resources/` und wird beim Bauen automatisch
+in alle Android-Größen umgerechnet:
+
+| Datei | Zweck |
+|-------|-------|
+| `icon.png` | Grundsymbol (1024 x 1024) |
+| `icon-foreground.png` | Emblem für adaptive Symbole, mit Rand |
+| `icon-background.png` | Tarnmuster als Hintergrundebene |
+| `splash.png` / `splash-dark.png` | Startbildschirm |
+
+Android beschneidet Symbole je nach Hersteller rund oder abgerundet. Deshalb ist
+das Emblem im Vordergrund auf 62 % verkleinert — so bleibt der Ring in jeder
+Form vollständig sichtbar.
+
+Zum Austauschen einfach `icon.png` ersetzen (quadratisch, mindestens
+1024 x 1024) und die drei abgeleiteten Dateien löschen; der Build erzeugt dann
+einfache Ersatzvarianten daraus.
+
+---
+
 ## Schritt 4 — Kalender einrichten
 
 **Vorher:** Dein Microsoft-Konto muss in den Android-Einstellungen unter
@@ -74,19 +96,19 @@ auf, sobald er auf dem Handy abonniert ist.
 
 ---
 
-## Urlaubsverrechnung
+## Kalender bedienen
 
-Wie gehabt über die Kennungen im Termintitel:
+| Aktion | Wirkung |
+|--------|---------|
+| Wischen nach links/rechts | vorheriger / nächster Monat |
+| Tippen auf einen Tag | Termine des Tages unten einblenden |
+| **Lange gedrückt halten** | Termineingabe für diesen Tag öffnen |
+| **+** unten rechts | Termineingabe öffnen |
+| **⚙** oben rechts | Kalender, Farben und Standardkalender einstellen |
 
-| Kennung | Wirkung |
-|---------|---------|
-| `EU`    | fest eingetragener Urlaub |
-| `EU?`   | geplanter Urlaub (erst nach „Scharf schalten" abgezogen) |
-| `FvD`   | Abzug vom Überstundenkonto |
-
-Im Block **Kalenderquellen** einen Kalender als *Urlaubskalender* markieren,
-danach im Block **Urlaubsverrechnung** auf *Jetzt verrechnen*.
-Gezählt werden nur Werktage; Feiertage in Baden-Württemberg fallen heraus.
+Termine mit `EU`, `EU?` oder `FvD` im Titel werden im Raster weiterhin farblich
+hervorgehoben (rot / blau / amber). Das Urlaubskonto im Reiter
+*Urlaub/Mehrarbeit* wird von Hand gepflegt.
 
 ---
 
@@ -128,6 +150,8 @@ auf `"latest"` setzen, die Datei erneut hochladen und den Build neu starten.
 
 * **Termine ändern** — Löschen und Neuanlegen funktioniert, direktes Bearbeiten
   eines bestehenden Termins ist noch nicht eingebaut
+* **Anhänge im Kalender** — Dateianhänge liegen in der App, nicht im
+  Gerätekalender. Auf anderen Geräten und bei deiner Frau erscheinen sie nicht.
 * **iOS** — das Projekt ist auf Android ausgelegt; für iPhone wäre ein Mac nötig
 * **Automatische Synchronisation zwischen Geräten** — dafür bleibt der
   JSON-Export der Weg
