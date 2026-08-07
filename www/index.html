@@ -69,17 +69,21 @@
   }
   html, body{transition: background-color .2s ease, color .2s ease;}
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  html,body{
+    margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+    height:100%;overflow:hidden;overscroll-behavior:none;
+  }
   body{
+    display:flex;flex-direction:column;
     background-image:
       radial-gradient(ellipse 1200px 600px at 50% -10%, var(--body-glow), transparent),
       repeating-linear-gradient(0deg, var(--body-lines) 0px, var(--body-lines) 1px, transparent 1px, transparent 3px);
-    min-height:100vh;
-    padding-bottom:calc(60px + env(safe-area-inset-bottom, 0px));
+    height:100%;
   }
 
   /* ---------- Topbar ---------- */
   .topbar{
+    flex-shrink:0;
     border-bottom:1px solid var(--border);
     background:var(--topbar-bg);
     padding:18px 24px;
@@ -122,6 +126,7 @@
 
   /* ---------- Settings bar ---------- */
   .settings-bar{
+    flex-shrink:0;
     border-bottom:1px solid var(--border);
     background:var(--panel-alt);
     padding:9px 24px;
@@ -163,7 +168,8 @@
   .cl-entry li{color:var(--text-dim);font-size:12.5px;line-height:1.55;margin-bottom:3px;}
 
   /* ---------- Cockpit (immer sichtbar, oben) ---------- */
-  .cockpit-wrap{max-width:1180px;margin:0 auto;padding:16px 24px 4px;}
+  .cockpit-wrap{flex-shrink:0;max-width:1180px;width:100%;margin:0 auto;padding:12px 24px 8px;display:none;}
+  body.zeigt-cockpit .cockpit-wrap{display:block;}
   .cockpit-panel{
     border:1px solid var(--border);background:var(--panel);border-radius:6px;
     padding:20px 24px;display:flex;gap:34px;flex-wrap:wrap;align-items:center;
@@ -182,11 +188,12 @@
 
   /* ---------- Tabs ---------- */
   .tab-bar{
-    display:flex;gap:2px;max-width:1180px;margin:14px auto 0;padding:0 24px;
+    flex-shrink:0;
+    display:flex;gap:2px;max-width:1180px;width:100%;margin:0 auto;padding:0 24px;
     border-bottom:1px solid var(--border);
   }
   .tab-btn{
-    background:none;border:none;border-bottom:2px solid transparent;
+    background:none;border:none;border-bottom:2px solid transparent;flex-shrink:0;
     color:var(--text-faint);font-family:var(--cond);font-weight:700;font-size:13.5px;
     letter-spacing:0.6px;text-transform:uppercase;padding:13px 16px 11px;cursor:pointer;
     transition:color .15s, border-color .15s;
@@ -194,7 +201,16 @@
   .tab-btn:hover{color:var(--text-dim);}
   .tab-btn.active{color:var(--amber);border-bottom-color:var(--amber);}
   .tab-panel{display:none;}
-  .tab-panel.active{display:block;}
+  .tab-panel.active{
+    display:block;flex:1;min-height:0;
+    overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  /* Kalender füllt die Fläche und scrollt selbst nicht */
+  #tabKalender.active{overflow:hidden;display:flex;flex-direction:column;padding-bottom:0;}
+  #tabKalender.active.einstellungen-offen{overflow-y:auto;display:block;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));}
 
   /* ---------- Layout ---------- */
   .grid{max-width:1180px;margin:0 auto;padding:8px 24px 0;}
@@ -396,12 +412,11 @@
   /* ---------- Kalender (Vollbild) ---------- */
   .kal-voll{
     display:flex;flex-direction:column;
-    height:calc(100vh - var(--kopf-hoehe, 150px));
-    min-height:340px;
+    flex:1;min-height:0;position:relative;
   }
   .kal-toolbar{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:8px 12px;flex-shrink:0;
+    padding:6px 10px;flex-shrink:0;
   }
   .kal-nav{display:flex;align-items:center;gap:6px;}
   .kal-monat{
@@ -409,27 +424,28 @@
     text-align:center;letter-spacing:0.3px;white-space:nowrap;
   }
   .kal-kopf{
-    display:grid;grid-template-columns:22px repeat(7,1fr);gap:2px;
-    padding:0 8px;flex-shrink:0;
+    display:grid;grid-template-columns:20px repeat(7,1fr);gap:2px;
+    padding:0 6px;flex-shrink:0;
   }
   .kal-wd{
-    font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;
-    color:var(--text-faint);text-align:center;padding:4px 0 3px;
+    font-family:var(--mono);font-size:9px;letter-spacing:0.8px;text-transform:uppercase;
+    color:var(--text-faint);text-align:center;padding:3px 0 2px;
   }
   .kal-body{
-    flex:1;display:grid;grid-template-columns:22px repeat(7,1fr);
-    grid-auto-rows:1fr;gap:2px;padding:0 8px 8px;
-    touch-action:pan-y;overflow:hidden;
+    flex:1;min-height:0;display:flex;flex-direction:column;gap:2px;
+    padding:0 6px 4px;touch-action:pan-y;overflow:hidden;
+  }
+  .kal-woche{
+    flex:1;min-height:0;position:relative;
+    display:grid;grid-template-columns:20px repeat(7,1fr);gap:2px;
   }
   .kal-kw{
-    display:flex;align-items:flex-start;justify-content:center;padding-top:4px;
-    font-family:var(--mono);font-size:8.5px;color:var(--text-faint);opacity:0.55;
+    display:flex;align-items:flex-start;justify-content:center;padding-top:3px;
+    font-family:var(--mono);font-size:8px;color:var(--text-faint);opacity:0.5;
   }
   .kal-tag{
     border:1px solid var(--border-soft);border-radius:4px;background:var(--panel-alt);
-    padding:2px 3px;cursor:pointer;position:relative;overflow:hidden;
-    display:flex;flex-direction:column;gap:1px;
-    transition:border-color .12s, background .12s;
+    padding:1px 2px;cursor:pointer;overflow:hidden;
     -webkit-tap-highlight-color:transparent;
   }
   .kal-tag.fremd{opacity:0.38;}
@@ -437,26 +453,41 @@
   .kal-tag.gewaehlt{background:var(--amber-dim);border-color:var(--amber);}
   .kal-tag.we{background:var(--panel);}
   .kal-tag.feiertag{background:rgba(255,92,92,0.09);}
-  .kal-tag.gedrueckt{background:var(--amber-dim);transform:scale(0.97);}
+  .kal-tag.gedrueckt{background:var(--amber-dim);}
   .kal-tag-nr{
-    font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text);
-    line-height:1.1;flex-shrink:0;
+    font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--text);
+    line-height:1.1;text-align:right;padding-right:2px;
   }
   .kal-tag.we .kal-tag-nr{color:var(--text-faint);}
   .kal-tag-ft{
-    font-size:7.5px;color:var(--red);line-height:1.1;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;
-  }
-  .kal-chip{
-    font-size:8.5px;line-height:1.25;padding:1px 3px;border-radius:2px;
+    font-size:7px;color:var(--red);line-height:1.05;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    color:#fff;flex-shrink:0;
   }
-  .kal-mehr{font-family:var(--mono);font-size:7.5px;color:var(--text-faint);padding-left:2px;flex-shrink:0;}
+
+  /* Balkenschicht: liegt über den Tageszellen einer Woche */
+  .kal-balken-schicht{
+    position:absolute;left:22px;right:0;top:14px;bottom:0;
+    pointer-events:none;overflow:hidden;
+  }
+  .kal-balken{
+    position:absolute;height:12px;border-radius:2px;
+    font-size:8.5px;line-height:12px;padding:0 3px;margin-bottom:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    pointer-events:none;
+  }
+  .kal-balken.start-offen{border-top-left-radius:0;border-bottom-left-radius:0;}
+  .kal-balken.ende-offen{border-top-right-radius:0;border-bottom-right-radius:0;}
+  .kal-mehr-marke{
+    position:absolute;font-family:var(--mono);font-size:7.5px;
+    color:var(--text-faint);pointer-events:none;
+  }
 
   .kal-tagdetail{
+    position:absolute;left:0;right:0;bottom:0;z-index:20;
     border-top:1px solid var(--border);background:var(--panel);
-    padding:12px 14px;flex-shrink:0;max-height:38vh;overflow-y:auto;
+    padding:12px 14px;max-height:46%;overflow-y:auto;
+    box-shadow:0 -8px 24px rgba(0,0,0,0.28);
+    padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
   }
   .kal-tagdetail h3{
     margin:0 0 10px;font-family:var(--cond);font-size:15px;font-weight:700;color:var(--text);
@@ -662,7 +693,7 @@
     <div class="brand-mark">DC</div>
     <div class="brand-text">
       <div class="eyebrow">Dienstliches Cockpit</div>
-      <h1>Urlaub &middot; Überstunden &middot; Ablaufdaten <span class="version-badge" id="versionBadge">v2.2 · 07.08.2026</span></h1>
+      <h1>Urlaub &middot; Überstunden &middot; Ablaufdaten <span class="version-badge" id="versionBadge">v2.3 · 07.08.2026</span></h1>
     </div>
   </div>
   <div class="status-chip">
@@ -702,6 +733,21 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v2.3 <span class="cl-date">07.08.2026</span></div>
+        <ul>
+          <li>Mehrtägige Termine werden als durchgehender Balken über die betroffenen Tage gezogen, statt auf jedem Tag einzeln zu erscheinen</li>
+          <li>Überlappende Termine werden automatisch auf Spuren verteilt; längere Termine liegen oben</li>
+          <li>Läuft ein Termin über das Wochenende hinaus, wird der Balken am Zeilenrand offen dargestellt</li>
+          <li>Sicherung (Export/Import) wieder hergestellt — sie war beim Umbau der Terminmaske verloren gegangen</li>
+          <li>Sicherung nutzt in der App jetzt das Teilen-Menü, da der übliche Download dort nicht funktioniert</li>
+          <li>Kalender nutzt die volle Höhe; je Tag sind nun mindestens fünf Termine sichtbar</li>
+          <li>Tagesansicht liegt als Blende über dem Kalender, statt ihm Platz wegzunehmen</li>
+          <li>Kalendereinstellungen lassen sich über „← Zurück zum Kalender" wieder schließen</li>
+          <li>Die App selbst scrollt nicht mehr; nur die Inhalte der einzelnen Reiter scrollen, der Kalender gar nicht</li>
+          <li>Urlaubs- und Überstundenanzeige erscheint nur noch im Reiter „Urlaub/Mehrarbeit"</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v2.2 <span class="cl-date">07.08.2026</span></div>
         <ul>
@@ -1114,6 +1160,9 @@
 
   <!-- Einstellungen (Quellen, Gerätekalender, Farben) -->
   <div class="grid" id="kalEinstellungenBereich" style="display:none;padding-top:14px;">
+    <div class="btn-row" style="margin:0 0 14px;">
+      <button type="button" class="btn add" id="kalEinstellungenZu">← Zurück zum Kalender</button>
+    </div>
     <div class="panel" id="nativPanel" style="display:none;">
       <div class="panel-head">
         <h2><span class="idx">N</span>Gerätekalender</h2>
@@ -1392,7 +1441,7 @@
 <footer>
   Urlaub: berechnet Werktage Mo–Fr, gesetzliche Feiertage Baden-Württemberg automatisch ausgenommen &middot; Ablaufregister: Warnstufe „gelb" ab 6 Monate vor Ablauf &middot; Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.
   <div style="margin-top:8px;color:var(--text-dim);">
-    Version 2.2 &middot; Stand 07.08.2026 &middot; Daten lokal im Browser gespeichert &middot; Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
+    Version 2.3 &middot; Stand 07.08.2026 &middot; Daten lokal im Browser gespeichert &middot; Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
   </div>
 </footer>
 
@@ -2673,13 +2722,19 @@
 
   // Einstellungen ein-/ausblenden
   const kalEinstellungenBereich = document.getElementById("kalEinstellungenBereich");
-  document.getElementById("kalEinstellungen").addEventListener("click", () => {
-    const auf = kalEinstellungenBereich.style.display !== "none";
-    kalEinstellungenBereich.style.display = auf ? "none" : "block";
-    kalVoll.style.display = auf ? "flex" : "none";
-    document.getElementById("kalFab").style.display = auf ? "none" : "flex";
-    if(!auf) window.scrollTo(0, 0);
-  });
+  const tabKalenderEl = document.getElementById("tabKalender");
+
+  function einstellungenZeigen(zeigen){
+    kalEinstellungenBereich.style.display = zeigen ? "block" : "none";
+    kalVoll.style.display = zeigen ? "none" : "flex";
+    tabKalenderEl.classList.toggle("einstellungen-offen", zeigen);
+    const fab = document.getElementById("kalFab");
+    if(fab) fab.style.display = zeigen ? "none" : "flex";
+    if(zeigen) tabKalenderEl.scrollTop = 0;
+    else setTimeout(renderKalender, 20);
+  }
+  document.getElementById("kalEinstellungen").addEventListener("click", () => einstellungenZeigen(true));
+  document.getElementById("kalEinstellungenZu").addEventListener("click", () => einstellungenZeigen(false));
 
   /* ---------- Wischen zwischen Monaten ---------- */
   (function wischen(){
@@ -2714,6 +2769,14 @@
     return (r*299 + g*587 + b*114) / 1000 > 150 ? "#11151b" : "#ffffff";
   }
 
+  function terminFarbe(t){
+    const kl = terminKlasse(t.titel);
+    if(kl === "eu")  return "#c0392b";
+    if(kl === "eup") return "#2e6fa8";
+    if(kl === "fvd") return "#b8860b";
+    return farbeFuerQuelle(t.quelleId, t.farbe);
+  }
+
   function renderKalender(){
     kalMonatEl.textContent = MONATE[kalAnsichtMonat] + " " + kalAnsichtJahr;
 
@@ -2723,7 +2786,6 @@
     const rasterStart = new Date(kalAnsichtJahr, kalAnsichtMonat, 1 - startOffset);
     rasterStart.setHours(0,0,0,0);
 
-    // Anzahl benötigter Wochen (5 oder 6)
     const tageImMonat = new Date(kalAnsichtJahr, kalAnsichtMonat + 1, 0).getDate();
     const wochen = Math.ceil((startOffset + tageImMonat) / 7);
 
@@ -2731,39 +2793,58 @@
     rasterEnde.setHours(23,59,59,999);
 
     const termine = terminFenster(rasterStart, rasterEnde);
-    const proTag = {};
-    termine.forEach(t => {
+
+    // Jeden Termin auf Start-/Endtag (auf Tagesebene) normieren
+    const spannen = termine.map(t => {
       const start = new Date(t.start); start.setHours(0,0,0,0);
       let ende = t.end ? new Date(t.end) : new Date(t.start);
-      if(t.allDay && t.end) ende = new Date(t.end.getTime() - 1);
+      if(t.allDay && t.end) ende = new Date(ende.getTime() - 1);
       ende.setHours(0,0,0,0);
-      const d = new Date(start);
+      if(ende < start) ende = new Date(start);
+      return { termin: t, start, ende };
+    }).sort((x, y) => {
+      // Längere Termine zuerst, damit durchgehende Balken oben liegen
+      const dx = (x.ende - x.start), dy = (y.ende - y.start);
+      if(dy !== dx) return dy - dx;
+      return x.start - y.start;
+    });
+
+    // Für das Tagesdetail weiterhin eine Zuordnung je Tag
+    const proTag = {};
+    spannen.forEach(sp => {
+      const d = new Date(sp.start);
       let guard = 0;
-      while(d <= ende && guard < 400){
+      while(d <= sp.ende && guard < 400){
         const k = tagSchluessel(d);
-        (proTag[k] = proTag[k] || []).push(t);
+        (proTag[k] = proTag[k] || []).push(sp.termin);
         d.setDate(d.getDate() + 1);
         guard++;
       }
     });
 
     const heuteK = tagSchluessel(new Date());
-    kalGrid.style.gridTemplateRows = "repeat(" + wochen + ", 1fr)";
     kalGrid.innerHTML = "";
 
     for(let w = 0; w < wochen; w++){
-      // Kalenderwoche links
-      const ersterDerWoche = new Date(rasterStart.getTime() + w * 7 * 86400000);
+      const wochenStart = new Date(rasterStart.getTime() + w * 7 * 86400000);
+      wochenStart.setHours(0,0,0,0);
+      const wochenEnde = new Date(wochenStart.getTime() + 6 * 86400000);
+      wochenEnde.setHours(0,0,0,0);
+
+      const zeile = document.createElement("div");
+      zeile.className = "kal-woche";
+
+      // Kalenderwoche
       const kw = document.createElement("div");
       kw.className = "kal-kw";
-      kw.textContent = kalenderwoche(ersterDerWoche);
-      kalGrid.appendChild(kw);
+      kw.textContent = kalenderwoche(wochenStart);
+      zeile.appendChild(kw);
 
+      // Tageszellen
       for(let i = 0; i < 7; i++){
-        const tag = new Date(rasterStart.getTime() + (w * 7 + i) * 86400000);
+        const tag = new Date(wochenStart.getTime() + i * 86400000);
         tag.setHours(0,0,0,0);
         const k = tagSchluessel(tag);
-        const eintraege = proTag[k] || [];
         const istFremd = tag.getMonth() !== kalAnsichtMonat;
         const wd = tag.getDay();
         const ftName = istFeiertagBW(tag) ? feiertagName(tag) : null;
@@ -2788,68 +2869,103 @@
           ft.textContent = ftName;
           zelle.appendChild(ft);
         }
+        zeile.appendChild(zelle);
+      }
 
-        const maxChips = ftName ? 2 : 3;
-        eintraege.slice(0, maxChips).forEach(t => {
-          const kl = terminKlasse(t.titel);
-          const farbe = kl === "eu" ? "#c0392b" : kl === "eup" ? "#2e6fa8"
-            : kl === "fvd" ? "#b8860b" : farbeFuerQuelle(t.quelleId, t.farbe);
-          const chip = document.createElement("div");
-          chip.className = "kal-chip";
-          chip.style.background = farbe;
-          chip.style.color = textAufFarbe(farbe);
-          chip.textContent = t.titel;
-          zelle.appendChild(chip);
-        });
-        if(eintraege.length > maxChips){
-          const mehr = document.createElement("div");
-          mehr.className = "kal-mehr";
-          mehr.textContent = "+" + (eintraege.length - maxChips);
-          zelle.appendChild(mehr);
+      // Balkenschicht: mehrtägige Termine als durchgehender Balken
+      const schicht = document.createElement("div");
+      schicht.className = "kal-balken-schicht";
+
+      // Termine dieser Woche ermitteln und in Spuren einsortieren
+      const inWoche = spannen.filter(sp => sp.start <= wochenEnde && sp.ende >= wochenStart);
+      const spuren = [];   // spuren[n] = Array belegter Spalten
+
+      inWoche.forEach(sp => {
+        const vonSpalte = Math.max(0, Math.round((sp.start - wochenStart) / 86400000));
+        const bisSpalte = Math.min(6, Math.round((sp.ende - wochenStart) / 86400000));
+
+        // Erste Spur suchen, in der keine Überschneidung besteht
+        let spur = 0;
+        while(true){
+          if(!spuren[spur]) spuren[spur] = [];
+          const frei = spuren[spur].every(b => bisSpalte < b.von || vonSpalte > b.bis);
+          if(frei){ spuren[spur].push({ von: vonSpalte, bis: bisSpalte }); break; }
+          spur++;
+          if(spur > 40) break;
         }
 
-        kalGrid.appendChild(zelle);
-      }
+        const farbe = terminFarbe(sp.termin);
+        const balken = document.createElement("div");
+        balken.className = "kal-balken"
+          + (sp.start < wochenStart ? " start-offen" : "")
+          + (sp.ende > wochenEnde ? " ende-offen" : "");
+        balken.style.background = farbe;
+        balken.style.color = textAufFarbe(farbe);
+        balken.style.left = "calc(" + (vonSpalte * 100 / 7) + "% + 1px)";
+        balken.style.width = "calc(" + ((bisSpalte - vonSpalte + 1) * 100 / 7) + "% - 3px)";
+        balken.style.top = (spur * 13) + "px";
+        balken.setAttribute("data-spur", spur);
+        // Titel nur am tatsächlichen Beginn des sichtbaren Balkens
+        balken.textContent = sp.termin.titel;
+        schicht.appendChild(balken);
+      });
+
+      zeile.appendChild(schicht);
+      kalGrid.appendChild(zeile);
     }
+
+    // Balken kappen, die nicht mehr in die Zeilenhöhe passen
+    requestAnimationFrame(() => {
+      kalGrid.querySelectorAll(".kal-balken-schicht").forEach(schicht => {
+        const hoehe = schicht.clientHeight;
+        const maxSpuren = Math.max(1, Math.floor(hoehe / 13));
+        const proSpalteUeber = {};
+        schicht.querySelectorAll(".kal-balken").forEach(b => {
+          const spur = +b.getAttribute("data-spur");
+          if(spur >= maxSpuren){
+            b.style.display = "none";
+            const linksProzent = parseFloat(b.style.left.replace("calc(", "")) || 0;
+            const spalte = Math.round(linksProzent / (100 / 7));
+            proSpalteUeber[spalte] = (proSpalteUeber[spalte] || 0) + 1;
+          }
+        });
+        Object.keys(proSpalteUeber).forEach(spalte => {
+          const marke = document.createElement("div");
+          marke.className = "kal-mehr-marke";
+          marke.textContent = "+" + proSpalteUeber[spalte];
+          marke.style.left = "calc(" + (spalte * 100 / 7) + "% + 2px)";
+          marke.style.top = ((maxSpuren - 1) * 13 + 1) + "px";
+          schicht.appendChild(marke);
+        });
+      });
+    });
 
     // Tippen = Tag wählen, langes Drücken = Termin anlegen
     kalGrid.querySelectorAll("[data-tag]").forEach(el => {
       let timer = null, langGedrueckt = false;
-
       const starten = () => {
         langGedrueckt = false;
         el.classList.add("gedrueckt");
         timer = setTimeout(() => {
           langGedrueckt = true;
           el.classList.remove("gedrueckt");
-          if(navigator.vibrate) { try{ navigator.vibrate(35); }catch(e){} }
+          if(navigator.vibrate){ try{ navigator.vibrate(35); }catch(e){} }
           terminMaskeOeffnen(el.getAttribute("data-tag"));
         }, 500);
       };
-      const abbrechen = () => {
-        clearTimeout(timer);
-        el.classList.remove("gedrueckt");
-      };
+      const abbrechen = () => { clearTimeout(timer); el.classList.remove("gedrueckt"); };
 
       el.addEventListener("touchstart", starten, { passive: true });
       el.addEventListener("touchend", () => {
         abbrechen();
-        if(!langGedrueckt){
-          kalGewaehlt = el.getAttribute("data-tag");
-          renderKalender();
-        }
+        if(!langGedrueckt){ kalGewaehlt = el.getAttribute("data-tag"); renderKalender(); }
       });
       el.addEventListener("touchmove", abbrechen, { passive: true });
       el.addEventListener("touchcancel", abbrechen);
-
-      // Maus (PC)
       el.addEventListener("mousedown", (e) => { if(e.button === 0) starten(); });
       el.addEventListener("mouseup", () => {
         abbrechen();
-        if(!langGedrueckt){
-          kalGewaehlt = el.getAttribute("data-tag");
-          renderKalender();
-        }
+        if(!langGedrueckt){ kalGewaehlt = el.getAttribute("data-tag"); renderKalender(); }
       });
       el.addEventListener("mouseleave", abbrechen);
       el.addEventListener("contextmenu", (e) => {
@@ -2870,12 +2986,10 @@
       const liste = proTag[kalGewaehlt] || [];
       kalTagEvents.innerHTML = "";
       if(!liste.length){
-        kalTagEvents.innerHTML = '<div class="empty-state" style="padding:14px;">Keine Termine. Zum Anlegen einen Tag lange gedrückt halten oder unten auf + tippen.</div>';
+        kalTagEvents.innerHTML = '<div class="empty-state" style="padding:14px;">Keine Termine. Zum Anlegen einen Tag lange gedrückt halten oder auf + tippen.</div>';
       }else{
         liste.forEach(t => {
-          const kl = terminKlasse(t.titel);
-          const farbe = kl === "eu" ? "#c0392b" : kl === "eup" ? "#2e6fa8"
-            : kl === "fvd" ? "#b8860b" : farbeFuerQuelle(t.quelleId, t.farbe);
+          const farbe = terminFarbe(t);
           const zeit = t.allDay ? "Ganztägig"
             : t.start.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" })
               + (t.end ? " – " + t.end.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" }) : "");
@@ -2885,8 +2999,6 @@
           box.innerHTML = '<div class="kal-ev-titel"></div><div class="kal-ev-meta"></div><div class="kal-ev-quelle"></div>';
           box.querySelector(".kal-ev-titel").textContent = t.titel;
           box.querySelector(".kal-ev-meta").textContent = zeit + (t.ort ? " · " + t.ort : "");
-
-          // Zugehörige Anhänge anzeigen
           const eigener = (kalender.eigene || []).find(x => x.uid === t.uid || x.nativId === t.uid);
           const anh = eigener && eigener.anhaenge ? eigener.anhaenge.length : 0;
           box.querySelector(".kal-ev-quelle").textContent = t.quelleName
@@ -2894,8 +3006,7 @@
           if(anh){
             eigener.anhaenge.forEach(a => {
               const link = document.createElement("a");
-              link.href = a.daten;
-              link.download = a.name;
+              link.href = a.daten; link.download = a.name;
               link.textContent = "↓ " + a.name;
               link.style.cssText = "display:inline-block;margin-top:5px;margin-right:10px;font-size:11.5px;color:var(--amber);";
               box.appendChild(link);
@@ -3724,6 +3835,110 @@
   }
 
   /* =========================================================
+     SICHERUNG: EXPORT / IMPORT (alle Daten)
+     ========================================================= */
+  const APP_VERSION = "2.3";
+
+  document.getElementById("exportBtn").addEventListener("click", async () => {
+    const payload = {
+      app: "Dienst-Cockpit", version: APP_VERSION, exportedAt: new Date().toISOString(),
+      ablaufregister: eintraege, urlaub, ueberstunden, todos, notizen, kalender
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const name = "DienstCockpit_v" + APP_VERSION + "_" + new Date().toISOString().slice(0,10) + ".json";
+    const blob = new Blob([json], { type: "application/json" });
+
+    // In der App: Teilen-Menü, damit die Datei irgendwo abgelegt werden kann
+    try{
+      if(navigator.canShare && navigator.share){
+        const datei = new File([blob], name, { type: "application/json" });
+        if(navigator.canShare({ files: [datei] })){
+          await navigator.share({ files: [datei], title: name });
+          return;
+        }
+      }
+    }catch(e){
+      if(e && e.name === "AbortError") return;
+    }
+
+    // Sonst: normaler Download
+    try{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }catch(e){
+      alert("Die Sicherung konnte nicht als Datei ausgegeben werden.");
+    }
+  });
+
+  const importBtn = document.getElementById("importBtn");
+  const importFile = document.getElementById("importFile");
+  importBtn.addEventListener("click", () => importFile.click());
+
+  importFile.addEventListener("change", () => {
+    const file = importFile.files[0];
+    if(!file) return;
+    const leser = new FileReader();
+    leser.onload = () => {
+      try{
+        const payload = JSON.parse(leser.result);
+        let etwas = false;
+
+        if(Array.isArray(payload.ablaufregister)){ eintraege = payload.ablaufregister; etwas = true; }
+
+        if(payload.urlaub && typeof payload.urlaub === "object"){
+          urlaub = Object.assign({ jahresanspruch: 24, zugaenge: [], zeitraeume: [], geplant: [], letztesJahr: null }, payload.urlaub);
+          if(!Array.isArray(urlaub.zugaenge)) urlaub.zugaenge = [];
+          if(!Array.isArray(urlaub.zeitraeume)) urlaub.zeitraeume = [];
+          if(!Array.isArray(urlaub.geplant)) urlaub.geplant = [];
+          migriereUrlaubStatus(urlaub);
+          etwas = true;
+        }
+        if(payload.ueberstunden && typeof payload.ueberstunden === "object"){
+          ueberstunden = Object.assign({ eintraege: [] }, payload.ueberstunden);
+          if(!Array.isArray(ueberstunden.eintraege)) ueberstunden.eintraege = [];
+          etwas = true;
+        }
+        if(payload.todos && typeof payload.todos === "object"){
+          todos = Object.assign({ eintraege: [] }, payload.todos);
+          if(!Array.isArray(todos.eintraege)) todos.eintraege = [];
+          etwas = true;
+        }
+        if(payload.notizen && typeof payload.notizen === "object"){
+          notizen = Object.assign({ eintraege: [] }, payload.notizen);
+          if(!Array.isArray(notizen.eintraege)) notizen.eintraege = [];
+          etwas = true;
+        }
+        if(payload.kalender && typeof payload.kalender === "object"){
+          kalender = Object.assign({ quellen: [], eigene: [], farben: {}, fvdStunden: 8 }, payload.kalender);
+          if(!Array.isArray(kalender.quellen)) kalender.quellen = [];
+          if(!Array.isArray(kalender.eigene)) kalender.eigene = [];
+          if(!kalender.farben || typeof kalender.farben !== "object") kalender.farben = {};
+          kalender.quellen.forEach(eventsDeserialisieren);
+          etwas = true;
+        }
+
+        if(!etwas) throw new Error("kein gültiges Format");
+
+        saveAblauf(); saveUrlaub(); saveUeberstunden(); saveTodos(); saveNotizen(); saveKalender();
+        uAnspruch.value = urlaub.jahresanspruch;
+        resetForm(); closeForm(); resetNotizForm();
+        renderAblauf(); renderUrlaub(); renderUeberstunden();
+        renderTodos(); renderNotizen(); renderQuellen(); renderEigene(); renderKalender();
+        alert("Sicherung erfolgreich eingelesen.");
+      }catch(e){
+        alert("Einlesen fehlgeschlagen — die Datei scheint keine gültige Sicherung dieser App zu sein.\n\n"
+          + (e && e.message ? e.message : e));
+      }
+      importFile.value = "";
+    };
+    leser.onerror = () => { alert("Die Datei konnte nicht gelesen werden."); importFile.value = ""; };
+    leser.readAsText(file);
+  });
+
+  /* =========================================================
      Init
      ========================================================= */
   resetForm();
@@ -3736,34 +3951,27 @@
   renderEigene();
   renderKalender();
 
-  // + Schaltfläche nur im Kalender-Reiter zeigen
-  (function fabSteuern(){
+  // Cockpit nur im Reiter "Urlaub/Mehrarbeit"; + Schaltfläche nur im Kalender
+  (function ansichtSteuern(){
     const fab = document.getElementById("kalFab");
     function pruefen(){
-      const kalAktiv = document.getElementById("tabKalender").classList.contains("active");
+      const kalAktiv = tabKalenderEl.classList.contains("active");
       const einstellungenOffen = kalEinstellungenBereich.style.display !== "none";
-      fab.style.display = (kalAktiv && !einstellungenOffen) ? "flex" : "none";
+      if(fab) fab.style.display = (kalAktiv && !einstellungenOffen) ? "flex" : "none";
+
+      const startAktiv = document.getElementById("tabStart").classList.contains("active");
+      document.body.classList.toggle("zeigt-cockpit", startAktiv);
+
+      if(kalAktiv && !einstellungenOffen) setTimeout(renderKalender, 20);
     }
-    document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => setTimeout(pruefen, 30)));
+    document.querySelectorAll("[data-tab]").forEach(b =>
+      b.addEventListener("click", () => setTimeout(pruefen, 30)));
     pruefen();
   })();
 
-  // Höhe von Kopf- und Reiterleiste messen, damit der Kalender exakt passt
-  (function kopfHoehe(){
-    function messen(){
-      const tb = document.querySelector(".topbar");
-      const sb = document.querySelector(".settings-bar");
-      const cw = document.querySelector(".cockpit-wrap");
-      const bar = document.querySelector(".tab-bar");
-      let h = 0;
-      [tb, sb, cw, bar].forEach(el => { if(el && el.offsetParent !== null) h += el.offsetHeight; });
-      document.documentElement.style.setProperty("--kopf-hoehe", h + "px");
-    }
-    messen();
-    window.addEventListener("resize", messen);
-    window.addEventListener("orientationchange", () => setTimeout(messen, 250));
-    setTimeout(messen, 300);
-  })();
+  // Bei Drehung des Geräts neu zeichnen
+  window.addEventListener("resize", () => setTimeout(renderKalender, 120));
+  window.addEventListener("orientationchange", () => setTimeout(renderKalender, 300));
 
   if(istApp){
     setTimeout(() => { nativKalenderEinlesen(); }, 400);
