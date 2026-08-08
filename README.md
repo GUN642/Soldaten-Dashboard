@@ -41,6 +41,23 @@ Kalender (z. B. der deiner Frau) aktualisieren sich automatisch.
 
 Heraus kommt eine ZIP-Datei mit der `app-debug.apk` darin.
 
+### Signierschlüssel
+
+Im Ordner `keystore/` liegt ein fester Signierschlüssel. Dadurch tragen alle
+Builds dieselbe Signatur, und eine neue Version lässt sich einfach über die
+vorhandene App installieren — ohne vorher zu deinstallieren, und ohne dass die
+Daten verloren gehen.
+
+**Diese Datei muss mit ins Repository hochgeladen werden**, sonst bricht der
+Build mit einer entsprechenden Meldung ab.
+
+Der Schritt „Signatur der fertigen APK prüfen" gibt im Protokoll den
+Fingerabdruck aus. Er muss bei jedem Build identisch sein.
+
+Der Schlüssel ist für den Eigengebrauch gedacht (Weitergabe per Datei). Für eine
+Veröffentlichung im Play Store wäre ein eigener, geheim gehaltener Schlüssel
+nötig — dieser hier liegt offen im Projekt.
+
 ---
 
 ## Schritt 3 — Auf dem Handy installieren
@@ -100,15 +117,26 @@ auf, sobald er auf dem Handy abonniert ist.
 
 | Aktion | Wirkung |
 |--------|---------|
+| Antippen des Emblems oben links | zwischen hell und dunkel wechseln |
 | Wischen nach links/rechts | vorheriger / nächster Monat |
 | Tippen auf einen Tag | Termine des Tages unten einblenden |
 | **Lange gedrückt halten** | Termineingabe für diesen Tag öffnen |
 | **+** unten rechts | Termineingabe öffnen |
 | **⚙** oben rechts | Kalender, Farben und Standardkalender einstellen |
 
-Termine mit `EU`, `EU?` oder `FvD` im Titel werden im Raster weiterhin farblich
-hervorgehoben (rot / blau / amber). Das Urlaubskonto im Reiter
-*Urlaub/Mehrarbeit* wird von Hand gepflegt.
+Termine übernehmen die Farbe ihres Kalenders. Ganztägige Termine werden flächig
+dargestellt, Termine mit Uhrzeit nur mit farbiger Flagge.
+
+### Urlaub aus dem Kalender anrechnen
+
+Legst du einen Termin in einem Kalender an, dessen Name auf Urlaub hindeutet
+(enthält „Urlaub", „EU", „FvD" oder „Abwesen"), erscheint in der Eingabemaske
+zusätzlich die Auswahl **Urlaub / FvD** samt Schalter **Nur geplant**:
+
+* **Urlaub, nur geplant** — als geplanter Urlaub eingetragen, erst nach
+  „Scharf schalten" abgezogen
+* **Urlaub, fest** — sofort abgezogen (Werktage ohne Feiertage BW)
+* **FvD, fest** — Stunden werden vom Überstundenkonto abgezogen
 
 ---
 
@@ -127,6 +155,10 @@ Ablaufdaten, To-dos, Notizen und Kalenderquellen. Diese Datei aufbewahren —
 bei einer Neuinstallation über *Import .json* zurückspielen.
 
 Die Daten liegen ausschließlich auf dem Gerät. Es gibt keinen Server.
+
+Zusätzlich sichert die App alles im nativen Gerätespeicher, damit nichts verloren
+geht, wenn Android den Speicher der Web-Ansicht aufräumt. Erst eine
+Deinstallation entfernt diese Sicherung — dann hilft nur der JSON-Import.
 
 ---
 
