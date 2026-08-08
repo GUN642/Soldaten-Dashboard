@@ -742,7 +742,7 @@
     <div class="brand-mark">DC</div>
     <div class="brand-text">
       <div class="eyebrow">Dienstliches Cockpit</div>
-      <h1>Dienst-Cockpit <span class="version-badge" id="versionBadge">v2.7</span></h1>
+      <h1>Dienst-Cockpit <span class="version-badge" id="versionBadge">v2.8</span></h1>
     </div>
   </div>
   <div class="kal-nav">
@@ -809,7 +809,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 2.7 &middot; Stand 07.08.2026 &middot; Daten liegen nur auf diesem Gerät<br>
+        Version 2.8 &middot; Stand 07.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -823,6 +823,16 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v2.8 <span class="cl-date">07.08.2026</span></div>
+        <ul>
+          <li>Fehler behoben: ganztägige Termine zeigten einen Tag zu viel. Android speichert sie als UTC-Mitternacht — rechnet man das direkt in Ortszeit um, rutscht das Ende einen Tag weiter. Das Datum wird jetzt korrekt übernommen, auch über die Zeitumstellung hinweg</li>
+          <li>Fehler behoben: Daten mussten nach dem Schließen der App neu eingelesen werden. Android kann den Speicher der Web-Ansicht wie einen Zwischenspeicher behandeln und verwerfen</li>
+          <li>Alle Daten werden jetzt zusätzlich im nativen Gerätespeicher gesichert und beim Start von dort zurückgeholt — sie überstehen Neustarts und App-Aktualisierungen</li>
+          <li>Schutz eingebaut: lässt sich der Gerätespeicher nicht lesen, wird er auch nicht überschrieben. Eine vorhandene Sicherung kann so nicht durch einen leeren Start verloren gehen</li>
+          <li>Ist der Speicher voll, weist die Meldung jetzt darauf hin, dass Dateianhänge den meisten Platz belegen</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v2.7 <span class="cl-date">07.08.2026</span></div>
         <ul>
@@ -1590,6 +1600,75 @@
   "use strict";
 
   /* =========================================================
+     DAUERHAFTE SPEICHERUNG
+     In der App ist localStorage der WebView nicht zuverlässig — Android kann
+     ihn wie einen Zwischenspeicher behandeln und beim Aufräumen verwerfen.
+     Deshalb wird jeder Schreibvorgang zusätzlich in den nativen Gerätespeicher
+     gespiegelt (Capacitor Preferences) und beim Start von dort zurückgeholt.
+     ========================================================= */
+  const CapBoot = window.Capacitor;
+  function prefPlugin(){
+    return (CapBoot && CapBoot.Plugins && CapBoot.Plugins.Preferences) || null;
+  }
+  const SPIEGEL_INDEX = "__dc_schluessel";
+
+  // Erst wenn der native Speicher gelesen wurde, darf zurückgeschrieben werden.
+  // Sonst könnte ein leerer Start die dort liegende Sicherung überschreiben.
+  let spiegelBereit = false;
+
+  async function speicherZurueckholen(){
+    const P = prefPlugin();
+    if(!P) return;
+    try{
+      const index = await P.get({ key: SPIEGEL_INDEX });
+      if(!index || !index.value){
+        // Noch keine Sicherung vorhanden — erste Nutzung, Spiegeln freigeben
+        spiegelBereit = true;
+        return;
+      }
+      const schluessel = JSON.parse(index.value);
+      if(!Array.isArray(schluessel)){ spiegelBereit = true; return; }
+
+      for(const k of schluessel){
+        try{
+          // Nur füllen, was im WebView-Speicher fehlt — Vorhandenes ist aktueller
+          if(localStorage.getItem(k) !== null) continue;
+          const wert = await P.get({ key: k });
+          if(wert && wert.value !== null && wert.value !== undefined){
+            localStorage.setItem(k, wert.value);
+          }
+        }catch(e){ /* einzelnen Schlüssel überspringen */ }
+      }
+      spiegelBereit = true;
+    }catch(e){
+      // Konnte nicht gelesen werden: nichts überschreiben, nur weiterarbeiten
+      spiegelBereit = false;
+    }
+  }
+
+  async function speicherSpiegeln(key, rohText){
+    const P = prefPlugin();
+    if(!P || !spiegelBereit) return;
+    try{
+      await P.set({ key: key, value: rohText });
+      const index = await P.get({ key: SPIEGEL_INDEX });
+      let liste = [];
+      if(index && index.value){
+        try{ liste = JSON.parse(index.value) || []; }catch(e){ liste = []; }
+      }
+      if(liste.indexOf(key) === -1){
+        liste.push(key);
+        await P.set({ key: SPIEGEL_INDEX, value: JSON.stringify(liste) });
+      }
+    }catch(e){ /* Spiegelung ist zusätzlich, kein harter Fehler */ }
+  }
+
+  // App erst starten, wenn der native Speicher gelesen wurde
+  speicherZurueckholen().then(appStarten, appStarten);
+
+  function appStarten(){
+
+  /* =========================================================
      Gemeinsame Helfer (Datum, Speicherung, Theme)
      ========================================================= */
   const DATE_RE = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/;
@@ -1621,19 +1700,36 @@
   function loadJSON(key, fallback){
     try{
       const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
+      if(!raw) return fallback;
+      // Beim Lesen mitspiegeln: so landen auch Daten im nativen Speicher,
+      // die vor dieser Fassung angelegt wurden oder seither unverändert sind.
+      speicherSpiegeln(key, raw);
+      return JSON.parse(raw);
     }catch(e){
       return fallback;
     }
   }
   function saveJSON(key, value){
+    let text;
     try{
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
+      text = JSON.stringify(value);
     }catch(e){
-      alert("Speichern fehlgeschlagen (lokaler Speicher nicht verfügbar).");
+      alert("Die Daten konnten nicht aufbereitet werden.");
       return false;
     }
+    let ok = true;
+    try{
+      localStorage.setItem(key, text);
+    }catch(e){
+      ok = false;
+      const voll = e && (e.name === "QuotaExceededError" || String(e).indexOf("quota") !== -1);
+      alert(voll
+        ? "Der Speicher ist voll. Bitte einige Dateianhänge aus Terminen entfernen —\nsie belegen den meisten Platz."
+        : "Speichern fehlgeschlagen (lokaler Speicher nicht verfügbar).");
+    }
+    // Zusätzlich in den nativen Gerätespeicher, damit nichts verloren geht
+    speicherSpiegeln(key, text);
+    return ok;
   }
 
   /* =========================================================
@@ -1661,6 +1757,7 @@
       document.querySelectorAll("[data-theme-btn]").forEach(b => b.classList.toggle("active", b === btn));
       applyThemeColor(theme);
       try{ localStorage.setItem("dienstcockpit_theme_v1", theme); }catch(e){}
+      speicherSpiegeln("dienstcockpit_theme_v1", theme);
     });
   });
   (function initTheme(){
@@ -4043,15 +4140,36 @@
       const von = new Date(new Date().getFullYear() - 1, 0, 1).getTime();
       const bis = new Date(new Date().getFullYear() + 2, 11, 31).getTime();
       const evs = await P.listEventsInRange({ from: von, to: bis });
-      geraeteTermine = ((evs && evs.result) || []).map(e => ({
-        id: String(e.id),
-        kalenderId: String(e.calendarId != null ? e.calendarId : ""),
-        titel: e.title || "(ohne Titel)",
-        start: new Date(e.startDate),
-        end: e.endDate ? new Date(e.endDate) : null,
-        allDay: !!e.isAllDay,
-        ort: e.location || ""
-      })).filter(e => e.start && !isNaN(e.start));
+      geraeteTermine = ((evs && evs.result) || []).map(e => {
+        const ganztags = !!e.isAllDay;
+        let start = new Date(e.startDate);
+        let ende = e.endDate ? new Date(e.endDate) : null;
+
+        if(ganztags){
+          // Android speichert Ganztagstermine als UTC-Mitternacht. Rechnet man das
+          // direkt in Ortszeit um, landet man bei 02:00 desselben Tages und das
+          // (exklusive) Ende rutscht einen Tag zu weit. Daher das Datum aus den
+          // UTC-Anteilen übernehmen und daraus ein lokales Datum bauen.
+          start = new Date(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+          if(ende){
+            const letzterTag = new Date(ende.getTime() - 1);   // exklusiv -> letzter belegter Tag
+            ende = new Date(letzterTag.getUTCFullYear(), letzterTag.getUTCMonth(), letzterTag.getUTCDate() + 1);
+          }
+          if(!ende || ende <= start){
+            ende = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1);
+          }
+        }
+
+        return {
+          id: String(e.id),
+          kalenderId: String(e.calendarId != null ? e.calendarId : ""),
+          titel: e.title || "(ohne Titel)",
+          start: start,
+          end: ende,
+          allDay: ganztags,
+          ort: e.location || ""
+        };
+      }).filter(e => e.start && !isNaN(e.start));
 
       nativStatus.textContent = geraeteKalender.length + " Kalender · " + geraeteTermine.length + " Termine";
       renderNativAuswahl();
@@ -4272,7 +4390,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "2.7";
+  const APP_VERSION = "2.8";
 
   document.getElementById("exportBtn").addEventListener("click", async () => {
     const payload = {
@@ -4588,6 +4706,7 @@
 
   if(istApp){
     setTimeout(() => { nativKalenderEinlesen(); }, 400);
+  }
   }
 })();
 </script>
