@@ -16,9 +16,9 @@
     --panel-alt: #0f141b;
     --border: #232c38;
     --border-soft: #1b222c;
-    --text: #e7ebf1;
-    --text-dim: #8b96a5;
-    --text-faint: #5a6472;
+    --text: #f2f5f9;
+    --text-dim: #b3bccb;
+    --text-faint: #8d97a6;
     --amber: #ffb020;
     --amber-dim: #7a5a1a;
     --green: #35d488;
@@ -59,8 +59,8 @@
   :root{
     --topbar-bg: linear-gradient(180deg, #0e131a, #0b0f14);
     --topbar-text: #eef2f7;
-    --topbar-eyebrow: #8b96a6;
-    --topbar-chip-text: #c3cad6;
+    --topbar-eyebrow: #a6b0bf;
+    --topbar-chip-text: #d5dbe4;
     --topbar-chip-border: #2a3140;
     --modal-shadow: 0 20px 60px rgba(0,0,0,0.5);
     --overlay-bg: rgba(0,0,0,0.6);
@@ -92,29 +92,19 @@
     padding-right:calc(16px + env(safe-area-inset-right, 0px));
     display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
   }
-  .topbar, .topbar .brand-text h1{color:var(--topbar-text);}
+  .topbar{color:var(--topbar-text);}
   .topbar .eyebrow{color:var(--topbar-eyebrow);}
   .topbar .status-chip{color:var(--topbar-chip-text);border-color:var(--topbar-chip-border);}
-  .brand{display:flex;align-items:center;gap:10px;min-width:0;}
-  .brand-mark{
-    width:32px;height:32px;flex-shrink:0;border:1.5px solid var(--amber);border-radius:4px;
-    display:flex;align-items:center;justify-content:center;
-    font-family:var(--mono);font-weight:700;color:var(--amber);font-size:13px;
-    background:rgba(255,176,32,0.06);letter-spacing:-0.5px;
+  .brand{
+    display:flex;align-items:center;gap:9px;min-width:0;
+    background:none;border:none;padding:0;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
   }
-  .brand-text .eyebrow{
-    font-family:var(--mono);font-size:8.5px;letter-spacing:1.8px;color:var(--text-faint);
-    text-transform:uppercase;margin-bottom:2px;
-  }
-  .brand-text h1{
-    margin:0;font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.3px;
-    display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;
-  }
-  .version-badge{
-    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.5px;
-    color:var(--topbar-eyebrow);border:1px solid var(--topbar-chip-border);border-radius:3px;
-    padding:2px 7px;
-  }
+  .brand:active{opacity:0.7;}
+  .brand img{height:30px;width:auto;display:block;}
+  .logo-hell{display:none;}
+  html[data-theme="light"] .logo-dunkel{display:none;}
+  html[data-theme="light"] .logo-hell{display:block;}
   .status-chip{
     font-family:var(--mono);font-size:10px;letter-spacing:0.5px;
     border:1px solid var(--border);padding:4px 8px;border-radius:3px;
@@ -187,19 +177,26 @@
   .val-neutral{color:var(--text-dim);}
 
   /* ---------- Tabs ---------- */
+  /* Reiterleiste am unteren Bildschirmrand */
   .tab-bar{
-    flex-shrink:0;
-    display:flex;gap:2px;max-width:1180px;width:100%;margin:0 auto;padding:0 24px;
-    border-bottom:1px solid var(--border);
+    flex-shrink:0;order:99;
+    display:flex;gap:2px;width:100%;
+    padding:0 8px;
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+    border-top:1px solid var(--border);
+    background:var(--panel-alt);
+    justify-content:space-between;
   }
   .tab-btn{
     background:none;border:none;border-bottom:2px solid transparent;flex-shrink:0;
     color:var(--text-faint);font-family:var(--cond);font-weight:700;font-size:12px;
-    letter-spacing:0.6px;text-transform:uppercase;padding:9px 13px 8px;cursor:pointer;
+    letter-spacing:0.4px;text-transform:uppercase;padding:9px 4px 7px;cursor:pointer;
+    flex:1;text-align:center;
     transition:color .15s, border-color .15s;
   }
   .tab-btn:hover{color:var(--text-dim);}
-  .tab-btn.active{color:var(--amber);border-bottom-color:var(--amber);}
+  .tab-btn.active{color:var(--amber);border-bottom-color:transparent;border-top:2px solid var(--amber);
+    margin-top:-2px;background:rgba(255,176,32,0.07);}
   .tab-panel{display:none;}
   .tab-panel.active{
     display:block;flex:1;min-height:0;
@@ -362,6 +359,12 @@
   .todo-prio.mittel{color:var(--amber);border-color:var(--amber);}
   .todo-prio.niedrig{color:var(--text-faint);border-color:var(--border);}
   .todo-row.overdue .todo-meta{color:var(--red);}
+  .todo-notiz{
+    font-size:12.5px;color:var(--text-dim);margin-top:6px;line-height:1.5;
+    white-space:pre-wrap;word-break:break-word;
+    padding-left:8px;border-left:2px solid var(--border);
+  }
+  .todo-anhaenge{margin-top:4px;}
 
   .eintrag-grid{
     display:grid;grid-template-columns:repeat(5, 1fr);gap:12px;
@@ -428,8 +431,8 @@
     padding:0 6px;flex-shrink:0;
   }
   .kal-wd{
-    font-family:var(--mono);font-size:9px;letter-spacing:0.8px;text-transform:uppercase;
-    color:var(--text-faint);text-align:center;padding:3px 0 2px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.8px;text-transform:uppercase;
+    color:var(--text-dim);text-align:center;padding:3px 0 2px;
   }
   .kal-body{
     flex:1;min-height:0;display:flex;flex-direction:column;gap:2px;
@@ -442,8 +445,8 @@
   /* Kalenderwoche sitzt platzsparend links oben im Montagsfeld */
   .kal-kw{
     position:absolute;left:2px;top:1px;
-    font-family:var(--mono);font-size:7.5px;color:var(--text-faint);
-    opacity:0.55;pointer-events:none;line-height:1;
+    font-family:var(--mono);font-size:9px;color:var(--text-dim);
+    opacity:0.9;pointer-events:none;line-height:1;
   }
   .kal-tag{position:relative;}
   .kal-tag{
@@ -458,12 +461,12 @@
   .kal-tag.feiertag{background:rgba(255,92,92,0.09);}
   .kal-tag.gedrueckt{background:var(--amber-dim);}
   .kal-tag-nr{
-    font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--text);
-    line-height:1.1;text-align:right;padding-right:2px;
+    font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);
+    line-height:1.1;text-align:right;padding-right:3px;
   }
   .kal-tag.we .kal-tag-nr{color:var(--text-faint);}
   .kal-tag-ft{
-    font-size:7px;color:var(--red);line-height:1.05;
+    font-size:8.5px;color:var(--red);line-height:1.1;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
 
@@ -473,16 +476,26 @@
     pointer-events:none;overflow:hidden;
   }
   .kal-balken{
-    position:absolute;height:12px;border-radius:2px;
-    font-size:8.5px;line-height:12px;padding:0 3px;margin-bottom:1px;
+    position:absolute;height:15px;border-radius:5px;
+    font-size:10px;line-height:15px;padding:0 5px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    pointer-events:none;
+    pointer-events:none;font-weight:500;
   }
-  .kal-balken.start-offen{border-top-left-radius:0;border-bottom-left-radius:0;}
-  .kal-balken.ende-offen{border-top-right-radius:0;border-bottom-right-radius:0;}
+  .kal-balken.start-offen{border-top-left-radius:1px;border-bottom-left-radius:1px;}
+  .kal-balken.ende-offen{border-top-right-radius:1px;border-bottom-right-radius:1px;}
+
+  /* Termine mit Uhrzeit: nur farbige Flagge, nicht flächig gefüllt */
+  .kal-balken.mit-zeit{
+    background:transparent !important;
+    padding-left:9px;
+  }
+  .kal-balken.mit-zeit::before{
+    content:"";position:absolute;left:2px;top:3px;bottom:3px;width:3.5px;
+    border-radius:2px;background:var(--flaggenfarbe);
+  }
   .kal-mehr-marke{
-    position:absolute;font-family:var(--mono);font-size:7.5px;
-    color:var(--text-faint);pointer-events:none;
+    position:absolute;font-family:var(--mono);font-size:9px;font-weight:600;
+    color:var(--text-dim);pointer-events:none;
   }
 
   .kal-tagdetail{
@@ -637,9 +650,7 @@
 
     .topbar{padding:13px 14px;padding-top:calc(13px + env(safe-area-inset-top, 0px));gap:10px;}
     .brand{gap:11px;}
-    .brand-mark{width:36px;height:36px;font-size:12px;}
-    .brand-text h1{font-size:17px;gap:7px;}
-    .brand-text .eyebrow{font-size:9.5px;letter-spacing:2px;}
+    .brand img{height:27px;}
     .topbar .status-chip{font-size:10px;padding:5px 9px;}
 
     .settings-bar{padding:8px 14px;gap:10px;row-gap:9px;}
@@ -713,7 +724,7 @@
     .eintrag-grid{grid-template-columns:repeat(2, 1fr);gap:6px;}
     .eintrag-art{font-size:11.5px;}
     .topbar{padding-left:calc(11px + env(safe-area-inset-left, 0px));padding-right:calc(11px + env(safe-area-inset-right, 0px));}
-    .brand-text h1{font-size:15.5px;}
+    .brand img{height:24px;}
     .version-badge{font-size:9px;}
 
     /* Cockpit-Kacheln untereinander */
@@ -738,13 +749,11 @@
 <body>
 
 <div class="topbar">
-  <div class="brand">
-    <div class="brand-mark">DC</div>
-    <div class="brand-text">
-      <div class="eyebrow">Dienstliches Cockpit</div>
-      <h1>Dienst-Cockpit <span class="version-badge" id="versionBadge">v2.8</span></h1>
-    </div>
-  </div>
+  <button class="brand" id="logoBtn" type="button" title="Hell/Dunkel wechseln">
+    <img class="logo-dunkel" src="logo-header.png" alt="Air Force CH-47 Team">
+    <img class="logo-hell" src="logo-header-light.png" alt="Air Force CH-47 Team">
+    <span class="version-badge" id="versionBadge">v3.1</span>
+  </button>
   <div class="kal-nav">
     <span class="status-chip"><span id="topStatusText">—</span></span>
     <button class="btn small" id="menueBtn" type="button" title="Menü">☰</button>
@@ -809,7 +818,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 2.8 &middot; Stand 07.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 3.1 &middot; Stand 08.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -823,6 +832,33 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v3.1 <span class="cl-date">08.08.2026</span></div>
+        <ul>
+          <li>„AIR FORCE CH-47 TEAM"-Logo in der Kopfzeile — ein Antippen wechselt zwischen hell und dunkel</li>
+          <li>Zwei Logo-Fassungen: im hellen Modus werden die weißen Anteile dunkel gesetzt, damit sie lesbar bleiben</li>
+          <li>Neues App-Symbol aus der CH-47-Silhouette, weiß auf dunklem Grund, samt passendem Startbildschirm</li>
+        </ul>
+      </div>
+      <div class="cl-entry">
+        <div class="cl-version">v3.0 <span class="cl-date">08.08.2026</span></div>
+        <ul>
+          <li><b>Fester Signierschlüssel:</b> Updates lassen sich jetzt über die vorhandene App installieren, ohne vorher zu deinstallieren — die Daten bleiben dabei erhalten</li>
+          <li>Reiterleiste an den unteren Bildschirmrand verlegt</li>
+          <li>Dunkler Modus mit deutlich mehr Kontrast; Kalenderwochen, Wochentage und Tagesnummern sind größer und besser lesbar</li>
+          <li>Terminbalken dicker und mit abgerundeten Ecken</li>
+          <li>Termine mit Uhrzeit erscheinen nur noch als farbige Flagge statt flächig gefüllt</li>
+          <li>Bei hellen Kalenderfarben wird die Beschriftung dunkel gesetzt</li>
+          <li>Emblem im Kopfbereich statt „DC" — ein Antippen wechselt zwischen hell und dunkel</li>
+          <li>Fehler behoben: beim Start wurde nur nach Benachrichtigungen gefragt, der Kalenderzugriff meldete lediglich einen Fehler. Beides wird jetzt beim Start nacheinander erfragt</li>
+          <li>Fehler behoben: neue Termine wurden doppelt angezeigt (einmal als eigener Eintrag, einmal aus dem Gerätekalender)</li>
+          <li>Kalender lassen sich dauerhaft aus der App entfernen und erscheinen dann auch nicht mehr in der Auswahl; „↺ Entfernte zurückholen" macht das rückgängig</li>
+          <li>Termine ohne Kalenderzuordnung (etwa Geburtstage aus dem Samsung-Kalender) gehen nicht mehr verloren, sondern erscheinen unter „Sonstige"</li>
+          <li>Bei Terminen in einem Urlaubskalender lässt sich wählen: Urlaub oder FvD, jeweils fest oder nur geplant — der Eintrag im Konto erfolgt automatisch</li>
+          <li>To-do-Liste: Notizfeld, Dateianhänge, Uhrzeit sowie Schnellauswahl „Heute", „Morgen" und „+1 Woche"</li>
+          <li>Erinnerungen an Aufgaben richten sich nach der eingetragenen Uhrzeit</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v2.8 <span class="cl-date">07.08.2026</span></div>
         <ul>
@@ -1316,6 +1352,7 @@
         <div class="btn-row" style="margin-top:0;margin-bottom:14px;">
           <button type="button" class="btn add" id="nativErlauben">Kalenderzugriff erlauben</button>
           <button type="button" class="btn" id="nativLaden">↻ Kalender einlesen</button>
+          <button type="button" class="btn" id="nativEntferntZurueck">↺ Entfernte zurückholen</button>
         </div>
 
         <div class="field" style="margin-bottom:12px;">
@@ -1468,6 +1505,19 @@
         </div>
       </div>
 
+      <div class="field" id="nvVerrechnung" style="margin-bottom:12px;display:none;">
+        <label>Auf Urlaub / Mehrarbeit anrechnen</label>
+        <div class="seg-group" style="width:100%;">
+          <button type="button" class="seg-btn active" data-anrech="keine" style="flex:1;">Nein</button>
+          <button type="button" class="seg-btn" data-anrech="eu" style="flex:1;">Urlaub</button>
+          <button type="button" class="seg-btn" data-anrech="fvd" style="flex:1;">FvD</button>
+        </div>
+        <div class="btn-row" style="margin-top:8px;" id="nvGeplantRow">
+          <button type="button" class="btn toggle-pill active" id="nvNurGeplant" aria-pressed="true">● Nur geplant</button>
+        </div>
+        <div class="hint" id="nvAnrechHinweis">Wird beim Speichern automatisch im Reiter „Urlaub/Mehrarbeit" eingetragen.</div>
+      </div>
+
       <div class="field" style="margin-bottom:12px;">
         <label>Dateianhang <span style="color:var(--text-faint);">(optional)</span></label>
         <input type="file" id="nvAnhangDatei" style="padding:7px 10px;">
@@ -1505,14 +1555,19 @@
       </div>
       <div class="panel-body">
         <form id="todoForm">
-          <div class="row c3" style="margin-bottom:12px;">
-            <div class="field">
-              <label for="tText">Aufgabe *</label>
-              <input type="text" id="tText" placeholder="z. B. Lehrgangsantrag einreichen" required>
-            </div>
+          <div class="field" style="margin-bottom:12px;">
+            <label for="tText">Aufgabe *</label>
+            <input type="text" id="tText" placeholder="z. B. Lehrgangsantrag einreichen" required>
+          </div>
+
+          <div class="row c3" style="margin-bottom:8px;">
             <div class="field">
               <label for="tFaellig">Fällig am <span style="color:var(--text-faint);">(optional)</span></label>
               <input type="text" id="tFaellig" placeholder="TT.MM.JJJJ">
+            </div>
+            <div class="field">
+              <label for="tUhrzeit">Uhrzeit <span style="color:var(--text-faint);">(optional)</span></label>
+              <input type="text" id="tUhrzeit" placeholder="HH:MM">
             </div>
             <div class="field">
               <label for="tPrio">Priorität</label>
@@ -1523,6 +1578,25 @@
               </select>
             </div>
           </div>
+
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button type="button" class="btn small" id="tHeute">Heute</button>
+            <button type="button" class="btn small" id="tMorgen">Morgen</button>
+            <button type="button" class="btn small" id="tWoche">+1 Woche</button>
+          </div>
+
+          <div class="field" style="margin-bottom:12px;">
+            <label for="tNotiz">Notizen <span style="color:var(--text-faint);">(optional)</span></label>
+            <textarea id="tNotiz" rows="3" placeholder="Weitere Angaben, Ansprechpartner, Zwischenschritte …"></textarea>
+          </div>
+
+          <div class="field" style="margin-bottom:12px;">
+            <label>Dateianhang <span style="color:var(--text-faint);">(optional)</span></label>
+            <input type="file" id="tAnhangDatei" style="padding:7px 10px;">
+            <div class="hint">Bis 2 MB je Datei. Anhänge werden in der App gespeichert.</div>
+            <div id="tAnhangListe" style="margin-top:8px;"></div>
+          </div>
+
           <div class="btn-row" style="margin-top:0;">
             <button type="submit" class="btn add">+ Aufgabe hinzufügen</button>
           </div>
@@ -1781,6 +1855,18 @@
   const changelogOverlay = document.getElementById("changelogOverlay");
 
   document.getElementById("menueBtn").addEventListener("click", () => { menueOverlay.style.display = "flex"; });
+
+  // Klick auf das Logo wechselt zwischen hell und dunkel
+  document.getElementById("logoBtn").addEventListener("click", () => {
+    const jetzt = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+    const knopf = document.querySelector('[data-theme-btn="' + jetzt + '"]');
+    if(knopf) knopf.click();
+    else{
+      document.documentElement.setAttribute("data-theme", jetzt);
+      try{ localStorage.setItem("dienstcockpit_theme_v1", jetzt); }catch(e){}
+      speicherSpiegeln("dienstcockpit_theme_v1", jetzt);
+    }
+  });
   document.getElementById("menueZu").addEventListener("click", () => { menueOverlay.style.display = "none"; });
   menueOverlay.addEventListener("click", (e) => { if(e.target === menueOverlay) menueOverlay.style.display = "none"; });
 
@@ -2481,7 +2567,56 @@
   const todoForm = document.getElementById("todoForm");
   const tText = document.getElementById("tText");
   const tFaellig = document.getElementById("tFaellig");
+  const tUhrzeit = document.getElementById("tUhrzeit");
   const tPrio = document.getElementById("tPrio");
+  const tNotiz = document.getElementById("tNotiz");
+  const tAnhangDatei = document.getElementById("tAnhangDatei");
+  const tAnhangListe = document.getElementById("tAnhangListe");
+  let tAnhaenge = [];
+
+  // Schnellauswahl für das Fälligkeitsdatum
+  function tagVersetzt(n){
+    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + n);
+    return toDEString(d);
+  }
+  document.getElementById("tHeute").addEventListener("click", () => { tFaellig.value = tagVersetzt(0); });
+  document.getElementById("tMorgen").addEventListener("click", () => { tFaellig.value = tagVersetzt(1); });
+  document.getElementById("tWoche").addEventListener("click", () => { tFaellig.value = tagVersetzt(7); });
+
+  function tRenderAnhaenge(){
+    tAnhangListe.innerHTML = "";
+    tAnhaenge.forEach((a, i) => {
+      const row = document.createElement("div");
+      row.className = "anhang-row";
+      row.innerHTML = '<div style="min-width:0;"><div class="anhang-name"></div>'
+        + '<div class="anhang-groesse"></div></div>'
+        + '<button type="button" class="btn icon danger" data-tanh-weg="' + i + '">✕</button>';
+      row.querySelector(".anhang-name").textContent = a.name;
+      row.querySelector(".anhang-groesse").textContent = groesseText(a.groesse);
+      tAnhangListe.appendChild(row);
+    });
+    tAnhangListe.querySelectorAll("[data-tanh-weg]").forEach(b =>
+      b.addEventListener("click", () => {
+        tAnhaenge.splice(+b.getAttribute("data-tanh-weg"), 1);
+        tRenderAnhaenge();
+      }));
+  }
+  tAnhangDatei.addEventListener("change", () => {
+    const datei = tAnhangDatei.files[0];
+    if(!datei) return;
+    if(datei.size > 2 * 1024 * 1024){
+      alert("Die Datei ist zu groß (" + groesseText(datei.size) + ").\n\nBitte höchstens 2 MB je Datei.");
+      tAnhangDatei.value = ""; return;
+    }
+    const leser = new FileReader();
+    leser.onload = () => {
+      tAnhaenge.push({ name: datei.name, groesse: datei.size, typ: datei.type, daten: leser.result });
+      tRenderAnhaenge();
+      tAnhangDatei.value = "";
+    };
+    leser.onerror = () => { alert("Die Datei konnte nicht gelesen werden."); tAnhangDatei.value = ""; };
+    leser.readAsDataURL(datei);
+  });
   const todoOffenList = document.getElementById("todoOffenList");
   const todoOffenEmpty = document.getElementById("todoOffenEmpty");
   const todoDoneList = document.getElementById("todoDoneList");
@@ -2497,14 +2632,27 @@
       alert("Bitte ein gültiges Fälligkeitsdatum (TT.MM.JJJJ) eingeben, oder das Feld leer lassen.");
       tFaellig.focus(); return;
     }
+    const uhrzeit = tUhrzeit.value.trim();
+    if(uhrzeit && !/^([01]?\d|2[0-3]):[0-5]\d$/.test(uhrzeit)){
+      alert("Bitte eine gültige Uhrzeit im Format HH:MM eingeben, oder das Feld leer lassen.");
+      tUhrzeit.focus(); return;
+    }
+    if(uhrzeit && !faelligEingabe){
+      alert("Für eine Uhrzeit wird auch ein Fälligkeitsdatum benötigt.");
+      tFaellig.focus(); return;
+    }
+
     todos.eintraege.push({
-      id: newId(), text, faellig: faelligEingabe, prio: tPrio.value,
+      id: newId(), text, faellig: faelligEingabe, uhrzeit: uhrzeit,
+      prio: tPrio.value, notiz: tNotiz.value.trim(), anhaenge: tAnhaenge.slice(),
       erledigt: false, erstellt: todayDE()
     });
     saveTodos();
     todoForm.reset();
     tPrio.value = "mittel";
+    tAnhaenge = []; tRenderAnhaenge();
     renderTodos();
+    if(typeof benPlanen === "function") benPlanen();
   });
 
   function toggleTodo(id){
@@ -2539,24 +2687,56 @@
     const prioLabel = t.prio ? t.prio.charAt(0).toUpperCase() + t.prio.slice(1) : "";
 
     const metaTeile = [];
-    if(t.faellig) metaTeile.push((ueberfaellig ? "Überfällig seit " : "Fällig: ") + fmt(t.faellig));
+    if(t.faellig){
+      metaTeile.push((ueberfaellig ? "Überfällig seit " : "Fällig: ") + fmt(t.faellig)
+        + (t.uhrzeit ? ", " + t.uhrzeit + " Uhr" : ""));
+    }
     if(t.erledigt && t.erledigtAm) metaTeile.push("Erledigt: " + fmt(t.erledigtAm));
+    const anzAnh = (t.anhaenge && t.anhaenge.length) || 0;
+    if(anzAnh) metaTeile.push(anzAnh + (anzAnh === 1 ? " Anhang" : " Anhänge"));
 
     const row = document.createElement("div");
     row.className = "todo-row" + (t.erledigt ? " done" : "") + (ueberfaellig ? " overdue" : "");
     row.innerHTML = `
       <div class="todo-check" title="${t.erledigt ? "Als offen markieren" : "Als erledigt markieren"}" data-toggle="${t.id}">${t.erledigt ? "✓" : ""}</div>
-      <div>
+      <div style="min-width:0;">
         <div class="todo-text"></div>
         <div class="todo-meta" style="display:${metaTeile.length ? "block" : "none"};"></div>
+        <div class="todo-notiz" style="display:none;"></div>
+        <div class="todo-anhaenge" style="display:none;"></div>
       </div>
       <div class="list-row-actions">
+        ${(t.notiz || anzAnh) ? `<button class="btn icon" title="Details" data-todo-auf="${t.id}">▸</button>` : ""}
         ${!t.erledigt && prioLabel ? `<span class="todo-prio ${t.prio}">${prioLabel}</span>` : ""}
         <button class="btn icon danger" title="Löschen" data-del-todo="${t.id}">✕</button>
       </div>
     `;
     row.querySelector(".todo-text").textContent = t.text;
     if(metaTeile.length) row.querySelector(".todo-meta").textContent = metaTeile.join(" · ");
+
+    // Notiz und Anhänge auf Wunsch einblenden
+    const notizEl = row.querySelector(".todo-notiz");
+    const anhEl = row.querySelector(".todo-anhaenge");
+    if(t.notiz) notizEl.textContent = t.notiz;
+    if(anzAnh){
+      t.anhaenge.forEach(a => {
+        const link = document.createElement("a");
+        link.href = a.daten; link.download = a.name;
+        link.className = "btn small";
+        link.style.cssText = "margin:5px 6px 0 0;display:inline-block;";
+        link.textContent = "↓ " + a.name;
+        anhEl.appendChild(link);
+      });
+    }
+    const aufKnopf = row.querySelector("[data-todo-auf]");
+    if(aufKnopf){
+      aufKnopf.addEventListener("click", () => {
+        const offen = notizEl.style.display !== "none" || anhEl.style.display !== "none";
+        if(t.notiz) notizEl.style.display = offen ? "none" : "block";
+        if(anzAnh) anhEl.style.display = offen ? "none" : "block";
+        aufKnopf.textContent = offen ? "▸" : "▾";
+      });
+    }
     return row;
   }
 
@@ -2918,8 +3098,10 @@
         });
       });
     });
-    // Selbst angelegte Termine ergaenzen
-    (kalender.eigene || []).forEach(t => {
+    // Selbst angelegte Termine ergaenzen.
+    // In der App liegt der Termin bereits im Gerätekalender und wird von dort
+    // gelesen — sonst erschiene er doppelt.
+    (kalender.eigene || []).filter(t => !(istApp && t.nativId)).forEach(t => {
       const startD = parseDateDE(t.von);
       if(!startD) return;
       const endD = t.bis ? (parseDateDE(t.bis) || startD) : startD;
@@ -3061,7 +3243,8 @@
     const h = String(hex || "").replace("#", "");
     if(h.length < 6) return "#ffffff";
     const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
-    return (r*299 + g*587 + b*114) / 1000 > 150 ? "#11151b" : "#ffffff";
+    // Schwelle bewusst hoch: bei hellen Kalenderfarben ist dunkle Schrift lesbarer
+    return (r*299 + g*587 + b*114) / 1000 > 135 ? "#0d1116" : "#ffffff";
   }
 
   // Balken ein- oder ausblenden, je nachdem wie viele in die Zeilenhöhe passen.
@@ -3236,8 +3419,15 @@
         balken.className = "kal-balken"
           + (sp.start < wochenStart ? " start-offen" : "")
           + (sp.ende > wochenEnde ? " ende-offen" : "");
-        balken.style.background = farbe;
-        balken.style.color = textAufFarbe(farbe);
+        if(sp.termin.allDay){
+          balken.style.background = farbe;
+          balken.style.color = textAufFarbe(farbe);
+        }else{
+          // Nur farbige Flagge, Text in normaler Schriftfarbe
+          balken.classList.add("mit-zeit");
+          balken.style.setProperty("--flaggenfarbe", farbe);
+          balken.style.color = "var(--text)";
+        }
         balken.style.left = "calc(" + (vonSpalte * 100 / 7) + "% + 1px)";
         balken.style.width = "calc(" + ((bisSpalte - vonSpalte + 1) * 100 / 7) + "% - 3px)";
         balken.style.top = (spur * 13) + "px";
@@ -3793,6 +3983,8 @@
     nvAnhaenge = [];
     renderAnhaenge();
     fuelleKalenderAuswahl();
+    nvAnrechnung = "keine"; nvGeplant = true;
+    verrechnungPruefen();
     nvOverlay.classList.add("offen");
     document.body.style.overflow = "hidden";
     setTimeout(() => nvTitel.focus(), 120);
@@ -3877,6 +4069,89 @@
     return /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(v || "").trim());
   }
 
+  /* ---------- Anrechnung auf Urlaub / Mehrarbeit ---------- */
+  const nvVerrechnung = document.getElementById("nvVerrechnung");
+  const nvGeplantRow = document.getElementById("nvGeplantRow");
+  const nvNurGeplant = document.getElementById("nvNurGeplant");
+  const nvAnrechHinweis = document.getElementById("nvAnrechHinweis");
+  let nvAnrechnung = "keine";
+  let nvGeplant = true;
+
+  function updateAnrechnungUI(){
+    document.querySelectorAll("[data-anrech]").forEach(b =>
+      b.classList.toggle("active", b.getAttribute("data-anrech") === nvAnrechnung));
+    nvGeplantRow.style.display = nvAnrechnung === "keine" ? "none" : "flex";
+    nvNurGeplant.classList.toggle("active", nvGeplant);
+    nvNurGeplant.setAttribute("aria-pressed", String(nvGeplant));
+    nvNurGeplant.textContent = (nvGeplant ? "● " : "○ ") + "Nur geplant";
+
+    if(nvAnrechnung === "keine"){
+      nvAnrechHinweis.textContent = 'Wird beim Speichern automatisch im Reiter „Urlaub/Mehrarbeit" eingetragen.';
+    }else if(nvAnrechnung === "eu"){
+      nvAnrechHinweis.textContent = nvGeplant
+        ? 'Wird als geplanter Urlaub eingetragen — erst nach „Scharf schalten" abgezogen.'
+        : "Wird sofort als fester Urlaub abgezogen (Werktage ohne Feiertage BW).";
+    }else{
+      nvAnrechHinweis.textContent = nvGeplant
+        ? "Wird als geplanter FvD vermerkt, aber noch nicht von den Überstunden abgezogen."
+        : "Die Stunden werden sofort vom Überstundenkonto abgezogen.";
+    }
+  }
+  document.querySelectorAll("[data-anrech]").forEach(b =>
+    b.addEventListener("click", () => { nvAnrechnung = b.getAttribute("data-anrech"); updateAnrechnungUI(); }));
+  nvNurGeplant.addEventListener("click", () => { nvGeplant = !nvGeplant; updateAnrechnungUI(); });
+
+  // Block nur bei einem Kalender anbieten, dessen Name auf Urlaub hindeutet
+  function verrechnungPruefen(){
+    const id = nvKalenderSel.value;
+    const k = geraeteKalender.find(x => x.id === id);
+    const name = ((k && k.title) || "").toLowerCase();
+    const passt = /urlaub|eu\b|abwesen|fvd/.test(name);
+    nvVerrechnung.style.display = passt ? "block" : "none";
+    if(!passt){ nvAnrechnung = "keine"; }
+    updateAnrechnungUI();
+  }
+  nvKalenderSel.addEventListener("change", verrechnungPruefen);
+
+  // Erzeugt die Einträge im Urlaubs- bzw. Überstundenkonto
+  function anrechnungEintragen(termin){
+    if(nvAnrechnung === "keine") return;
+    const von = parseDateDE(termin.von);
+    const bis = parseDateDE(termin.bis) || von;
+    if(!von) return;
+    const tage = computeArbeitstage(von, bis);
+    if(tage <= 0){
+      alert("Der Zeitraum enthält keine Werktage — es wurde nichts angerechnet.");
+      return;
+    }
+
+    if(nvAnrechnung === "eu"){
+      urlaub.zeitraeume.push({
+        id: newId(), von: termin.von, bis: termin.bis, tage: tage,
+        notiz: termin.titel, status: nvGeplant ? "geplant" : "eingetragen",
+        herkunft: "termin", quelle: termin.uid
+      });
+      saveUrlaub(); renderUrlaub();
+    }else{
+      const stunden = -Math.abs((kalender.fvdStunden || 8) * tage);
+      if(nvGeplant){
+        // Als geplant vermerken: noch nicht abziehen, aber festhalten
+        urlaub.zeitraeume.push({
+          id: newId(), von: termin.von, bis: termin.bis, tage: 0,
+          notiz: "FvD geplant: " + termin.titel, status: "geplant",
+          herkunft: "termin", quelle: termin.uid, fvdStunden: Math.abs(stunden)
+        });
+        saveUrlaub(); renderUrlaub();
+      }else{
+        ueberstunden.eintraege.push({
+          id: newId(), datum: termin.von, stunden: stunden,
+          notiz: "FvD: " + termin.titel, herkunft: "termin", quelle: termin.uid
+        });
+        saveUeberstunden(); renderUeberstunden();
+      }
+    }
+  }
+
   document.getElementById("nvSpeichern").addEventListener("click", async () => {
     const titel = nvTitel.value.trim();
     if(!titel){ alert("Bitte einen Titel eingeben."); nvTitel.focus(); return; }
@@ -3921,6 +4196,7 @@
 
     kalender.eigene.push(termin);
     saveKalender();
+    anrechnungEintragen(termin);
     if(typeof benPlanen === "function") benPlanen();
 
     nvTitel.value = ""; nvVon.value = ""; nvBis.value = "";
@@ -4069,8 +4345,9 @@
   let zielKalenderId = "";
 
   const NATIV_KEY = "nativ_einstellungen_v1";
-  let nativCfg = loadJSON(NATIV_KEY, { zielKalenderId: "", versteckt: [] });
+  let nativCfg = loadJSON(NATIV_KEY, { zielKalenderId: "", versteckt: [], entfernt: [] });
   if(!Array.isArray(nativCfg.versteckt)) nativCfg.versteckt = [];
+  if(!Array.isArray(nativCfg.entfernt)) nativCfg.entfernt = [];
   zielKalenderId = nativCfg.zielKalenderId || "";
   function saveNativCfg(){ saveJSON(NATIV_KEY, nativCfg); }
 
@@ -4135,7 +4412,7 @@
           eigeneFarbe: !!farbenEigen[id],
           sichtbar: nativCfg.versteckt.indexOf(id) === -1
         };
-      });
+      }).filter(k => nativCfg.entfernt.indexOf(k.id) === -1);
 
       const von = new Date(new Date().getFullYear() - 1, 0, 1).getTime();
       const bis = new Date(new Date().getFullYear() + 2, 11, 31).getTime();
@@ -4231,7 +4508,8 @@
           '<div class="quelle-meta"></div>' +
           '<div class="farb-reihe"></div>' +
         '</div>' +
-        '<div></div>';
+        '<button type="button" class="btn icon danger" data-kal-weg="' + k.id + '" ' +
+          'title="Kalender aus der App entfernen">✕</button>';
 
       const nameEl = row.querySelector(".quelle-name");
       nameEl.textContent = k.title;
@@ -4289,6 +4567,23 @@
         renderKalender();
       });
     });
+    nativKalenderListe.querySelectorAll("[data-kal-weg]").forEach(el => {
+      el.addEventListener("click", () => {
+        const id = el.getAttribute("data-kal-weg");
+        const k = geraeteKalender.find(x => x.id === id);
+        if(!k) return;
+        if(!confirm('Kalender „' + k.title + '" aus der App entfernen?\n\n'
+          + 'Er verschwindet aus dem Kalender und aus der Auswahl beim Anlegen von Terminen. '
+          + 'Auf dem Gerät selbst bleibt er unverändert und lässt sich über „↻ Kalender einlesen" zurückholen.')) return;
+        nativCfg.entfernt.push(id);
+        nativCfg.versteckt = nativCfg.versteckt.filter(x => x !== id);
+        if(zielKalenderId === id){ zielKalenderId = ""; nativCfg.zielKalenderId = ""; }
+        saveNativCfg();
+        geraeteKalender = geraeteKalender.filter(x => x.id !== id);
+        renderNativAuswahl();
+        renderKalender();
+      });
+    });
     nativKalenderListe.querySelectorAll("[data-farb-reset]").forEach(el => {
       el.addEventListener("click", () => {
         const id = el.getAttribute("data-farb-reset");
@@ -4309,6 +4604,13 @@
       if(ok) nativKalenderEinlesen();
     });
     document.getElementById("nativLaden").addEventListener("click", nativKalenderEinlesen);
+    document.getElementById("nativEntferntZurueck").addEventListener("click", () => {
+      if(!nativCfg.entfernt.length){ alert("Es wurden keine Kalender entfernt."); return; }
+      if(!confirm(nativCfg.entfernt.length + " entfernte(n) Kalender wieder anzeigen?")) return;
+      nativCfg.entfernt = [];
+      saveNativCfg();
+      nativKalenderEinlesen();
+    });
     nativZielkalender.addEventListener("change", () => {
       zielKalenderId = nativZielkalender.value;
       nativCfg.zielKalenderId = zielKalenderId;
@@ -4321,6 +4623,17 @@
     if(!istApp) return [];
     const sichtbar = {};
     geraeteKalender.forEach(k => { if(k.sichtbar) sichtbar[k.id] = k; });
+
+    // Manche Kalender (z. B. der Geburtstagskalender von Samsung) liefern keine
+    // Kalenderzuordnung an den Terminen. Solche Termine würden sonst wegfallen —
+    // sie werden einem Sammeleintrag zugeordnet.
+    const sammel = { id: "", title: "Sonstige (u. a. Geburtstage)",
+                     farbe: farbenEigen[""] || "#b98cff",
+                     konto: { dienst: "Lokal", name: "" } };
+    if(nativCfg.versteckt.indexOf("") === -1 && nativCfg.entfernt.indexOf("") === -1){
+      sichtbar[""] = sichtbar[""] || sammel;
+    }
+
     return geraeteTermine
       .filter(e => sichtbar[e.kalenderId] !== undefined)
       .filter(e => {
@@ -4390,7 +4703,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "2.8";
+  const APP_VERSION = "3.1";
 
   document.getElementById("exportBtn").addEventListener("click", async () => {
     const payload = {
@@ -4626,12 +4939,17 @@
       if(t.erledigt || !t.faellig) return;
       const d = parseDateDE(t.faellig);
       if(!d) return;
-      d.setHours(9, 0, 0, 0);
+      if(t.uhrzeit && /^([01]?\d|2[0-3]):[0-5]\d$/.test(t.uhrzeit)){
+        const [h, m] = t.uhrzeit.split(":").map(Number);
+        d.setHours(h, m, 0, 0);
+      }else{
+        d.setHours(9, 0, 0, 0);
+      }
       if(d.getTime() <= jetzt) return;
       geplant.push({
         id: benId("todo:" + t.id),
         title: "Aufgabe fällig",
-        body: t.text,
+        body: t.text + (t.notiz ? " — " + t.notiz.slice(0, 80) : ""),
         schedule: { at: d, allowWhileIdle: true }
       });
     });
@@ -4663,10 +4981,10 @@
 
   if(!istApp){
     benStatusZeigen("Benachrichtigungen stehen nur in der Android-App zur Verfügung.");
-  }else{
-    benPlugin() ? benBerechtigung().then(ok => { if(ok) benPlanen(); })
-                : benStatusZeigen("Benachrichtigungs-Plugin nicht verfügbar.");
+  }else if(!benPlugin()){
+    benStatusZeigen("Benachrichtigungs-Plugin nicht verfügbar.");
   }
+  // Die Abfrage der Berechtigung erfolgt beim Start (siehe unten)
 
   /* =========================================================
      Init
@@ -4705,7 +5023,26 @@
   window.addEventListener("orientationchange", () => setTimeout(renderKalender, 300));
 
   if(istApp){
-    setTimeout(() => { nativKalenderEinlesen(); }, 400);
+    // Beim Start zuerst den Kalenderzugriff erfragen, danach die Benachrichtigungen.
+    // Vorher lief nur die Benachrichtigungsanfrage an und der Kalender meldete
+    // lediglich einen Fehler, den man im Menü von Hand beheben musste.
+    setTimeout(async () => {
+      try{
+        const ok = await nativBerechtigung();
+        if(ok){
+          await nativKalenderEinlesen();
+        }else{
+          nativStatus.textContent = "Kalenderzugriff fehlt — im Menü ⚙ erteilen";
+        }
+      }catch(e){ /* App läuft auch ohne Kalender weiter */ }
+
+      try{
+        if(benPlugin()){
+          const b = await benBerechtigung();
+          if(b) benPlanen();
+        }
+      }catch(e){ /* Benachrichtigungen sind zusätzlich */ }
+    }, 300);
   }
   }
 })();
