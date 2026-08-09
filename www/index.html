@@ -882,7 +882,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 3.4 &middot; Stand 09.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 3.5 &middot; Stand 09.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -896,6 +896,16 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v3.5 <span class="cl-date">09.08.2026</span></div>
+        <ul>
+          <li>Wiederkehrende Termine werden jetzt selbst aufgelöst. Geburtstage stehen in der Datenbank mit dem Geburtsjahr und einer Jahresregel — dieses Datum liegt weit vor dem angezeigten Zeitraum und fiel bisher heraus</li>
+          <li>Zusätzliche Abfrage weit zurück, aus der nur wiederkehrende Termine übernommen werden; im Kalendermenü abschaltbar</li>
+          <li>Änderungen aus Outlook oder der Kalender-App werden übernommen, sobald die App wieder in den Vordergrund kommt</li>
+          <li>Neuer Knopf ↻ in der Kalenderleiste zum sofortigen Neueinlesen</li>
+          <li>Neue Diagnose im Kalendermenü: zeigt alle erkannten Kalender mit Terminanzahl, Herkunft und die Rohdaten des Geräts — hilfreich, wenn ein Kalender fehlt</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v3.4 <span class="cl-date">09.08.2026</span></div>
         <ul>
@@ -1495,6 +1505,7 @@
       </div>
       <div class="kal-nav">
         <button class="btn small" type="button" id="kalHeute">Heute</button>
+        <button class="btn small" type="button" id="kalNeuLaden" title="Kalender neu einlesen">↻</button>
         <button class="btn small" type="button" id="kalEinstellungen">⚙</button>
       </div>
     </div>
@@ -1529,6 +1540,15 @@
           <button type="button" class="btn" id="nativLaden">↻ Kalender einlesen</button>
           <button type="button" class="btn" id="nativEntferntZurueck">↺ Entfernte zurückholen</button>
         </div>
+
+        <div class="btn-row" style="margin-top:0;margin-bottom:14px;">
+          <button type="button" class="btn toggle-pill active" id="geburtstageToggle">● Geburtstage einbeziehen</button>
+          <button type="button" class="btn small" id="nativDiagnose">🔍 Diagnose</button>
+        </div>
+        <div class="hint" id="diagnoseAusgabe" style="display:none;white-space:pre-wrap;
+             font-family:var(--mono);font-size:10.5px;line-height:1.5;
+             background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;
+             padding:10px;margin-bottom:14px;max-height:300px;overflow:auto;"></div>
 
         <div class="field" style="margin-bottom:12px;">
           <label for="nativZielkalender">Standardkalender für neue Termine</label>
@@ -3378,6 +3398,19 @@
     kalGewaehlt = tagSchluessel(h);
     renderKalender();
   });
+  const kalNeuLadenBtn = document.getElementById("kalNeuLaden");
+  if(kalNeuLadenBtn){
+    kalNeuLadenBtn.addEventListener("click", async () => {
+      kalNeuLadenBtn.textContent = "…";
+      if(istApp && typeof nativKalenderEinlesen === "function"){
+        await nativKalenderEinlesen();
+      }
+      renderKalender();
+      if(typeof renderDashboard === "function") renderDashboard();
+      kalNeuLadenBtn.textContent = "↻";
+    });
+  }
+
   document.getElementById("kalTagSchliessen").addEventListener("click", () => {
     kalGewaehlt = null;
     renderKalender();
@@ -4610,6 +4643,7 @@
   }
 
   let geraeteKalender = [];      // [{id, title, konto, farbe, sichtbar}]
+  let letzteRohdaten = [];       // erste Termine im Rohformat, für die Diagnose
   let geraeteTermine = [];       // eingelesene Termine
   let zielKalenderId = "";
 
@@ -4617,6 +4651,7 @@
   let nativCfg = loadJSON(NATIV_KEY, { zielKalenderId: "", versteckt: [], entfernt: [] });
   if(!Array.isArray(nativCfg.versteckt)) nativCfg.versteckt = [];
   if(!Array.isArray(nativCfg.entfernt)) nativCfg.entfernt = [];
+  if(nativCfg.geburtstage === undefined) nativCfg.geburtstage = true;
   zielKalenderId = nativCfg.zielKalenderId || "";
   function saveNativCfg(){ saveJSON(NATIV_KEY, nativCfg); }
 
@@ -4686,7 +4721,10 @@
       const von = new Date(new Date().getFullYear() - 1, 0, 1).getTime();
       const bis = new Date(new Date().getFullYear() + 2, 11, 31).getTime();
       const evs = await P.listEventsInRange({ from: von, to: bis });
-      geraeteTermine = ((evs && evs.result) || []).map(e => {
+      const rohListe = (evs && evs.result) || [];
+      letzteRohdaten = rohListe.slice(0, 3);   // für die Diagnose
+
+      geraeteTermine = rohListe.map(e => {
         const ganztags = !!e.isAllDay;
         let start = new Date(e.startDate);
         let ende = e.endDate ? new Date(e.endDate) : null;
@@ -4714,10 +4752,69 @@
           end: ende,
           allDay: ganztags,
           ort: e.location || "",
-          // Notiz/Beschreibung mitlesen — sonst fehlen Zeilenumbrüche in der Anzeige
+          // Wiederholungsregel mitnehmen, falls das Plugin sie liefert
+          rrule: e.rrule || e.recurrenceRule || e.rule || null,
           notiz: textAusHtml(e.description || e.notes || e.beschreibung || "")
         };
       }).filter(e => e.start && !isNaN(e.start));
+
+      // Geburtstage und andere jährliche Termine stehen in der Datenbank oft mit
+      // ihrem Ursprungsdatum (Geburtsjahr) und einer Jahresregel. Dieses Datum
+      // liegt weit vor dem angezeigten Zeitraum, deshalb eine zweite Abfrage
+      // weit zurück — daraus werden nur wiederkehrende Termine übernommen.
+      if(nativCfg.geburtstage !== false){
+        try{
+          const weitVon = new Date(1900, 0, 1).getTime();
+          const alt = await P.listEventsInRange({ from: weitVon, to: von });
+          const altListe = (alt && alt.result) || [];
+          const bekannt = {};
+          geraeteTermine.forEach(e => { bekannt[e.id] = true; });
+
+          altListe.forEach(e => {
+            const regel = e.rrule || e.recurrenceRule || e.rule || null;
+            if(!regel) return;                       // nur Wiederkehrende
+            if(bekannt[String(e.id)]) return;        // schon vorhanden
+            let st = new Date(e.startDate);
+            let en = e.endDate ? new Date(e.endDate) : null;
+            const gt = !!e.isAllDay;
+            if(gt){
+              st = new Date(st.getUTCFullYear(), st.getUTCMonth(), st.getUTCDate());
+              if(en){
+                const l = new Date(en.getTime() - 1);
+                en = new Date(l.getUTCFullYear(), l.getUTCMonth(), l.getUTCDate() + 1);
+              }
+              if(!en || en <= st) en = new Date(st.getFullYear(), st.getMonth(), st.getDate() + 1);
+            }
+            if(isNaN(st)) return;
+            geraeteTermine.push({
+              id: String(e.id),
+              kalenderId: String(e.calendarId != null ? e.calendarId : ""),
+              titel: e.title || "(ohne Titel)",
+              start: st, end: en, allDay: gt,
+              ort: e.location || "", rrule: regel,
+              notiz: textAusHtml(e.description || e.notes || "")
+            });
+          });
+        }catch(e){ /* ohne Zusatzabfrage weitermachen */ }
+      }
+
+      // Wiederholende Termine (z. B. Geburtstage) auflösen. Manche Fassungen des
+      // Plugins liefern nur den Ursprungstermin samt Regel — der liegt oft Jahre
+      // zurück und wäre im angezeigten Zeitraum sonst unsichtbar.
+      const aufgeloest = [];
+      geraeteTermine.forEach(e => {
+        if(!e.rrule){ aufgeloest.push(e); return; }
+        const roh = { start: e.start, end: e.end, allDay: e.allDay, rrule: e.rrule };
+        const treffer = expandiereEvent(roh, new Date(von), new Date(bis));
+        if(!treffer.length){ aufgeloest.push(e); return; }
+        treffer.forEach((vk, i) => {
+          aufgeloest.push(Object.assign({}, e, {
+            id: e.id + (i ? ":" + i : ""),
+            start: vk.start, end: vk.end
+          }));
+        });
+      });
+      geraeteTermine = aufgeloest;
 
       nativStatus.textContent = geraeteKalender.length + " Kalender · " + geraeteTermine.length + " Termine";
       renderNativAuswahl();
@@ -4875,6 +4972,63 @@
       if(ok) nativKalenderEinlesen();
     });
     document.getElementById("nativLaden").addEventListener("click", nativKalenderEinlesen);
+    // Geburtstage ein-/ausschalten
+    const geburtstageToggle = document.getElementById("geburtstageToggle");
+    function updateGeburtstageUI(){
+      const an = nativCfg.geburtstage !== false;
+      geburtstageToggle.classList.toggle("active", an);
+      geburtstageToggle.textContent = (an ? "● " : "○ ") + "Geburtstage einbeziehen";
+    }
+    geburtstageToggle.addEventListener("click", async () => {
+      nativCfg.geburtstage = nativCfg.geburtstage === false;
+      saveNativCfg();
+      updateGeburtstageUI();
+      await nativKalenderEinlesen();
+    });
+    updateGeburtstageUI();
+
+    // Diagnose: zeigt, was das Gerät tatsächlich liefert
+    document.getElementById("nativDiagnose").addEventListener("click", () => {
+      const feld = document.getElementById("diagnoseAusgabe");
+      if(feld.style.display !== "none"){ feld.style.display = "none"; return; }
+
+      const zeilen = [];
+      zeilen.push("KALENDER (" + geraeteKalender.length + ")");
+      geraeteKalender.forEach(k => {
+        const anzahl = geraeteTermine.filter(e => e.kalenderId === k.id).length;
+        zeilen.push("  [" + k.id + "] " + k.title
+          + "\n      " + ((k.konto && k.konto.dienst) || "?")
+          + " · " + anzahl + " Termine"
+          + (k.sichtbar ? "" : " · ausgeblendet"));
+      });
+
+      const ohneZuordnung = geraeteTermine.filter(e =>
+        !geraeteKalender.some(k => k.id === e.kalenderId)).length;
+      zeilen.push("");
+      zeilen.push("Termine gesamt: " + geraeteTermine.length);
+      zeilen.push("ohne Kalenderzuordnung: " + ohneZuordnung);
+      zeilen.push("mit Wiederholung: " + geraeteTermine.filter(e => e.rrule).length);
+      zeilen.push("entfernte Kalender: " + nativCfg.entfernt.length);
+      zeilen.push("Geburtstagsabfrage: " + (nativCfg.geburtstage !== false ? "an" : "aus"));
+
+      zeilen.push("");
+      zeilen.push("ROHDATEN erster Termine — zeigt, welche Felder das Gerät liefert:");
+      if(!letzteRohdaten.length){
+        zeilen.push("  (keine)");
+      }else{
+        letzteRohdaten.forEach((r, i) => {
+          zeilen.push("  #" + (i+1) + " Felder: " + Object.keys(r).join(", "));
+        });
+        try{
+          zeilen.push("");
+          zeilen.push(JSON.stringify(letzteRohdaten[0], null, 1).slice(0, 800));
+        }catch(e){}
+      }
+
+      feld.textContent = zeilen.join("\n");
+      feld.style.display = "block";
+    });
+
     document.getElementById("nativEntferntZurueck").addEventListener("click", () => {
       if(!nativCfg.entfernt.length){ alert("Es wurden keine Kalender entfernt."); return; }
       if(!confirm(nativCfg.entfernt.length + " entfernte(n) Kalender wieder anzeigen?")) return;
@@ -4999,7 +5153,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "3.4";
+  const APP_VERSION = "3.5";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -5587,6 +5741,34 @@
   window.addEventListener("orientationchange", () => setTimeout(renderKalender, 300));
 
   if(istApp){
+    /* Änderungen, die in Outlook oder der Kalender-App vorgenommen wurden,
+       bekommt die App nicht mitgeteilt. Deshalb bei jeder Rückkehr aus dem
+       Hintergrund neu einlesen. */
+    (function aufWiedereintritt(){
+      const AppPlugin = (Cap && Cap.Plugins && Cap.Plugins.App) || null;
+      let laeuft = false;
+      const neuLaden = async () => {
+        if(laeuft) return;
+        laeuft = true;
+        try{
+          await nativKalenderEinlesen();
+          renderKalender();
+          if(typeof renderDashboard === "function") renderDashboard();
+        }catch(e){ /* stillschweigend */ }
+        laeuft = false;
+      };
+      if(AppPlugin && AppPlugin.addListener){
+        AppPlugin.addListener("appStateChange", (zustand) => {
+          if(zustand && zustand.isActive) neuLaden();
+        });
+        AppPlugin.addListener("resume", neuLaden);
+      }
+      // Zusätzlich über den Browserweg, falls das Plugin fehlt
+      document.addEventListener("visibilitychange", () => {
+        if(document.visibilityState === "visible") neuLaden();
+      });
+    })();
+
     // Beim Start zuerst den Kalenderzugriff erfragen, danach die Benachrichtigungen.
     // Vorher lief nur die Benachrichtigungsanfrage an und der Kalender meldete
     // lediglich einen Fehler, den man im Menü von Hand beheben musste.
