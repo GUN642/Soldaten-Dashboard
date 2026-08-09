@@ -882,7 +882,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 3.6 &middot; Stand 09.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 3.7 &middot; Stand 09.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -896,6 +896,14 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v3.7 <span class="cl-date">09.08.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Anlässe aus den Kontakten erschienen doppelt. Ist ein Kontakt über mehrere Konten hinterlegt (etwa lokal und bei Google), steht derselbe Anlass mehrfach in der Datenbank — gleiche Einträge werden nun zusammengefasst</li>
+          <li>Fehler behoben: Die Kontakt-Anlässe ließen sich nicht abwählen, weil sie kein echter Gerätekalender sind. Sie erscheinen jetzt als „Geburtstage &amp; Anlässe" in der Kalenderliste und lassen sich wie jeder andere Kalender ausblenden, einfärben oder entfernen</li>
+          <li>Ebenso geführt: Termine ohne Kalenderzuordnung erscheinen als „Sonstige" in der Liste, statt unsichtbar mitzulaufen — auch sie sind abwählbar</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v3.6 <span class="cl-date">09.08.2026</span></div>
         <ul>
@@ -4834,6 +4842,37 @@
 
       // Wichtige Daten der Kontakte mitlesen
       if(nativCfg.kontaktdaten !== false) await kontaktDatenLesen();
+      else kontaktEreignisse = [];
+
+      /* Termine ohne Kalenderzuordnung: als eigener Eintrag führen, damit
+         auch sie abwählbar sind statt unsichtbar mitzulaufen. */
+      const ohneZuordnung = geraeteTermine.filter(e =>
+        !geraeteKalender.some(k => k.id === e.kalenderId)).length;
+      if(ohneZuordnung && nativCfg.entfernt.indexOf("sonstige") === -1){
+        geraeteKalender.push({
+          id: "",
+          title: "Sonstige (ohne Kalenderzuordnung)",
+          konto: { dienst: "Lokal", name: ohneZuordnung + " Termine" },
+          farbe: farbenEigen[""] || "#b98cff",
+          geraeteFarbe: "#b98cff",
+          eigeneFarbe: !!farbenEigen[""],
+          sichtbar: nativCfg.versteckt.indexOf("") === -1
+        });
+      }
+
+      /* Als eigener Eintrag in die Kalenderliste aufnehmen, damit er sich
+         genauso ein-/ausblenden, einfärben und entfernen lässt. */
+      if(kontaktEreignisse.length && nativCfg.entfernt.indexOf("kontakte") === -1){
+        geraeteKalender.push({
+          id: "kontakte",
+          title: "Geburtstage & Anlässe",
+          konto: { dienst: "Lokal", name: "aus den Kontakten" },
+          farbe: farbenEigen["kontakte"] || "#ff8fc7",
+          geraeteFarbe: "#ff8fc7",
+          eigeneFarbe: !!farbenEigen["kontakte"],
+          sichtbar: nativCfg.versteckt.indexOf("kontakte") === -1
+        });
+      }
 
       nativStatus.textContent = geraeteKalender.length + " Kalender · "
         + geraeteTermine.length + " Termine"
@@ -4964,7 +5003,8 @@
         if(!confirm('Kalender „' + k.title + '" aus der App entfernen?\n\n'
           + 'Er verschwindet aus dem Kalender und aus der Auswahl beim Anlegen von Terminen. '
           + 'Auf dem Gerät selbst bleibt er unverändert und lässt sich über „↻ Kalender einlesen" zurückholen.')) return;
-        nativCfg.entfernt.push(id);
+        // Leere Kennung eindeutig ablegen, sonst nicht wiederauffindbar
+        nativCfg.entfernt.push(id === "" ? "sonstige" : id);
         nativCfg.versteckt = nativCfg.versteckt.filter(x => x !== id);
         if(zielKalenderId === id){ zielKalenderId = ""; nativCfg.zielKalenderId = ""; }
         saveNativCfg();
@@ -5042,7 +5082,9 @@
       const zeilen = [];
       zeilen.push("KALENDER (" + geraeteKalender.length + ")");
       geraeteKalender.forEach(k => {
-        const anzahl = geraeteTermine.filter(e => e.kalenderId === k.id).length;
+        const anzahl = k.id === "kontakte"
+          ? kontaktEreignisse.length
+          : geraeteTermine.filter(e => e.kalenderId === k.id).length;
         zeilen.push("  [" + k.id + "] " + k.title
           + "\n      " + ((k.konto && k.konto.dienst) || "?")
           + " · " + anzahl + " Termine"
@@ -5132,16 +5174,6 @@
     const sichtbar = {};
     geraeteKalender.forEach(k => { if(k.sichtbar) sichtbar[k.id] = k; });
 
-    // Manche Kalender (z. B. der Geburtstagskalender von Samsung) liefern keine
-    // Kalenderzuordnung an den Terminen. Solche Termine würden sonst wegfallen —
-    // sie werden einem Sammeleintrag zugeordnet.
-    const sammel = { id: "", title: "Sonstige (u. a. Geburtstage)",
-                     farbe: farbenEigen[""] || "#b98cff",
-                     konto: { dienst: "Lokal", name: "" } };
-    if(nativCfg.versteckt.indexOf("") === -1 && nativCfg.entfernt.indexOf("") === -1){
-      sichtbar[""] = sichtbar[""] || sammel;
-    }
-
     return geraeteTermine
       .filter(e => sichtbar[e.kalenderId] !== undefined)
       .filter(e => {
@@ -5211,7 +5243,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "3.6";
+  const APP_VERSION = "3.7";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -5600,7 +5632,27 @@
       const b = await P.berechtigungAnfragen();
       if(!b || !b.erlaubt) return false;
       const r = await P.ereignisseLesen();
-      kontaktEreignisse = (r && r.ereignisse) || [];
+      const roh = (r && r.ereignisse) || [];
+
+      /* Ist ein Kontakt über mehrere Konten hinterlegt (etwa lokal und bei
+         Google), steht derselbe Anlass mehrfach in der Datenbank. Nach Name,
+         Datum und Art zusammenfassen. */
+      const gesehen = {};
+      kontaktEreignisse = [];
+      roh.forEach(e => {
+        const d = kontaktDatumZerlegen(e.datum);
+        const datumsSchluessel = d
+          ? (d.jahr || "0000") + "-" + d.monat + "-" + d.tag
+          : String(e.datum || "");
+        const schluessel = [
+          String(e.name || "").trim().toLowerCase(),
+          datumsSchluessel,
+          String(e.typ)
+        ].join("|");
+        if(gesehen[schluessel]) return;
+        gesehen[schluessel] = true;
+        kontaktEreignisse.push(e);
+      });
       return true;
     }catch(e){
       kontaktEreignisse = [];
@@ -5612,6 +5664,9 @@
   function kontaktTermineImFenster(vonDate, bisDate){
     if(nativCfg.kontaktdaten === false) return [];
     if(!kontaktEreignisse.length) return [];
+    // Ausgeblendet oder entfernt: nichts anzeigen
+    if(nativCfg.versteckt.indexOf("kontakte") !== -1) return [];
+    if(nativCfg.entfernt.indexOf("kontakte") !== -1) return [];
 
     const liste = [];
     const vonJahr = vonDate.getFullYear();
