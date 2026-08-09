@@ -484,16 +484,10 @@
   }
   .kal-balken{
     position:absolute;border-radius:999px;
-    font-size:10px;line-height:13px;padding:0 6px;
+    height:13px;font-size:10px;line-height:13px;padding:0 5px;
     overflow:hidden;pointer-events:none;font-weight:500;
-    white-space:nowrap;text-overflow:ellipsis;
-  }
-  /* Zweizeilige Balken: Titel darf umbrechen */
-  .kal-balken.zweizeilig{
-    white-space:normal;text-overflow:clip;
-    border-radius:7px;
-    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
-    word-break:break-word;
+    /* Zu lange Titel werden schlicht abgeschnitten, ohne Auslassungspunkte */
+    white-space:nowrap;text-overflow:clip;
   }
   .kal-balken.start-offen{border-top-left-radius:2px;border-bottom-left-radius:2px;}
   .kal-balken.ende-offen{border-top-right-radius:2px;border-bottom-right-radius:2px;}
@@ -656,6 +650,49 @@
   body.kal-max .kal-toolbar{padding-top:calc(6px + env(safe-area-inset-top, 0px));}
   .kal-monat{cursor:pointer;user-select:none;padding:2px 6px;border-radius:4px;}
   .kal-monat:active{background:var(--amber-dim);}
+
+  /* ---------- Dashboard ---------- */
+  .db-kopf{
+    display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+    margin-bottom:12px;
+  }
+  .db-datum{font-family:var(--cond);font-size:19px;font-weight:700;color:var(--text);}
+  .db-kw{font-family:var(--mono);font-size:11px;color:var(--text-dim);}
+  .db-kacheln{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;
+  }
+  .db-kachel{
+    border:1px solid var(--border);border-radius:6px;background:var(--panel);
+    padding:11px 12px;text-align:center;
+  }
+  .db-wert{font-family:var(--mono);font-size:21px;font-weight:600;color:var(--amber);line-height:1.1;}
+  .db-label{
+    font-family:var(--mono);font-size:9px;letter-spacing:0.6px;text-transform:uppercase;
+    color:var(--text-faint);margin-top:4px;
+  }
+  .db-zeile{
+    display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:start;
+    border:1px solid var(--border-soft);border-left:4px solid var(--text-faint);border-radius:5px;
+    padding:9px 11px;margin-bottom:7px;background:var(--panel-alt);cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .db-zeile:active{background:var(--amber-dim);}
+  .db-zeit{
+    font-family:var(--mono);font-size:11px;color:var(--text-dim);
+    line-height:1.3;padding-top:1px;
+  }
+  .db-zeit.ganztags{font-size:9.5px;letter-spacing:0.4px;}
+  .db-titel{font-size:13.5px;color:var(--text);font-weight:600;word-break:break-word;}
+  .db-unten{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:2px;}
+  .db-jetzt{border-left-color:var(--amber) !important;box-shadow:inset 0 0 0 1px var(--amber-dim);}
+  #dbWetterRahmen iframe{
+    width:100%;border:none;border-radius:6px;display:block;background:var(--panel-alt);
+  }
+  @media (max-width:480px){
+    .db-kacheln{gap:6px;}
+    .db-wert{font-size:18px;}
+    .db-label{font-size:8px;}
+  }
 
   ::selection{background:var(--amber-dim);}
 
@@ -830,9 +867,7 @@
         <div class="btn-row" style="margin-top:0;">
           <button type="button" class="btn toggle-pill active" id="todoImKalToggle">● Aufgaben im Kalender</button>
           <button type="button" class="btn toggle-pill" id="erledigtImKalToggle">○ Auch erledigte</button>
-          <button type="button" class="btn toggle-pill active" id="umbruchToggle">● Titel umbrechen</button>
         </div>
-        <div class="hint">Umbrechen zeigt mehr vom Titel, jeder Termin braucht dafür aber die doppelte Höhe — es passen dann weniger Termine je Tag ins Raster.</div>
       </div>
 
       <div class="field" style="margin-bottom:16px;">
@@ -847,7 +882,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 3.3 &middot; Stand 08.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 3.4 &middot; Stand 09.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -861,6 +896,16 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v3.4 <span class="cl-date">09.08.2026</span></div>
+        <ul>
+          <li>Neuer Startreiter „Heute": Termine und fällige Aufgaben des Tages auf einen Blick, dazu Resturlaub, Mehrarbeit und ablaufende Lehrgänge. Ein laufender Termin ist hervorgehoben</li>
+          <li>Wetter-Meteogramm von meteoblue einbindbar — Adresse des eigenen Widgets unter „⚙ Ort" eintragen</li>
+          <li>Termintitel im Monatsraster brechen nicht mehr um und werden ohne Auslassungspunkte abgeschnitten</li>
+          <li>Fehler behoben: Bei Terminen aus Outlook erschien die Beschreibung als roher HTML-Code. Sie wird jetzt in lesbaren Text umgewandelt, samt Umlauten und Aufzählungen</li>
+          <li>Fehler behoben: Beim Wischen durch die Monate öffnete sich versehentlich die Tagesansicht. Ab einer kleinen Fingerbewegung wird die Berührung als Wischen gewertet</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v3.3 <span class="cl-date">08.08.2026</span></div>
         <ul>
@@ -1128,7 +1173,8 @@
 </div>
 
 <div class="tab-bar">
-  <button class="tab-btn active" data-tab="tabKalender">Kalender</button>
+  <button class="tab-btn active" data-tab="tabDashboard">Heute</button>
+  <button class="tab-btn" data-tab="tabKalender">Kalender</button>
   <button class="tab-btn" data-tab="tabStart">Urlaub/Mehrarbeit</button>
   <button class="tab-btn" data-tab="tabAblauf">Lehrgänge</button>
   <button class="tab-btn" data-tab="tabTodo">To-do</button>
@@ -1362,7 +1408,82 @@
 </div>
 
 <!-- ============ TAB: KALENDER ============ -->
-<div class="tab-panel active" id="tabKalender">
+<!-- ============ TAB: DASHBOARD ============ -->
+<div class="tab-panel active" id="tabDashboard">
+  <div class="grid" style="padding-top:12px;">
+
+    <div class="db-kopf">
+      <div class="db-datum" id="dbDatum">—</div>
+      <div class="db-kw" id="dbKw"></div>
+    </div>
+
+    <div class="db-kacheln">
+      <div class="db-kachel">
+        <div class="db-wert" id="dbUrlaub">—</div>
+        <div class="db-label">Resturlaub</div>
+      </div>
+      <div class="db-kachel">
+        <div class="db-wert" id="dbUeber">—</div>
+        <div class="db-label">Mehrarbeit</div>
+      </div>
+      <div class="db-kachel">
+        <div class="db-wert" id="dbLehrgang">—</div>
+        <div class="db-label">Lehrgänge &lt; 6 Mon.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">01</span>Termine heute</h2>
+        <span class="status-chip"><span id="dbTermineZahl">0</span></span>
+      </div>
+      <div class="panel-body" id="dbTermine">
+        <div class="empty-state">Keine Termine heute.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">02</span>Aufgaben</h2>
+        <span class="status-chip"><span id="dbTodoZahl">0</span></span>
+      </div>
+      <div class="panel-body" id="dbTodos">
+        <div class="empty-state">Keine offenen Aufgaben für heute.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">03</span>Wetter</h2>
+        <button class="btn small" type="button" id="dbWetterEinstellen">⚙ Ort</button>
+      </div>
+      <div class="panel-body">
+        <div id="dbWetterEinrichten" style="display:none;">
+          <div class="field" style="margin-bottom:10px;">
+            <label for="dbWetterUrl">meteoblue-Widget-Adresse</label>
+            <input type="text" id="dbWetterUrl" placeholder="https://www.meteoblue.com/de/weather/widget/…">
+          </div>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn add" type="button" id="dbWetterSpeichern">Übernehmen</button>
+            <button class="btn" type="button" id="dbWetterLeeren">Entfernen</button>
+          </div>
+          <div class="panel-note">
+            So kommst du an die Adresse: bei <a href="https://www.meteoblue.com" target="_blank" rel="noopener">meteoblue.com</a>
+            anmelden (kostenlos), deinen Ort suchen, unter „Widget" das <b>Meteogramm</b> einrichten und aus dem
+            angezeigten HTML-Schnipsel die Adresse hinter <code>src="…"</code> hier einfügen.
+            Die Adresse wird unverändert übernommen, wie es die Nutzungsbedingungen von meteoblue verlangen.
+          </div>
+        </div>
+        <div id="dbWetterRahmen">
+          <div class="empty-state">Noch kein Wetter eingerichtet — auf „⚙ Ort" tippen.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="tab-panel" id="tabKalender">
 
   <!-- Vollbild-Monatsansicht -->
   <div class="kal-voll" id="kalVoll">
@@ -2267,6 +2388,7 @@
     });
 
     updateCockpit();
+    if(typeof renderDashboard === "function") renderDashboard();
   }
 
   /* =========================================================
@@ -2330,6 +2452,7 @@
 
   function renderUeberstunden(){
     ueberstundenTotal = ueberstunden.eintraege.reduce((s, e) => s + (Number(e.stunden) || 0), 0);
+    if(typeof dbUrlaubWert === "function") dbUrlaubWert();
     sumUeberstunden.textContent = (ueberstundenTotal > 0 ? "+" : "") + ueberstundenTotal;
 
     const sorted = ueberstunden.eintraege.slice().sort((a,b) => (parseDateDE(a.datum)||0) - (parseDateDE(b.datum)||0));
@@ -2708,6 +2831,7 @@
     tAnhaenge = []; tRenderAnhaenge();
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
+    if(typeof renderDashboard === "function") renderDashboard();
     if(typeof benPlanen === "function") benPlanen();
   });
 
@@ -2719,6 +2843,7 @@
     saveTodos();
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
+    if(typeof renderDashboard === "function") renderDashboard();
   }
   function removeTodo(id){
     if(!confirm("Diese Aufgabe wirklich löschen?")) return;
@@ -2726,6 +2851,7 @@
     saveTodos();
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
+    if(typeof renderDashboard === "function") renderDashboard();
   }
   document.getElementById("todoClearDoneBtn").addEventListener("click", () => {
     const anzahl = todos.eintraege.filter(t => t.erledigt).length;
@@ -2735,6 +2861,7 @@
     saveTodos();
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
+    if(typeof renderDashboard === "function") renderDashboard();
   });
 
   const PRIO_RANG = { hoch: 0, mittel: 1, niedrig: 2 };
@@ -3319,16 +3446,7 @@
       const ueberProSpalte = {};
       schicht.querySelectorAll(".kal-balken").forEach(b => {
         const spur = +b.getAttribute("data-spur");
-        const hoehe = +(b.getAttribute("data-hoehe") || 1);
-        // Zweizeilige Balken brauchen zwei Spuren und müssen ganz hineinpassen
-        let passt = (spur + hoehe) <= maxSpuren;
-
-        // Wenn nur die zweite Zeile fehlt: einzeilig anzeigen statt weglassen
-        if(!passt && hoehe === 2 && spur < maxSpuren){
-          b.classList.remove("zweizeilig");
-          b.style.height = "13px";
-          passt = true;
-        }
+        const passt = spur < maxSpuren;
         b.style.display = passt ? "" : "none";
         if(!passt){
           const vonSpalte = +b.getAttribute("data-von");
@@ -3478,19 +3596,11 @@
       const inWoche = spannen.filter(sp => sp.start <= wochenEnde && sp.ende >= wochenStart);
       const spuren = [];   // spuren[n] = Array belegter Spalten
 
-      // Breite einer Tagesspalte, um zu schätzen wie viel Text in eine Zeile passt
-      const rasterBreite = kalGrid.clientWidth || 360;
-      const spaltenBreite = (rasterBreite - 12) / 7;
-
       inWoche.forEach(sp => {
         const vonSpalte = Math.max(0, Math.round((sp.start - wochenStart) / 86400000));
         const bisSpalte = Math.min(6, Math.round((sp.ende - wochenStart) / 86400000));
 
-        // Passt der Titel in eine Zeile? Sonst zwei Zeilen und damit zwei Spuren.
-        const balkenBreite = (bisSpalte - vonSpalte + 1) * spaltenBreite - 3;
-        const platzZeichen = Math.max(3, Math.floor((balkenBreite - 12) / 5.4));
-        const zweizeilig = String(sp.termin.titel || "").length > platzZeichen;
-        const spurHoehe = zweizeilig ? 2 : 1;
+        const spurHoehe = 1;
 
         // Erste Stelle suchen, an der alle benötigten Spuren frei sind
         let spur = 0;
@@ -3510,11 +3620,8 @@
         const farbe = terminFarbe(sp.termin);
         const balken = document.createElement("div");
         balken.className = "kal-balken"
-          + (zweizeilig ? " zweizeilig" : "")
           + (sp.start < wochenStart ? " start-offen" : "")
           + (sp.ende > wochenEnde ? " ende-offen" : "");
-        balken.style.height = (spurHoehe * 16 - 3) + "px";
-        balken.setAttribute("data-hoehe", spurHoehe);
         if(sp.termin.allDay){
           balken.style.background = farbe;
           balken.style.color = textAufFarbe(farbe);
@@ -3545,7 +3652,9 @@
 
     // Tippen = Tag wählen, langes Drücken = Termin anlegen
     kalGrid.querySelectorAll("[data-tag]").forEach(el => {
-      let timer = null, langGedrueckt = false;
+      let timer = null, langGedrueckt = false, bewegt = false;
+      let startX = 0, startY = 0;
+
       const starten = () => {
         langGedrueckt = false;
         el.classList.add("gedrueckt");
@@ -3558,12 +3667,32 @@
       };
       const abbrechen = () => { clearTimeout(timer); el.classList.remove("gedrueckt"); };
 
-      el.addEventListener("touchstart", starten, { passive: true });
+      el.addEventListener("touchstart", (e) => {
+        bewegt = false;
+        if(e.touches.length === 1){
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }
+        starten();
+      }, { passive: true });
+
+      el.addEventListener("touchmove", (e) => {
+        // Ab ein wenig Bewegung als Wischen werten und den Tag nicht auswählen
+        if(e.touches.length === 1){
+          const dx = Math.abs(e.touches[0].clientX - startX);
+          const dy = Math.abs(e.touches[0].clientY - startY);
+          if(dx > 8 || dy > 8) bewegt = true;
+        }
+        if(bewegt) abbrechen();
+      }, { passive: true });
+
       el.addEventListener("touchend", () => {
         abbrechen();
-        if(!langGedrueckt){ kalGewaehlt = el.getAttribute("data-tag"); renderKalender(); }
+        if(!langGedrueckt && !bewegt){
+          kalGewaehlt = el.getAttribute("data-tag");
+          renderKalender();
+        }
       });
-      el.addEventListener("touchmove", abbrechen, { passive: true });
       el.addEventListener("touchcancel", abbrechen);
       el.addEventListener("mousedown", (e) => { if(e.button === 0) starten(); });
       el.addEventListener("mouseup", () => {
@@ -4586,7 +4715,7 @@
           allDay: ganztags,
           ort: e.location || "",
           // Notiz/Beschreibung mitlesen — sonst fehlen Zeilenumbrüche in der Anzeige
-          notiz: e.description || e.notes || e.beschreibung || ""
+          notiz: textAusHtml(e.description || e.notes || e.beschreibung || "")
         };
       }).filter(e => e.start && !isNaN(e.start));
 
@@ -4761,6 +4890,31 @@
   }
 
   /* Termine des Geräts in die Monatsansicht einspeisen */
+  /* Termindetails aus Outlook u. Ä. enthalten oft eine vollständige
+     HTML-Nachricht. Daraus lesbaren Text machen. */
+  function textAusHtml(roh){
+    let t = String(roh || "");
+    if(!t) return "";
+    if(!/<[a-z!\/][^>]*>/i.test(t)) return t.trim();   // sieht nicht nach HTML aus
+
+    t = t.replace(/<!--[\s\S]*?-->/g, "");
+    t = t.replace(/<(script|style|head)\b[\s\S]*?<\/\1>/gi, "");
+    t = t.replace(/<\s*br\s*\/?\s*>/gi, "\n");
+    t = t.replace(/<\s*li\b[^>]*>/gi, "• ");
+    t = t.replace(/<\s*\/\s*(p|div|tr|li|h[1-6]|table)\s*>/gi, "\n");
+    t = t.replace(/<[^>]+>/g, "");
+
+    const ent = { nbsp:" ", amp:"&", lt:"<", gt:">", quot:'"', apos:"'",
+                  auml:"ä", ouml:"ö", uuml:"ü", Auml:"Ä", Ouml:"Ö", Uuml:"Ü",
+                  szlig:"ß", euro:"€", ndash:"–", mdash:"—", hellip:"…" };
+    t = t.replace(/&([a-zA-Z]+);/g, (m, w) => (ent[w] !== undefined ? ent[w] : m));
+    t = t.replace(/&#(\d+);/g, (m, z) => String.fromCharCode(+z));
+    t = t.replace(/&#x([0-9a-f]+);/gi, (m, z) => String.fromCharCode(parseInt(z, 16)));
+
+    t = t.replace(/[ \t]+/g, " ").replace(/ *\n */g, "\n").replace(/\n{3,}/g, "\n\n");
+    return t.trim();
+  }
+
   function nativTermineImFenster(vonDate, bisDate){
     if(!istApp) return [];
     const sichtbar = {};
@@ -4845,7 +4999,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "3.3";
+  const APP_VERSION = "3.4";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -5172,8 +5326,6 @@
   const erledigtImKalToggle = document.getElementById("erledigtImKalToggle");
   if(kalender.todosImKalender === undefined) kalender.todosImKalender = true;
   if(kalender.erledigteImKalender === undefined) kalender.erledigteImKalender = false;
-  if(kalender.titelUmbrechen === undefined) kalender.titelUmbrechen = true;
-  const umbruchToggle = document.getElementById("umbruchToggle");
 
   function updateTodoKalUI(){
     const an = kalender.todosImKalender !== false;
@@ -5183,14 +5335,7 @@
     erledigtImKalToggle.classList.toggle("active", erl);
     erledigtImKalToggle.textContent = (erl ? "● " : "○ ") + "Auch erledigte";
     erledigtImKalToggle.style.display = an ? "" : "none";
-    const um = kalender.titelUmbrechen !== false;
-    umbruchToggle.classList.toggle("active", um);
-    umbruchToggle.textContent = (um ? "● " : "○ ") + "Titel umbrechen";
   }
-  umbruchToggle.addEventListener("click", () => {
-    kalender.titelUmbrechen = kalender.titelUmbrechen === false;
-    saveKalender(); updateTodoKalUI(); renderKalender();
-  });
   todoImKalToggle.addEventListener("click", () => {
     kalender.todosImKalender = kalender.todosImKalender === false;
     saveKalender(); updateTodoKalUI(); renderKalender();
@@ -5200,6 +5345,199 @@
     saveKalender(); updateTodoKalUI(); renderKalender();
   });
   updateTodoKalUI();
+
+  /* =========================================================
+     DASHBOARD ("Heute")
+     ========================================================= */
+  const DB_KEY = "dashboard_v1";
+  let dashboard = loadJSON(DB_KEY, { wetterUrl: "" });
+  if(typeof dashboard.wetterUrl !== "string") dashboard.wetterUrl = "";
+  function saveDashboard(){ saveJSON(DB_KEY, dashboard); }
+
+  const dbDatum = document.getElementById("dbDatum");
+  const dbKw = document.getElementById("dbKw");
+  const dbTermine = document.getElementById("dbTermine");
+  const dbTodos = document.getElementById("dbTodos");
+  const dbTermineZahl = document.getElementById("dbTermineZahl");
+  const dbTodoZahl = document.getElementById("dbTodoZahl");
+  const dbWetterRahmen = document.getElementById("dbWetterRahmen");
+  const dbWetterEinrichten = document.getElementById("dbWetterEinrichten");
+  const dbWetterUrl = document.getElementById("dbWetterUrl");
+
+  /* ---------- Wetter ---------- */
+  document.getElementById("dbWetterEinstellen").addEventListener("click", () => {
+    const auf = dbWetterEinrichten.style.display !== "none";
+    dbWetterEinrichten.style.display = auf ? "none" : "block";
+    if(!auf) dbWetterUrl.value = dashboard.wetterUrl || "";
+  });
+
+  document.getElementById("dbWetterSpeichern").addEventListener("click", () => {
+    let wert = dbWetterUrl.value.trim();
+    if(!wert){ alert("Bitte eine Adresse eintragen."); return; }
+
+    // Falls der ganze HTML-Schnipsel eingefügt wurde: Adresse herauslösen
+    const treffer = wert.match(/src\s*=\s*["']([^"']+)["']/i);
+    if(treffer) wert = treffer[1];
+    if(wert.startsWith("//")) wert = "https:" + wert;
+
+    if(!/^https:\/\/(www\.)?meteoblue\.com\//i.test(wert)){
+      alert("Das sieht nicht nach einer meteoblue-Adresse aus.\n\n"
+        + "Erwartet wird eine Adresse, die mit https://www.meteoblue.com/ beginnt.");
+      return;
+    }
+    dashboard.wetterUrl = wert;
+    saveDashboard();
+    dbWetterEinrichten.style.display = "none";
+    renderWetter();
+  });
+
+  document.getElementById("dbWetterLeeren").addEventListener("click", () => {
+    dashboard.wetterUrl = "";
+    saveDashboard();
+    dbWetterUrl.value = "";
+    renderWetter();
+  });
+
+  function renderWetter(){
+    dbWetterRahmen.innerHTML = "";
+    if(!dashboard.wetterUrl){
+      dbWetterRahmen.innerHTML = '<div class="empty-state">Noch kein Wetter eingerichtet — auf „⚙ Ort" tippen.</div>';
+      return;
+    }
+    const rahmen = document.createElement("iframe");
+    // Adresse unverändert übernehmen (Vorgabe von meteoblue)
+    rahmen.src = dashboard.wetterUrl;
+    rahmen.setAttribute("loading", "lazy");
+    rahmen.setAttribute("scrolling", "no");
+    rahmen.style.height = "420px";
+    dbWetterRahmen.appendChild(rahmen);
+
+    // Pflichtangabe: Verweis auf meteoblue
+    const hinweis = document.createElement("div");
+    hinweis.className = "hint";
+    hinweis.style.marginTop = "6px";
+    hinweis.innerHTML = 'Wetterdaten: <a href="https://www.meteoblue.com" target="_blank" rel="noopener">meteoblue</a>';
+    dbWetterRahmen.appendChild(hinweis);
+  }
+
+  /* ---------- Dashboard zeichnen ---------- */
+  function renderDashboard(){
+    const heute = new Date(); heute.setHours(0,0,0,0);
+    const heuteK = tagSchluessel(heute);
+
+    dbDatum.textContent = heute.toLocaleDateString("de-DE",
+      { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
+    const ft = istFeiertagBW(heute) ? feiertagName(heute) : null;
+    dbKw.textContent = "KW " + kalenderwoche(heute) + (ft ? " · " + ft : "");
+
+    // Kennzahlen
+    dbUrlaubWert();
+    // Lehrgänge, die in weniger als 6 Monaten ablaufen
+    let warnend = 0, abgelaufen = 0;
+    eintraege.forEach(e => {
+      const st = getStatus(e.gueltigBis).key;
+      if(st === "warnung") warnend++;
+      if(st === "abgelaufen") abgelaufen++;
+    });
+    const lehrgangEl = document.getElementById("dbLehrgang");
+    lehrgangEl.textContent = warnend + (abgelaufen ? " + " + abgelaufen : "");
+    lehrgangEl.style.color = abgelaufen ? "var(--red)" : warnend ? "var(--amber)" : "var(--green)";
+
+    // Termine heute — ohne Aufgaben, die stehen unten gesondert
+    const tagStart = new Date(heute);
+    const tagEnde = new Date(heute.getTime() + 86399999);
+    const alle = terminFenster(tagStart, tagEnde).filter(t => !t.istTodo);
+
+    dbTermine.innerHTML = "";
+    if(!alle.length){
+      dbTermine.innerHTML = '<div class="empty-state">Keine Termine heute.</div>';
+    }else{
+      const jetzt = new Date();
+      alle.forEach(t => {
+        const farbe = terminFarbe(t);
+        const laeuft = !t.allDay && t.start <= jetzt && (t.end || t.start) >= jetzt;
+        const zeile = document.createElement("div");
+        zeile.className = "db-zeile" + (laeuft ? " db-jetzt" : "");
+        zeile.style.borderLeftColor = farbe;
+        zeile.innerHTML = '<div class="db-zeit"></div>'
+          + '<div><div class="db-titel"></div><div class="db-unten"></div></div>';
+        const zeitEl = zeile.querySelector(".db-zeit");
+        if(t.allDay){
+          zeitEl.textContent = "GANZTÄGIG";
+          zeitEl.classList.add("ganztags");
+        }else{
+          zeitEl.textContent = t.start.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" })
+            + (t.end ? "\n" + t.end.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" }) : "");
+          zeitEl.style.whiteSpace = "pre-line";
+        }
+        zeile.querySelector(".db-titel").textContent = t.titel;
+        zeile.querySelector(".db-unten").textContent = t.quelleName
+          + (t.ort ? " · " + t.ort : "")
+          + (laeuft ? " · läuft gerade" : "");
+        zeile.addEventListener("click", () => terminDetailZeigen(t, farbe));
+        dbTermine.appendChild(zeile);
+      });
+    }
+    dbTermineZahl.textContent = alle.length + (alle.length === 1 ? " Termin" : " Termine");
+
+    // Aufgaben: heute fällig oder überfällig, dazu solche ohne Datum
+    const offen = (todos.eintraege || []).filter(t => !t.erledigt);
+    const relevant = offen.filter(t => {
+      if(!t.faellig) return false;
+      const d = parseDateDE(t.faellig);
+      return d && d <= heute;
+    });
+    const ohneDatum = offen.filter(t => !t.faellig);
+
+    dbTodos.innerHTML = "";
+    if(!relevant.length && !ohneDatum.length){
+      dbTodos.innerHTML = '<div class="empty-state">Keine offenen Aufgaben für heute.</div>';
+    }else{
+      const zeigen = relevant.concat(ohneDatum.slice(0, 3));
+      zeigen.forEach(t => {
+        const d = t.faellig ? parseDateDE(t.faellig) : null;
+        const ueberfaellig = d && d < heute;
+        const zeile = document.createElement("div");
+        zeile.className = "db-zeile";
+        zeile.style.borderLeftColor = ueberfaellig ? "var(--red)"
+          : t.prio === "hoch" ? "#ff8a3d" : "#4dd0c4";
+        zeile.innerHTML = '<div class="db-zeit"></div>'
+          + '<div><div class="db-titel"></div><div class="db-unten"></div></div>';
+        const zeitEl = zeile.querySelector(".db-zeit");
+        if(t.uhrzeit){
+          zeitEl.textContent = t.uhrzeit;
+        }else{
+          zeitEl.textContent = ueberfaellig ? "OFFEN" : d ? "HEUTE" : "—";
+          zeitEl.classList.add("ganztags");
+        }
+        if(ueberfaellig) zeitEl.style.color = "var(--red)";
+        zeile.querySelector(".db-titel").textContent = t.text;
+        zeile.querySelector(".db-unten").textContent =
+          (ueberfaellig ? "Überfällig seit " + fmt(t.faellig) : d ? "heute fällig" : "ohne Termin")
+          + (t.prio === "hoch" ? " · hohe Priorität" : "");
+        zeile.addEventListener("click", () => {
+          const knopf = document.querySelector('[data-tab="tabTodo"]');
+          if(knopf) knopf.click();
+        });
+        dbTodos.appendChild(zeile);
+      });
+    }
+    dbTodoZahl.textContent = relevant.length
+      ? relevant.length + " fällig"
+      : offen.length + " offen";
+  }
+
+  // Kennzahlen aus dem Urlaubskonto übernehmen
+  function dbUrlaubWert(){
+    const u = document.getElementById("dbUrlaub");
+    const m = document.getElementById("dbUeber");
+    if(u) u.textContent = (typeof resturlaub === "number" ? resturlaub : 0) + " T";
+    if(m){
+      const saldo = (typeof ueberstundenTotal === "number") ? ueberstundenTotal : 0;
+      m.textContent = (saldo > 0 ? "+" : "") + saldo + " h";
+      m.style.color = saldo < 0 ? "var(--red)" : "var(--amber)";
+    }
+  }
 
   /* =========================================================
      Init
@@ -5213,6 +5551,8 @@
   renderQuellen();
   renderEigene();
   renderKalender();
+  renderWetter();
+  renderDashboard();
 
   // Cockpit nur im Reiter "Urlaub/Mehrarbeit"; + Schaltfläche nur im Kalender
   (function ansichtSteuern(){
@@ -5232,6 +5572,10 @@
       if(aktiv && titelEl) titelEl.textContent = aktiv.textContent.trim();
 
       if(kalAktiv && !einstellungenOffen) setTimeout(renderKalender, 20);
+      const dbEl = document.getElementById("tabDashboard");
+      if(dbEl && dbEl.classList.contains("active") && typeof renderDashboard === "function"){
+        setTimeout(renderDashboard, 20);
+      }
     }
     document.querySelectorAll("[data-tab]").forEach(b =>
       b.addEventListener("click", () => setTimeout(pruefen, 30)));
