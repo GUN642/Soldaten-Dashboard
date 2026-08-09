@@ -69,6 +69,23 @@ jobs:
             grep -q "android.permission.$P" "$MANIFEST" || { echo "FEHLER: $P fehlt"; exit 1; }
           done
 
+      - name: Eigenes Kontakt-Plugin einsetzen
+        run: |
+          ZIEL=android/app/src/main/java/de/gun/dienstcockpit
+          if [ ! -d "$ZIEL" ]; then
+            echo "FEHLER: $ZIEL nicht gefunden - stimmt die appId in capacitor.config.json?"
+            find android/app/src/main/java -type d || true
+            exit 1
+          fi
+          if [ ! -f native/KontaktDatenPlugin.java ]; then
+            echo "FEHLER: native/KontaktDatenPlugin.java fehlt im Projekt."
+            exit 1
+          fi
+          cp native/KontaktDatenPlugin.java "$ZIEL/"
+          cp native/MainActivity.java "$ZIEL/"
+          echo "Eingesetzt:"
+          ls -la "$ZIEL"
+
       - name: App-Icon erzeugen (falls vorhanden)
         run: |
           if [ -f resources/icon.png ]; then
