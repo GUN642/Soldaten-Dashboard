@@ -101,10 +101,17 @@
     -webkit-tap-highlight-color:transparent;
   }
   .brand:active{opacity:0.7;}
-  .brand img{height:30px;width:auto;display:block;}
-  .logo-hell{display:none;}
-  html[data-theme="light"] .logo-dunkel{display:none;}
-  html[data-theme="light"] .logo-hell{display:block;}
+  .brand img{height:30px;width:auto;}
+  /* Auswahl mit gleichem Vorrang, sonst gewinnt ".brand img" und beide erscheinen */
+  .brand img.logo-dunkel{display:block;}
+  .brand img.logo-hell{display:none;}
+  html[data-theme="light"] .brand img.logo-dunkel{display:none;}
+  html[data-theme="light"] .brand img.logo-hell{display:block;}
+  .seiten-titel{
+    font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.4px;
+    color:var(--topbar-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    flex:1;min-width:0;padding-left:4px;
+  }
   .status-chip{
     font-family:var(--mono);font-size:10px;letter-spacing:0.5px;
     border:1px solid var(--border);padding:4px 8px;border-radius:3px;
@@ -476,13 +483,13 @@
     pointer-events:none;overflow:hidden;
   }
   .kal-balken{
-    position:absolute;height:15px;border-radius:5px;
-    font-size:10px;line-height:15px;padding:0 5px;
+    position:absolute;height:13px;border-radius:999px;
+    font-size:10px;line-height:13px;padding:0 6px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     pointer-events:none;font-weight:500;
   }
-  .kal-balken.start-offen{border-top-left-radius:1px;border-bottom-left-radius:1px;}
-  .kal-balken.ende-offen{border-top-right-radius:1px;border-bottom-right-radius:1px;}
+  .kal-balken.start-offen{border-top-left-radius:2px;border-bottom-left-radius:2px;}
+  .kal-balken.ende-offen{border-top-right-radius:2px;border-bottom-right-radius:2px;}
 
   /* Termine mit Uhrzeit: nur farbige Flagge, nicht flächig gefüllt */
   .kal-balken.mit-zeit{
@@ -490,8 +497,8 @@
     padding-left:9px;
   }
   .kal-balken.mit-zeit::before{
-    content:"";position:absolute;left:2px;top:3px;bottom:3px;width:3.5px;
-    border-radius:2px;background:var(--flaggenfarbe);
+    content:"";position:absolute;left:2px;top:2px;bottom:2px;width:3.5px;
+    border-radius:999px;background:var(--flaggenfarbe);
   }
   .kal-mehr-marke{
     position:absolute;font-family:var(--mono);font-size:9px;font-weight:600;
@@ -524,6 +531,11 @@
   .ev-zeile .ev-wert{color:var(--text);word-break:break-word;white-space:pre-wrap;}
   .kal-ev-titel{font-size:13px;color:var(--text);font-weight:600;}
   .kal-ev-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-dim);margin-top:2px;}
+  .kal-ev-notiz{
+    font-size:12px;color:var(--text-dim);margin-top:5px;line-height:1.5;
+    white-space:pre-wrap;word-break:break-word;
+    padding-left:8px;border-left:2px solid var(--border);
+  }
   .kal-ev-quelle{font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:2px;}
 
   .kal-fab{
@@ -752,8 +764,8 @@
   <button class="brand" id="logoBtn" type="button" title="Hell/Dunkel wechseln">
     <img class="logo-dunkel" src="logo-header.png" alt="Air Force CH-47 Team">
     <img class="logo-hell" src="logo-header-light.png" alt="Air Force CH-47 Team">
-    <span class="version-badge" id="versionBadge">v3.1</span>
   </button>
+  <div class="seiten-titel" id="seitenTitel">Kalender</div>
   <div class="kal-nav">
     <span class="status-chip"><span id="topStatusText">—</span></span>
     <button class="btn small" id="menueBtn" type="button" title="Menü">☰</button>
@@ -818,7 +830,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 3.1 &middot; Stand 08.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 3.2 &middot; Stand 08.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -832,6 +844,19 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v3.2 <span class="cl-date">08.08.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Der Export blieb ohne Wirkung. Im Android-WebView funktioniert der übliche Datei-Download nicht — die Datei wird jetzt im Gerätespeicher angelegt und über das Teilen-Menü weitergegeben. Gilt ebenso für die .ics-Ausgabe</li>
+          <li>Fehler behoben: Bei FvD wurden pauschal 8 Stunden abgezogen. Mit Uhrzeit wird nun die tatsächliche Dauer angerechnet (13:00–16:30 ergibt 3,5 Stunden), auch über Mitternacht hinweg. Nur bei ganztägigen Terminen gilt weiterhin der eingestellte Wert je Werktag</li>
+          <li>Fehler behoben: Im dunklen Modus lagen beide Logo-Fassungen übereinander — die Auswahlregel hatte zu geringen Vorrang</li>
+          <li>Neben dem Logo steht jetzt der Name der aktuellen Ansicht</li>
+          <li>Notizfeld bei Terminen ist mehrzeilig; Umbrüche bleiben in der Tagesansicht erhalten</li>
+          <li>App-Symbol deutlich größer, die Rotorspitzen laufen bewusst über den Rand</li>
+          <li>Kalenderbalken etwas schmaler und mit größerem Abstand, sodass sie sich nicht mehr berühren; Schriftgröße unverändert</li>
+          <li>Balken vollständig abgerundet; die Flagge zeitgebundener Termine ebenfalls</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v3.1 <span class="cl-date">08.08.2026</span></div>
         <ul>
@@ -1500,8 +1525,8 @@
           <input type="text" id="nvOrt" placeholder="Optional">
         </div>
         <div class="field">
-          <label for="nvNotiz">Notiz <span style="color:var(--text-faint);">(optional)</span></label>
-          <input type="text" id="nvNotiz" placeholder="Optional">
+          <label for="nvNotiz">Notiz <span style="color:var(--text-faint);">(optional, mehrzeilig)</span></label>
+          <textarea id="nvNotiz" rows="3" placeholder="Zeilenumbrüche sind möglich"></textarea>
         </div>
       </div>
 
@@ -3253,7 +3278,7 @@
     kalGrid.querySelectorAll(".kal-balken-schicht").forEach(schicht => {
       const hoehe = schicht.clientHeight;
       if(hoehe <= 0) return;
-      const maxSpuren = Math.max(1, Math.floor(hoehe / 13));
+      const maxSpuren = Math.max(1, Math.floor(hoehe / 16));
 
       schicht.querySelectorAll(".kal-mehr-marke").forEach(m => m.remove());
 
@@ -3276,7 +3301,7 @@
         marke.className = "kal-mehr-marke";
         marke.textContent = "+" + ueberProSpalte[spalte];
         marke.style.left = "calc(" + (spalte * 100 / 7) + "% + 2px)";
-        marke.style.top = ((maxSpuren - 1) * 13 + 1) + "px";
+        marke.style.top = ((maxSpuren - 1) * 16 + 1) + "px";
         schicht.appendChild(marke);
       });
     });
@@ -3430,7 +3455,7 @@
         }
         balken.style.left = "calc(" + (vonSpalte * 100 / 7) + "% + 1px)";
         balken.style.width = "calc(" + ((bisSpalte - vonSpalte + 1) * 100 / 7) + "% - 3px)";
-        balken.style.top = (spur * 13) + "px";
+        balken.style.top = (spur * 16) + "px";
         balken.setAttribute("data-spur", spur);
         balken.setAttribute("data-von", vonSpalte);
         balken.setAttribute("data-bis", bisSpalte);
@@ -3503,10 +3528,16 @@
           const box = document.createElement("div");
           box.className = "kal-ev";
           box.style.borderLeftColor = farbe;
-          box.innerHTML = '<div class="kal-ev-titel"></div><div class="kal-ev-meta"></div><div class="kal-ev-quelle"></div>';
+          box.innerHTML = '<div class="kal-ev-titel"></div><div class="kal-ev-meta"></div>'
+            + '<div class="kal-ev-notiz" style="display:none;"></div><div class="kal-ev-quelle"></div>';
           box.querySelector(".kal-ev-titel").textContent = t.titel;
           box.querySelector(".kal-ev-meta").textContent = zeit + (t.ort ? " · " + t.ort : "");
           const eigener = (kalender.eigene || []).find(x => x.uid === t.uid || x.nativId === t.uid);
+          if(eigener && eigener.notiz){
+            const nz = box.querySelector(".kal-ev-notiz");
+            nz.textContent = eigener.notiz;
+            nz.style.display = "block";
+          }
           const anh = eigener && eigener.anhaenge ? eigener.anhaenge.length : 0;
           box.querySelector(".kal-ev-quelle").textContent = t.quelleName
             + (anh ? " · " + anh + (anh === 1 ? " Anhang" : " Anhänge") : "")
@@ -3807,32 +3838,7 @@
 
   async function icsAusgeben(termine, name){
     const text = icsDokument(termine);
-    const blob = new Blob([text], { type: "text/calendar;charset=utf-8" });
-
-    // Bevorzugt das Teilen-Menü (Android): Kalender-App kann die Datei direkt annehmen
-    try{
-      if(navigator.canShare && navigator.share){
-        const datei = new File([blob], name, { type: "text/calendar" });
-        if(navigator.canShare({ files: [datei] })){
-          await navigator.share({ files: [datei], title: name });
-          return;
-        }
-      }
-    }catch(e){
-      if(e && e.name === "AbortError") return; // Nutzer hat abgebrochen
-    }
-
-    // Sonst: normaler Download
-    try{
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = name;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-    }catch(e){
-      // Letzter Ausweg: Inhalt zum Kopieren anzeigen
-      prompt("Die Datei konnte nicht erzeugt werden. Inhalt zum Kopieren:", text);
-    }
+    await dateiAusgeben(text, name, "text/calendar;charset=utf-8");
   }
 
   /* ---------- Termin-Detailansicht ---------- */
@@ -4094,7 +4100,7 @@
     }else{
       nvAnrechHinweis.textContent = nvGeplant
         ? "Wird als geplanter FvD vermerkt, aber noch nicht von den Überstunden abgezogen."
-        : "Die Stunden werden sofort vom Überstundenkonto abgezogen.";
+        : "Die Stunden werden sofort abgezogen — bei Angabe einer Uhrzeit genau die tatsächliche Dauer.";
     }
   }
   document.querySelectorAll("[data-anrech]").forEach(b =>
@@ -4133,7 +4139,21 @@
       });
       saveUrlaub(); renderUrlaub();
     }else{
-      const stunden = -Math.abs((kalender.fvdStunden || 8) * tage);
+      // Bei einem Termin mit Uhrzeit die tatsächliche Dauer nehmen,
+      // bei ganztägigen Terminen den eingestellten Wert je Werktag.
+      let dauer;
+      if(!termin.ganztags && termin.zeitVon && termin.zeitBis){
+        const [vh, vm] = termin.zeitVon.split(":").map(Number);
+        const [bh, bm] = termin.zeitBis.split(":").map(Number);
+        let minuten = (bh * 60 + bm) - (vh * 60 + vm);
+        if(minuten <= 0) minuten += 24 * 60;          // über Mitternacht
+        dauer = Math.round((minuten / 60) * 100) / 100;
+        // Mehrtägig mit Uhrzeit: Dauer je betroffenem Werktag
+        if(tage > 1) dauer = dauer * tage;
+      }else{
+        dauer = (kalender.fvdStunden || 8) * tage;
+      }
+      const stunden = -Math.abs(dauer);
       if(nvGeplant){
         // Als geplant vermerken: noch nicht abziehen, aber festhalten
         urlaub.zeitraeume.push({
@@ -4703,39 +4723,74 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "3.1";
+  const APP_VERSION = "3.2";
 
-  document.getElementById("exportBtn").addEventListener("click", async () => {
-    const payload = {
-      app: "Dienst-Cockpit", version: APP_VERSION, exportedAt: new Date().toISOString(),
-      ablaufregister: eintraege, urlaub, ueberstunden, todos, notizen, kalender
-    };
-    const json = JSON.stringify(payload, null, 2);
-    const name = "DienstCockpit_v" + APP_VERSION + "_" + new Date().toISOString().slice(0,10) + ".json";
-    const blob = new Blob([json], { type: "application/json" });
+  /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
+     denn der übliche Download funktioniert im Android-WebView nicht. */
+  async function dateiAusgeben(text, name, mimeTyp){
+    const FS = (Cap && Cap.Plugins && Cap.Plugins.Filesystem) || null;
+    const SH = (Cap && Cap.Plugins && Cap.Plugins.Share) || null;
 
-    // In der App: Teilen-Menü, damit die Datei irgendwo abgelegt werden kann
+    if(istApp && FS){
+      try{
+        await FS.writeFile({
+          path: name,
+          data: text,
+          directory: "CACHE",
+          encoding: "utf8"
+        });
+        const ort = await FS.getUri({ path: name, directory: "CACHE" });
+        if(SH){
+          await SH.share({ title: name, url: ort.uri, dialogTitle: name });
+        }else{
+          alert("Datei gespeichert unter:\n" + ort.uri);
+        }
+        return true;
+      }catch(e){
+        if(e && (e.message === "Share canceled" || e.name === "AbortError")) return true;
+        alert("Die Datei konnte nicht ausgegeben werden.\n\n" + (e && e.message ? e.message : e));
+        return false;
+      }
+    }
+
+    // Browser: Teilen-Menü, sonst Download
+    const blob = new Blob([text], { type: mimeTyp });
     try{
       if(navigator.canShare && navigator.share){
-        const datei = new File([blob], name, { type: "application/json" });
+        const datei = new File([blob], name, { type: mimeTyp });
         if(navigator.canShare({ files: [datei] })){
           await navigator.share({ files: [datei], title: name });
-          return;
+          return true;
         }
       }
     }catch(e){
-      if(e && e.name === "AbortError") return;
+      if(e && e.name === "AbortError") return true;
     }
-
-    // Sonst: normaler Download
     try{
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
+      return true;
     }catch(e){
-      alert("Die Sicherung konnte nicht als Datei ausgegeben werden.");
+      alert("Die Datei konnte nicht erzeugt werden.");
+      return false;
+    }
+  }
+
+  document.getElementById("exportBtn").addEventListener("click", async () => {
+    try{
+      const payload = {
+        app: "Dienst-Cockpit", version: APP_VERSION, exportedAt: new Date().toISOString(),
+        ablaufregister: eintraege, urlaub, ueberstunden, todos, notizen, kalender
+      };
+      const json = JSON.stringify(payload, null, 2);
+      const name = "DienstCockpit_v" + APP_VERSION + "_" + new Date().toISOString().slice(0,10) + ".json";
+      const ok = await dateiAusgeben(json, name, "application/json");
+      if(ok) menueOverlay.style.display = "none";
+    }catch(e){
+      alert("Die Sicherung konnte nicht erstellt werden.\n\n" + (e && e.message ? e.message : e));
     }
   });
 
@@ -5010,6 +5065,11 @@
       if(!kalAktiv) document.body.classList.remove("kal-max");
       const startAktiv = document.getElementById("tabStart").classList.contains("active");
       document.body.classList.toggle("zeigt-cockpit", startAktiv);
+
+      // Namen des aktiven Reiters in der Kopfzeile anzeigen
+      const aktiv = document.querySelector(".tab-btn.active");
+      const titelEl = document.getElementById("seitenTitel");
+      if(aktiv && titelEl) titelEl.textContent = aktiv.textContent.trim();
 
       if(kalAktiv && !einstellungenOffen) setTimeout(renderKalender, 20);
     }
