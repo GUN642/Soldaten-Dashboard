@@ -6,7 +6,11 @@
     "allowMixedContent": false
   },
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "allowNavigation": [
+      "*.meteoblue.com",
+      "meteoblue.com"
+    ]
   },
   "plugins": {
     "SplashScreen": {
