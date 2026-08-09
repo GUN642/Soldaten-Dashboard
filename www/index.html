@@ -483,10 +483,17 @@
     pointer-events:none;overflow:hidden;
   }
   .kal-balken{
-    position:absolute;height:13px;border-radius:999px;
+    position:absolute;border-radius:999px;
     font-size:10px;line-height:13px;padding:0 6px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    pointer-events:none;font-weight:500;
+    overflow:hidden;pointer-events:none;font-weight:500;
+    white-space:nowrap;text-overflow:ellipsis;
+  }
+  /* Zweizeilige Balken: Titel darf umbrechen */
+  .kal-balken.zweizeilig{
+    white-space:normal;text-overflow:clip;
+    border-radius:7px;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+    word-break:break-word;
   }
   .kal-balken.start-offen{border-top-left-radius:2px;border-bottom-left-radius:2px;}
   .kal-balken.ende-offen{border-top-right-radius:2px;border-bottom-right-radius:2px;}
@@ -819,6 +826,16 @@
       </div>
 
       <div class="field" style="margin-bottom:16px;">
+        <label>Kalenderanzeige</label>
+        <div class="btn-row" style="margin-top:0;">
+          <button type="button" class="btn toggle-pill active" id="todoImKalToggle">● Aufgaben im Kalender</button>
+          <button type="button" class="btn toggle-pill" id="erledigtImKalToggle">○ Auch erledigte</button>
+          <button type="button" class="btn toggle-pill active" id="umbruchToggle">● Titel umbrechen</button>
+        </div>
+        <div class="hint">Umbrechen zeigt mehr vom Titel, jeder Termin braucht dafür aber die doppelte Höhe — es passen dann weniger Termine je Tag ins Raster.</div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px;">
         <label>Info</label>
         <div class="btn-row" style="margin-top:0;">
           <button class="btn" id="openChangelogBtn" type="button">&#128220; Changelog</button>
@@ -830,7 +847,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 3.2 &middot; Stand 08.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 3.3 &middot; Stand 08.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -844,6 +861,18 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v3.3 <span class="cl-date">08.08.2026</span></div>
+        <ul>
+          <li>Termintitel im Monatsraster brechen jetzt auf zwei Zeilen um, statt abgeschnitten zu werden — im Menü abschaltbar, da umgebrochene Termine die doppelte Höhe brauchen</li>
+          <li>Fehler behoben: Notizen und ihre Zeilenumbrüche erschienen nicht. Die App schrieb die Notiz in den Gerätekalender, las sie aber nie zurück — jetzt wird sie mitgelesen und samt Umbrüchen angezeigt</li>
+          <li>Uhrzeiten werden auch ohne Doppelpunkt erkannt: 1300, 13.00, 13 00, 930 oder einfach 9 werden automatisch zu 13:00 bzw. 09:30 und 09:00</li>
+          <li>Gilt für Termine, Aufgaben und die Erinnerungszeit im Menü; das Feld schreibt sich beim Verlassen selbst um</li>
+          <li>Fällige Aufgaben erscheinen jetzt auch im Kalender — mit Kästchen, farblich nach Zustand: überfällig rot, hohe Priorität orange, erledigt grau</li>
+          <li>Aufgaben mit Uhrzeit erscheinen als Termin, ohne Uhrzeit ganztägig; ein Antippen wechselt zur Aufgabenliste</li>
+          <li>Im Menü einstellbar, ob Aufgaben im Kalender erscheinen und ob erledigte mitangezeigt werden</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v3.2 <span class="cl-date">08.08.2026</span></div>
         <ul>
@@ -1511,11 +1540,11 @@
       <div class="row c2" id="nvZeitRow" style="margin-bottom:12px;display:none;">
         <div class="field">
           <label for="nvZeitVon">Uhrzeit von</label>
-          <input type="text" id="nvZeitVon" placeholder="HH:MM" value="08:00">
+          <input type="text" id="nvZeitVon" placeholder="z. B. 0800 oder 8:00" value="08:00" inputmode="numeric">
         </div>
         <div class="field">
           <label for="nvZeitBis">Uhrzeit bis</label>
-          <input type="text" id="nvZeitBis" placeholder="HH:MM" value="16:00">
+          <input type="text" id="nvZeitBis" placeholder="z. B. 1630" value="16:00" inputmode="numeric">
         </div>
       </div>
 
@@ -1592,7 +1621,7 @@
             </div>
             <div class="field">
               <label for="tUhrzeit">Uhrzeit <span style="color:var(--text-faint);">(optional)</span></label>
-              <input type="text" id="tUhrzeit" placeholder="HH:MM">
+              <input type="text" id="tUhrzeit" placeholder="z. B. 0930" inputmode="numeric">
             </div>
             <div class="field">
               <label for="tPrio">Priorität</label>
@@ -2604,6 +2633,7 @@
     const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + n);
     return toDEString(d);
   }
+  zeitFeldAnbinden(document.getElementById("tUhrzeit"));
   document.getElementById("tHeute").addEventListener("click", () => { tFaellig.value = tagVersetzt(0); });
   document.getElementById("tMorgen").addEventListener("click", () => { tFaellig.value = tagVersetzt(1); });
   document.getElementById("tWoche").addEventListener("click", () => { tFaellig.value = tagVersetzt(7); });
@@ -2657,8 +2687,8 @@
       alert("Bitte ein gültiges Fälligkeitsdatum (TT.MM.JJJJ) eingeben, oder das Feld leer lassen.");
       tFaellig.focus(); return;
     }
-    const uhrzeit = tUhrzeit.value.trim();
-    if(uhrzeit && !/^([01]?\d|2[0-3]):[0-5]\d$/.test(uhrzeit)){
+    const uhrzeit = zeitNormieren(tUhrzeit.value) || "";
+    if(tUhrzeit.value.trim() && !uhrzeit){
       alert("Bitte eine gültige Uhrzeit im Format HH:MM eingeben, oder das Feld leer lassen.");
       tUhrzeit.focus(); return;
     }
@@ -2677,6 +2707,7 @@
     tPrio.value = "mittel";
     tAnhaenge = []; tRenderAnhaenge();
     renderTodos();
+    if(typeof renderKalender === "function") renderKalender();
     if(typeof benPlanen === "function") benPlanen();
   });
 
@@ -2687,12 +2718,14 @@
     t.erledigtAm = t.erledigt ? todayDE() : "";
     saveTodos();
     renderTodos();
+    if(typeof renderKalender === "function") renderKalender();
   }
   function removeTodo(id){
     if(!confirm("Diese Aufgabe wirklich löschen?")) return;
     todos.eintraege = todos.eintraege.filter(t => t.id !== id);
     saveTodos();
     renderTodos();
+    if(typeof renderKalender === "function") renderKalender();
   }
   document.getElementById("todoClearDoneBtn").addEventListener("click", () => {
     const anzahl = todos.eintraege.filter(t => t.erledigt).length;
@@ -2701,6 +2734,7 @@
     todos.eintraege = todos.eintraege.filter(t => !t.erledigt);
     saveTodos();
     renderTodos();
+    if(typeof renderKalender === "function") renderKalender();
   });
 
   const PRIO_RANG = { hoch: 0, mittel: 1, niedrig: 2 };
@@ -3285,7 +3319,16 @@
       const ueberProSpalte = {};
       schicht.querySelectorAll(".kal-balken").forEach(b => {
         const spur = +b.getAttribute("data-spur");
-        const passt = spur < maxSpuren;
+        const hoehe = +(b.getAttribute("data-hoehe") || 1);
+        // Zweizeilige Balken brauchen zwei Spuren und müssen ganz hineinpassen
+        let passt = (spur + hoehe) <= maxSpuren;
+
+        // Wenn nur die zweite Zeile fehlt: einzeilig anzeigen statt weglassen
+        if(!passt && hoehe === 2 && spur < maxSpuren){
+          b.classList.remove("zweizeilig");
+          b.style.height = "13px";
+          passt = true;
+        }
         b.style.display = passt ? "" : "none";
         if(!passt){
           const vonSpalte = +b.getAttribute("data-von");
@@ -3307,9 +3350,19 @@
     });
   }
 
-  // Bei jeder Größenänderung des Rasters neu kappen
+  // Bei Größenänderung neu kappen. Ändert sich die Breite, muss komplett neu
+  // gezeichnet werden, denn davon hängt ab, welche Titel umbrechen.
+  let letzteBreite = 0;
   if(window.ResizeObserver){
-    const beobachter = new ResizeObserver(() => balkenKappen());
+    const beobachter = new ResizeObserver(() => {
+      const breite = kalGrid.clientWidth;
+      if(breite > 0 && Math.abs(breite - letzteBreite) > 4){
+        letzteBreite = breite;
+        renderKalender();
+      }else{
+        balkenKappen();
+      }
+    });
     beobachter.observe(kalGrid);
   }
 
@@ -3425,25 +3478,43 @@
       const inWoche = spannen.filter(sp => sp.start <= wochenEnde && sp.ende >= wochenStart);
       const spuren = [];   // spuren[n] = Array belegter Spalten
 
+      // Breite einer Tagesspalte, um zu schätzen wie viel Text in eine Zeile passt
+      const rasterBreite = kalGrid.clientWidth || 360;
+      const spaltenBreite = (rasterBreite - 12) / 7;
+
       inWoche.forEach(sp => {
         const vonSpalte = Math.max(0, Math.round((sp.start - wochenStart) / 86400000));
         const bisSpalte = Math.min(6, Math.round((sp.ende - wochenStart) / 86400000));
 
-        // Erste Spur suchen, in der keine Überschneidung besteht
+        // Passt der Titel in eine Zeile? Sonst zwei Zeilen und damit zwei Spuren.
+        const balkenBreite = (bisSpalte - vonSpalte + 1) * spaltenBreite - 3;
+        const platzZeichen = Math.max(3, Math.floor((balkenBreite - 12) / 5.4));
+        const zweizeilig = String(sp.termin.titel || "").length > platzZeichen;
+        const spurHoehe = zweizeilig ? 2 : 1;
+
+        // Erste Stelle suchen, an der alle benötigten Spuren frei sind
         let spur = 0;
-        while(true){
-          if(!spuren[spur]) spuren[spur] = [];
-          const frei = spuren[spur].every(b => bisSpalte < b.von || vonSpalte > b.bis);
-          if(frei){ spuren[spur].push({ von: vonSpalte, bis: bisSpalte }); break; }
+        while(spur < 60){
+          let frei = true;
+          for(let k = 0; k < spurHoehe; k++){
+            if(!spuren[spur + k]) spuren[spur + k] = [];
+            if(!spuren[spur + k].every(b => bisSpalte < b.von || vonSpalte > b.bis)){ frei = false; break; }
+          }
+          if(frei){
+            for(let k = 0; k < spurHoehe; k++) spuren[spur + k].push({ von: vonSpalte, bis: bisSpalte });
+            break;
+          }
           spur++;
-          if(spur > 40) break;
         }
 
         const farbe = terminFarbe(sp.termin);
         const balken = document.createElement("div");
         balken.className = "kal-balken"
+          + (zweizeilig ? " zweizeilig" : "")
           + (sp.start < wochenStart ? " start-offen" : "")
           + (sp.ende > wochenEnde ? " ende-offen" : "");
+        balken.style.height = (spurHoehe * 16 - 3) + "px";
+        balken.setAttribute("data-hoehe", spurHoehe);
         if(sp.termin.allDay){
           balken.style.background = farbe;
           balken.style.color = textAufFarbe(farbe);
@@ -3533,16 +3604,24 @@
           box.querySelector(".kal-ev-titel").textContent = t.titel;
           box.querySelector(".kal-ev-meta").textContent = zeit + (t.ort ? " · " + t.ort : "");
           const eigener = (kalender.eigene || []).find(x => x.uid === t.uid || x.nativId === t.uid);
-          if(eigener && eigener.notiz){
+          const notizText = t.notiz || (eigener && eigener.notiz) || "";
+          if(notizText){
             const nz = box.querySelector(".kal-ev-notiz");
-            nz.textContent = eigener.notiz;
+            nz.textContent = notizText;      // white-space:pre-wrap erhält die Umbrüche
             nz.style.display = "block";
           }
           const anh = eigener && eigener.anhaenge ? eigener.anhaenge.length : 0;
           box.querySelector(".kal-ev-quelle").textContent = t.quelleName
             + (anh ? " · " + anh + (anh === 1 ? " Anhang" : " Anhänge") : "")
             + " · antippen für Details";
-          box.addEventListener("click", () => terminDetailZeigen(t, farbe));
+          box.addEventListener("click", () => {
+            if(t.istTodo){
+              const knopf = document.querySelector('[data-tab="tabTodo"]');
+              if(knopf) knopf.click();
+              return;
+            }
+            terminDetailZeigen(t, farbe);
+          });
           kalTagEvents.appendChild(box);
         });
       }
@@ -3894,9 +3973,12 @@
 
     // Zusatzangaben aus einem selbst angelegten Termin
     const eigener = (kalender.eigene || []).find(x => x.uid === t.uid || x.nativId === t.uid);
-    if(eigener){
-      const n = evZeile("Notiz", eigener.notiz);
+    const notizText = t.notiz || (eigener && eigener.notiz) || "";
+    if(notizText){
+      const n = evZeile("Notiz", notizText);
       if(n) evInhalt.appendChild(n);
+    }
+    if(eigener){
 
       if(eigener.anhaenge && eigener.anhaenge.length){
         const kopf = document.createElement("div");
@@ -3978,6 +4060,8 @@
   }
   nvGanztagToggle.addEventListener("click", () => { nvGanztags = !nvGanztags; updateGanztagUI(); });
   updateGanztagUI();
+  zeitFeldAnbinden(nvZeitVon);
+  zeitFeldAnbinden(nvZeitBis);
 
   function terminMaskeOeffnen(tagSchluesselWert){
     if(tagSchluesselWert){
@@ -4071,8 +4155,44 @@
     leser.readAsDataURL(datei);
   });
 
+  /* Uhrzeit tolerant einlesen: 1300, 13.00, 13 00, 13:00, 9, 930 ... -> "13:00" */
+  function zeitNormieren(wert){
+    let t = String(wert || "").trim();
+    if(!t) return null;
+    // Trennzeichen vereinheitlichen
+    t = t.replace(/[.,;\-\s]+/g, ":").replace(/uhr/i, "").trim();
+
+    let st, mi;
+    if(t.indexOf(":") !== -1){
+      const teile = t.split(":").filter(x => x !== "");
+      if(!teile.length) return null;
+      st = parseInt(teile[0], 10);
+      mi = teile.length > 1 ? parseInt(teile[1], 10) : 0;
+    }else{
+      if(!/^\d{1,4}$/.test(t)) return null;
+      if(t.length <= 2){ st = parseInt(t, 10); mi = 0; }
+      else if(t.length === 3){ st = parseInt(t.slice(0,1), 10); mi = parseInt(t.slice(1), 10); }
+      else { st = parseInt(t.slice(0,2), 10); mi = parseInt(t.slice(2), 10); }
+    }
+    if(!Number.isFinite(st) || !Number.isFinite(mi)) return null;
+    if(st === 24 && mi === 0) { st = 0; }
+    if(st < 0 || st > 23 || mi < 0 || mi > 59) return null;
+    return String(st).padStart(2, "0") + ":" + String(mi).padStart(2, "0");
+  }
+
+  // Feld beim Verlassen automatisch in HH:MM umschreiben
+  function zeitFeldAnbinden(el){
+    if(!el) return;
+    const pruefen = () => {
+      const norm = zeitNormieren(el.value);
+      if(norm) el.value = norm;
+    };
+    el.addEventListener("blur", pruefen);
+    el.addEventListener("change", pruefen);
+  }
+
   function zeitGueltig(v){
-    return /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(v || "").trim());
+    return zeitNormieren(v) !== null;
   }
 
   /* ---------- Anrechnung auf Urlaub / Mehrarbeit ---------- */
@@ -4194,8 +4314,8 @@
       von: toDEString(startD),
       bis: toDEString(endD),
       ganztags: nvGanztags,
-      zeitVon: nvGanztags ? "" : nvZeitVon.value.trim(),
-      zeitBis: nvGanztags ? "" : nvZeitBis.value.trim(),
+      zeitVon: nvGanztags ? "" : zeitNormieren(nvZeitVon.value),
+      zeitBis: nvGanztags ? "" : zeitNormieren(nvZeitBis.value),
       ort: nvOrt.value.trim(),
       notiz: nvNotiz.value.trim(),
       anhaenge: nvAnhaenge.slice(),
@@ -4464,7 +4584,9 @@
           start: start,
           end: ende,
           allDay: ganztags,
-          ort: e.location || ""
+          ort: e.location || "",
+          // Notiz/Beschreibung mitlesen — sonst fehlen Zeilenumbrüche in der Anzeige
+          notiz: e.description || e.notes || e.beschreibung || ""
         };
       }).filter(e => e.start && !isNaN(e.start));
 
@@ -4666,7 +4788,7 @@
           + (sichtbar[e.kalenderId].konto && sichtbar[e.kalenderId].konto.dienst
              ? " · " + sichtbar[e.kalenderId].konto.dienst : ""),
         farbe: sichtbar[e.kalenderId].farbe || "#5fb4ff",
-        titel: e.titel, uid: e.id, ort: e.ort,
+        titel: e.titel, uid: e.id, ort: e.ort, notiz: e.notiz || "",
         start: e.start, end: e.end, allDay: e.allDay
       }));
   }
@@ -4723,7 +4845,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "3.2";
+  const APP_VERSION = "3.3";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -4884,13 +5006,16 @@
     benVorlauf.value = ben.vorlaufMin;
     saveBen(); benPlanen();
   });
+  zeitFeldAnbinden(benGanztagsZeit);
   benGanztagsZeit.addEventListener("change", () => {
-    if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(benGanztagsZeit.value.trim())){
+    const norm = zeitNormieren(benGanztagsZeit.value);
+    if(norm) benGanztagsZeit.value = norm;
+    if(!norm){
       alert("Bitte eine gültige Uhrzeit im Format HH:MM eingeben.");
       benGanztagsZeit.value = ben.ganztagsZeit;
       return;
     }
-    ben.ganztagsZeit = benGanztagsZeit.value.trim();
+    ben.ganztagsZeit = norm;
     saveBen(); benPlanen();
   });
 
@@ -4994,8 +5119,9 @@
       if(t.erledigt || !t.faellig) return;
       const d = parseDateDE(t.faellig);
       if(!d) return;
-      if(t.uhrzeit && /^([01]?\d|2[0-3]):[0-5]\d$/.test(t.uhrzeit)){
-        const [h, m] = t.uhrzeit.split(":").map(Number);
+      const norm = zeitNormieren(t.uhrzeit);
+      if(norm){
+        const [h, m] = norm.split(":").map(Number);
         d.setHours(h, m, 0, 0);
       }else{
         d.setHours(9, 0, 0, 0);
@@ -5040,6 +5166,40 @@
     benStatusZeigen("Benachrichtigungs-Plugin nicht verfügbar.");
   }
   // Die Abfrage der Berechtigung erfolgt beim Start (siehe unten)
+
+  /* ---------- Aufgaben im Kalender ---------- */
+  const todoImKalToggle = document.getElementById("todoImKalToggle");
+  const erledigtImKalToggle = document.getElementById("erledigtImKalToggle");
+  if(kalender.todosImKalender === undefined) kalender.todosImKalender = true;
+  if(kalender.erledigteImKalender === undefined) kalender.erledigteImKalender = false;
+  if(kalender.titelUmbrechen === undefined) kalender.titelUmbrechen = true;
+  const umbruchToggle = document.getElementById("umbruchToggle");
+
+  function updateTodoKalUI(){
+    const an = kalender.todosImKalender !== false;
+    todoImKalToggle.classList.toggle("active", an);
+    todoImKalToggle.textContent = (an ? "● " : "○ ") + "Aufgaben im Kalender";
+    const erl = kalender.erledigteImKalender === true;
+    erledigtImKalToggle.classList.toggle("active", erl);
+    erledigtImKalToggle.textContent = (erl ? "● " : "○ ") + "Auch erledigte";
+    erledigtImKalToggle.style.display = an ? "" : "none";
+    const um = kalender.titelUmbrechen !== false;
+    umbruchToggle.classList.toggle("active", um);
+    umbruchToggle.textContent = (um ? "● " : "○ ") + "Titel umbrechen";
+  }
+  umbruchToggle.addEventListener("click", () => {
+    kalender.titelUmbrechen = kalender.titelUmbrechen === false;
+    saveKalender(); updateTodoKalUI(); renderKalender();
+  });
+  todoImKalToggle.addEventListener("click", () => {
+    kalender.todosImKalender = kalender.todosImKalender === false;
+    saveKalender(); updateTodoKalUI(); renderKalender();
+  });
+  erledigtImKalToggle.addEventListener("click", () => {
+    kalender.erledigteImKalender = kalender.erledigteImKalender !== true;
+    saveKalender(); updateTodoKalUI(); renderKalender();
+  });
+  updateTodoKalUI();
 
   /* =========================================================
      Init
