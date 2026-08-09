@@ -28,6 +28,20 @@ jobs:
       - name: Android SDK einrichten
         uses: android-actions/setup-android@v3
 
+      - name: Festen Signierschluessel einrichten
+        run: |
+          if [ ! -f keystore/debug.keystore ]; then
+            echo "FEHLER: keystore/debug.keystore fehlt im Projekt."
+            echo "Ohne diese Datei erhaelt jeder Build eine neue Signatur und"
+            echo "Updates lassen sich nicht ueber die vorhandene App installieren."
+            exit 1
+          fi
+          mkdir -p ~/.android
+          cp keystore/debug.keystore ~/.android/debug.keystore
+          echo "Signatur, die dieser Build verwendet:"
+          keytool -list -v -keystore ~/.android/debug.keystore -storepass android \
+            | grep -E "SHA256:" | head -1
+
       - name: Abhaengigkeiten installieren
         run: npm install
 
@@ -41,7 +55,7 @@ jobs:
             echo "FEHLER: $MANIFEST nicht gefunden."
             exit 1
           fi
-          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM USE_EXACT_ALARM RECEIVE_BOOT_COMPLETED VIBRATE; do
+          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM USE_EXACT_ALARM RECEIVE_BOOT_COMPLETED VIBRATE READ_CONTACTS INTERNET; do
             if grep -q "android.permission.$P" "$MANIFEST"; then
               echo "bereits vorhanden: $P"
             else
@@ -73,6 +87,12 @@ jobs:
       - name: APK bauen
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Signatur der fertigen APK pruefen
+        run: |
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+          echo "Fingerabdruck der APK (muss bei jedem Build identisch sein):"
+          keytool -printcert -jarfile "$APK" | grep -E "SHA256:" | head -1
 
       - name: APK bereitstellen
         uses: actions/upload-artifact@v4
