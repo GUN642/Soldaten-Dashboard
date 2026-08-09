@@ -882,7 +882,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 3.5 &middot; Stand 09.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 3.6 &middot; Stand 09.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -896,6 +896,17 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v3.6 <span class="cl-date">09.08.2026</span></div>
+        <ul>
+          <li>Geburtstage, Jahrestage und eigene Anlässe aus den Kontakten erscheinen jetzt im Kalender</li>
+          <li>Ursache des Fehlens: Der Kalender „Wichtige Daten der Kontakte" ist nur eine Anzeige — die Daten liegen in der Kontakte-Datenbank und sind über die Kalender-Schnittstelle nicht erreichbar. Die App liest sie nun direkt aus den Kontakten</li>
+          <li>Geburtstage zeigen das Alter, Jahrestage die Anzahl der Jahre</li>
+          <li>Umgang mit unvollständigen Angaben: Anlässe ohne Jahr erscheinen ohne Zahl, der 29. Februar nur in Schaltjahren</li>
+          <li>Im Kalendermenü abschaltbar; die Diagnose zeigt, wie viele Anlässe gefunden wurden</li>
+          <li>Dafür ist eine Berechtigung für die Kontakte nötig, die beim Einschalten erfragt wird</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v3.5 <span class="cl-date">09.08.2026</span></div>
         <ul>
@@ -1543,6 +1554,7 @@
 
         <div class="btn-row" style="margin-top:0;margin-bottom:14px;">
           <button type="button" class="btn toggle-pill active" id="geburtstageToggle">● Geburtstage einbeziehen</button>
+          <button type="button" class="btn toggle-pill active" id="kontaktdatenToggle">● Kontakt-Anlässe</button>
           <button type="button" class="btn small" id="nativDiagnose">🔍 Diagnose</button>
         </div>
         <div class="hint" id="diagnoseAusgabe" style="display:none;white-space:pre-wrap;
@@ -3333,6 +3345,9 @@
     if(typeof nativTermineImFenster === "function"){
       nativTermineImFenster(vonDate, bisDate).forEach(t => liste.push(t));
     }
+    if(typeof kontaktTermineImFenster === "function"){
+      kontaktTermineImFenster(vonDate, bisDate).forEach(t => liste.push(t));
+    }
     return liste.sort((a,b) => a.start - b.start);
   }
 
@@ -4652,6 +4667,7 @@
   if(!Array.isArray(nativCfg.versteckt)) nativCfg.versteckt = [];
   if(!Array.isArray(nativCfg.entfernt)) nativCfg.entfernt = [];
   if(nativCfg.geburtstage === undefined) nativCfg.geburtstage = true;
+  if(nativCfg.kontaktdaten === undefined) nativCfg.kontaktdaten = true;
   zielKalenderId = nativCfg.zielKalenderId || "";
   function saveNativCfg(){ saveJSON(NATIV_KEY, nativCfg); }
 
@@ -4816,7 +4832,12 @@
       });
       geraeteTermine = aufgeloest;
 
-      nativStatus.textContent = geraeteKalender.length + " Kalender · " + geraeteTermine.length + " Termine";
+      // Wichtige Daten der Kontakte mitlesen
+      if(nativCfg.kontaktdaten !== false) await kontaktDatenLesen();
+
+      nativStatus.textContent = geraeteKalender.length + " Kalender · "
+        + geraeteTermine.length + " Termine"
+        + (kontaktEreignisse.length ? " · " + kontaktEreignisse.length + " Kontaktdaten" : "");
       renderNativAuswahl();
       renderKalender();
     }catch(e){
@@ -4979,6 +5000,32 @@
       geburtstageToggle.classList.toggle("active", an);
       geburtstageToggle.textContent = (an ? "● " : "○ ") + "Geburtstage einbeziehen";
     }
+    // Wichtige Daten der Kontakte ein-/ausschalten
+    const kontaktdatenToggle = document.getElementById("kontaktdatenToggle");
+    function updateKontaktdatenUI(){
+      const an = nativCfg.kontaktdaten !== false;
+      kontaktdatenToggle.classList.toggle("active", an);
+      kontaktdatenToggle.textContent = (an ? "● " : "○ ") + "Kontakt-Anlässe";
+    }
+    kontaktdatenToggle.addEventListener("click", async () => {
+      nativCfg.kontaktdaten = nativCfg.kontaktdaten === false;
+      saveNativCfg();
+      updateKontaktdatenUI();
+      if(nativCfg.kontaktdaten !== false){
+        const ok = await kontaktDatenLesen();
+        if(!ok){
+          alert("Die Kontakte konnten nicht gelesen werden.\n\n"
+            + "Entweder wurde die Berechtigung abgelehnt, oder diese Fassung der App "
+            + "enthält das nötige Zusatzmodul nicht.");
+        }
+      }else{
+        kontaktEreignisse = [];
+      }
+      renderKalender();
+      if(typeof renderDashboard === "function") renderDashboard();
+    });
+    updateKontaktdatenUI();
+
     geburtstageToggle.addEventListener("click", async () => {
       nativCfg.geburtstage = nativCfg.geburtstage === false;
       saveNativCfg();
@@ -5010,6 +5057,17 @@
       zeilen.push("mit Wiederholung: " + geraeteTermine.filter(e => e.rrule).length);
       zeilen.push("entfernte Kalender: " + nativCfg.entfernt.length);
       zeilen.push("Geburtstagsabfrage: " + (nativCfg.geburtstage !== false ? "an" : "aus"));
+      zeilen.push("");
+      zeilen.push("KONTAKT-ANLÄSSE (Geburtstage, Jahrestage)");
+      zeilen.push("  Zusatzmodul: " + (kontaktPlugin() ? "vorhanden" : "FEHLT"));
+      zeilen.push("  Anlässe gefunden: " + kontaktEreignisse.length);
+      zeilen.push("  Einbeziehen: " + (nativCfg.kontaktdaten !== false ? "an" : "aus"));
+      if(kontaktEreignisse.length){
+        kontaktEreignisse.slice(0, 5).forEach(e => {
+          zeilen.push("    " + (e.name || "?") + " · " + e.bezeichnung + " · " + e.datum);
+        });
+        if(kontaktEreignisse.length > 5) zeilen.push("    …");
+      }
 
       zeilen.push("");
       zeilen.push("ROHDATEN erster Termine — zeigt, welche Felder das Gerät liefert:");
@@ -5153,7 +5211,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "3.5";
+  const APP_VERSION = "3.6";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -5499,6 +5557,102 @@
     saveKalender(); updateTodoKalUI(); renderKalender();
   });
   updateTodoKalUI();
+
+  /* =========================================================
+     WICHTIGE DATEN AUS DEN KONTAKTEN
+     Geburtstage, Jahrestage und eigene Anlässe. Diese liegen in der
+     Kontakte-Datenbank; der Kalender "Wichtige Daten der Kontakte" ist nur
+     eine Anzeige und liefert über die Kalender-Schnittstelle nichts.
+     ========================================================= */
+  let kontaktEreignisse = [];      // [{name, datum, bezeichnung, typ}]
+
+  function kontaktPlugin(){
+    return (Cap && Cap.Plugins && Cap.Plugins.KontaktDaten) || null;
+  }
+
+  /* Datumsangaben der Kontakte kommen in mehreren Formaten:
+     "1985-03-14", "--03-14" (ohne Jahr), teils auch "14.03.1985". */
+  function kontaktDatumZerlegen(roh){
+    const t = String(roh || "").trim();
+    if(!t) return null;
+
+    let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) return { jahr: +m[1], monat: +m[2], tag: +m[3] };
+
+    m = t.match(/^--(\d{1,2})-(\d{1,2})/);
+    if(m) return { jahr: null, monat: +m[1], tag: +m[2] };
+
+    m = t.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if(m) return { jahr: +m[3], monat: +m[2], tag: +m[1] };
+
+    m = t.match(/^(\d{1,2})\.(\d{1,2})\.?$/);
+    if(m) return { jahr: null, monat: +m[2], tag: +m[1] };
+
+    const d = new Date(t);
+    if(!isNaN(d)) return { jahr: d.getFullYear(), monat: d.getMonth() + 1, tag: d.getDate() };
+    return null;
+  }
+
+  async function kontaktDatenLesen(){
+    const P = kontaktPlugin();
+    if(!P) return false;
+    try{
+      const b = await P.berechtigungAnfragen();
+      if(!b || !b.erlaubt) return false;
+      const r = await P.ereignisseLesen();
+      kontaktEreignisse = (r && r.ereignisse) || [];
+      return true;
+    }catch(e){
+      kontaktEreignisse = [];
+      return false;
+    }
+  }
+
+  /* Aus jedem Anlass die Wiederholungen im gezeigten Zeitraum bilden */
+  function kontaktTermineImFenster(vonDate, bisDate){
+    if(nativCfg.kontaktdaten === false) return [];
+    if(!kontaktEreignisse.length) return [];
+
+    const liste = [];
+    const vonJahr = vonDate.getFullYear();
+    const bisJahr = bisDate.getFullYear();
+
+    kontaktEreignisse.forEach((e, idx) => {
+      const d = kontaktDatumZerlegen(e.datum);
+      if(!d || !d.monat || !d.tag) return;
+
+      for(let jahr = vonJahr; jahr <= bisJahr; jahr++){
+        const start = new Date(jahr, d.monat - 1, d.tag);
+        start.setHours(0,0,0,0);
+        // Ungültige Angaben (z. B. 30.02.) überspringen
+        if(start.getMonth() !== d.monat - 1) continue;
+        const ende = new Date(start.getTime() + 86400000);
+        if(start > bisDate || ende < vonDate) continue;
+
+        let titel = (e.name || "Unbekannt");
+        if(e.bezeichnung === "Geburtstag"){
+          const alter = d.jahr ? (jahr - d.jahr) : null;
+          titel = "🎂 " + titel + (alter !== null && alter > 0 ? " (" + alter + ")" : "");
+        }else{
+          const jahre = d.jahr ? (jahr - d.jahr) : null;
+          titel = "🎉 " + titel + " · " + e.bezeichnung
+            + (jahre !== null && jahre > 0 ? " (" + jahre + ")" : "");
+        }
+
+        liste.push({
+          quelleId: "kontakte",
+          quelleName: "Wichtige Daten der Kontakte",
+          farbe: farbenEigen["kontakte"] || "#ff8fc7",
+          titel: titel,
+          uid: "kontakt:" + (e.kontaktId || idx) + ":" + jahr,
+          ort: "", notiz: "",
+          start: start, end: ende, allDay: true,
+          istKontakt: true
+        });
+      }
+    });
+    return liste;
+  }
 
   /* =========================================================
      DASHBOARD ("Heute")
