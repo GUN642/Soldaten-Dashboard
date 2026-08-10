@@ -95,6 +95,16 @@ jobs:
             echo "Kein resources/icon.png vorhanden - Standardsymbol wird verwendet"
           fi
 
+      - name: Versionsnummer setzen
+        run: |
+          GRADLE=android/app/build.gradle
+          VNAME=$(node -p "require('./package.json').version")
+          VCODE=${GITHUB_RUN_NUMBER:-1}
+          echo "versionCode $VCODE / versionName $VNAME"
+          sed -i "s/versionCode .*/versionCode $VCODE/" "$GRADLE"
+          sed -i "s/versionName .*/versionName \"$VNAME\"/" "$GRADLE"
+          grep -E "versionCode|versionName" "$GRADLE"
+
       - name: Web-Dateien uebernehmen
         run: npx cap sync android
 
@@ -108,8 +118,17 @@ jobs:
       - name: Signatur der fertigen APK pruefen
         run: |
           APK=android/app/build/outputs/apk/debug/app-debug.apk
-          echo "Fingerabdruck der APK (muss bei jedem Build identisch sein):"
-          keytool -printcert -jarfile "$APK" | grep -E "SHA256:" | head -1
+          echo "=============================================="
+          echo " FINGERABDRUCK DER APK"
+          echo " Muss bei JEDEM Build gleich sein. Weicht er ab,"
+          echo " laesst sich das Update nicht darueber installieren."
+          echo "=============================================="
+          keytool -printcert -jarfile "$APK" | grep -E "SHA256:|Inhaber:|Owner:" | head -3
+          echo "=============================================="
+          echo " Erwartet wird:"
+          echo " 42:6E:07:AE:3C:EE:9D:62:DB:D8:12:0D:C9:40:1E:BC:"
+          echo " 2C:20:69:D1:9B:F5:6F:77:4F:7F:D2:90:99:4A:69:94"
+          echo "=============================================="
 
       - name: APK bereitstellen
         uses: actions/upload-artifact@v4
