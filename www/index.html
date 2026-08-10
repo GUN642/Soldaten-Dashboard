@@ -882,7 +882,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 3.7 &middot; Stand 09.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 3.8 &middot; Stand 10.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -896,6 +896,15 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v3.8 <span class="cl-date">10.08.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Im Oktober erschien der 25. zweimal und alle Folgetage waren verschoben. Am 25.10. endet die Sommerzeit, dieser Tag hat 25 Stunden — die Tagesrechnung mit festen 24 Stunden blieb dadurch auf demselben Datum stehen. Alle Datumsschritte laufen jetzt über die Datumsanteile und sind von der Zeitumstellung unabhängig</li>
+          <li>Betroffen waren auch Kalenderwochen, Terminspalten und ganztägige Termine an solchen Tagen</li>
+          <li>Wetter-Widget mit dem eigenen Ort vorbelegt, dazu ein ↻ zum Neuladen und „↺ Standardort" zum Zurücksetzen</li>
+          <li>Jeder Build erhält eine höhere Versionsnummer, damit Android eine neue Fassung als Update erkennt</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v3.7 <span class="cl-date">09.08.2026</span></div>
         <ul>
@@ -1484,7 +1493,10 @@
     <div class="panel">
       <div class="panel-head">
         <h2><span class="idx">03</span>Wetter</h2>
-        <button class="btn small" type="button" id="dbWetterEinstellen">⚙ Ort</button>
+        <div class="kal-nav">
+          <button class="btn small" type="button" id="dbWetterNeu" title="Wetter neu laden">↻</button>
+          <button class="btn small" type="button" id="dbWetterEinstellen">⚙ Ort</button>
+        </div>
       </div>
       <div class="panel-body">
         <div id="dbWetterEinrichten" style="display:none;">
@@ -1494,6 +1506,7 @@
           </div>
           <div class="btn-row" style="margin-top:0;">
             <button class="btn add" type="button" id="dbWetterSpeichern">Übernehmen</button>
+            <button class="btn" type="button" id="dbWetterStandard">↺ Standardort</button>
             <button class="btn" type="button" id="dbWetterLeeren">Entfernen</button>
           </div>
           <div class="panel-note">
@@ -3335,7 +3348,7 @@
       if(t.ganztags){
         s2.setHours(0,0,0,0);
         e2.setHours(0,0,0,0);
-        e2 = new Date(e2.getTime() + 86400000);
+        e2 = tagPlus(e2, 1);
       }else{
         const [sh, sm] = (t.zeitVon || "08:00").split(":").map(Number);
         const [eh, em] = (t.zeitBis || "16:00").split(":").map(Number);
@@ -3389,6 +3402,23 @@
   // Kopfzeile: leere Ecke über der KW-Spalte, dann die Wochentage
   kalKopf.innerHTML = WOCHENTAGE.map(w => '<div class="kal-wd">' + w + '</div>').join("");
 
+  /* Tagesrechnung über die Datumsanteile, nicht über Millisekunden.
+     An den Tagen der Zeitumstellung hat ein Tag 23 bzw. 25 Stunden — mit
+     festen 86.400.000 ms landet man dann auf demselben oder einem
+     übersprungenen Datum. Genau daran lag die doppelte Anzeige des 25.10. */
+  function tagPlus(datum, anzahl){
+    const d = new Date(datum.getFullYear(), datum.getMonth(), datum.getDate() + anzahl);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  /* Abstand in Kalendertagen, unabhängig von der Uhrzeit */
+  function tagDifferenz(spaeter, frueher){
+    const a = Date.UTC(spaeter.getFullYear(), spaeter.getMonth(), spaeter.getDate());
+    const b = Date.UTC(frueher.getFullYear(), frueher.getMonth(), frueher.getDate());
+    return Math.round((a - b) / 86400000);
+  }
+
   function kalenderwoche(d){
     // ISO-8601: Woche mit dem ersten Donnerstag des Jahres ist Woche 1
     const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -3397,7 +3427,7 @@
     const ersterDonnerstag = new Date(t.getFullYear(), 0, 4);
     const wt2 = (ersterDonnerstag.getDay() + 6) % 7;
     ersterDonnerstag.setDate(ersterDonnerstag.getDate() - wt2 + 3);
-    return 1 + Math.round((t - ersterDonnerstag) / (7 * 86400000));
+    return 1 + Math.round(tagDifferenz(t, ersterDonnerstag) / 7);
   }
 
   function monatWechseln(delta){
@@ -3559,7 +3589,7 @@
     const tageImMonat = new Date(kalAnsichtJahr, kalAnsichtMonat + 1, 0).getDate();
     const wochen = Math.ceil((startOffset + tageImMonat) / 7);
 
-    const rasterEnde = new Date(rasterStart.getTime() + (wochen * 7 - 1) * 86400000);
+    const rasterEnde = tagPlus(rasterStart, wochen * 7 - 1);
     rasterEnde.setHours(23,59,59,999);
 
     const termine = terminFenster(rasterStart, rasterEnde);
@@ -3596,18 +3626,15 @@
     kalGrid.innerHTML = "";
 
     for(let w = 0; w < wochen; w++){
-      const wochenStart = new Date(rasterStart.getTime() + w * 7 * 86400000);
-      wochenStart.setHours(0,0,0,0);
-      const wochenEnde = new Date(wochenStart.getTime() + 6 * 86400000);
-      wochenEnde.setHours(0,0,0,0);
+      const wochenStart = tagPlus(rasterStart, w * 7);
+      const wochenEnde = tagPlus(wochenStart, 6);
 
       const zeile = document.createElement("div");
       zeile.className = "kal-woche";
 
       // Tageszellen
       for(let i = 0; i < 7; i++){
-        const tag = new Date(wochenStart.getTime() + i * 86400000);
-        tag.setHours(0,0,0,0);
+        const tag = tagPlus(wochenStart, i);
         const k = tagSchluessel(tag);
         const istFremd = tag.getMonth() !== kalAnsichtMonat;
         const wd = tag.getDay();
@@ -3653,8 +3680,8 @@
       const spuren = [];   // spuren[n] = Array belegter Spalten
 
       inWoche.forEach(sp => {
-        const vonSpalte = Math.max(0, Math.round((sp.start - wochenStart) / 86400000));
-        const bisSpalte = Math.min(6, Math.round((sp.ende - wochenStart) / 86400000));
+        const vonSpalte = Math.max(0, tagDifferenz(sp.start, wochenStart));
+        const bisSpalte = Math.min(6, tagDifferenz(sp.ende, wochenStart));
 
         const spurHoehe = 1;
 
@@ -4764,7 +4791,7 @@
             ende = new Date(letzterTag.getUTCFullYear(), letzterTag.getUTCMonth(), letzterTag.getUTCDate() + 1);
           }
           if(!ende || ende <= start){
-            ende = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1);
+            ende = tagPlus(start, 1);
           }
         }
 
@@ -5203,8 +5230,7 @@
     let s2 = new Date(startD), e2 = new Date(endD);
     if(t.ganztags){
       s2.setHours(0,0,0,0);
-      e2.setHours(0,0,0,0);
-      e2 = new Date(e2.getTime() + 86400000);
+      e2 = tagPlus(e2, 1);
     }else{
       const [sh, sm] = (t.zeitVon || "08:00").split(":").map(Number);
       const [eh, em] = (t.zeitBis || "16:00").split(":").map(Number);
@@ -5243,7 +5269,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "3.7";
+  const APP_VERSION = "3.8";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -5681,7 +5707,7 @@
         start.setHours(0,0,0,0);
         // Ungültige Angaben (z. B. 30.02.) überspringen
         if(start.getMonth() !== d.monat - 1) continue;
-        const ende = new Date(start.getTime() + 86400000);
+        const ende = tagPlus(start, 1);
         if(start > bisDate || ende < vonDate) continue;
 
         let titel = (e.name || "Unbekannt");
@@ -5713,8 +5739,14 @@
      DASHBOARD ("Heute")
      ========================================================= */
   const DB_KEY = "dashboard_v1";
-  let dashboard = loadJSON(DB_KEY, { wetterUrl: "" });
-  if(typeof dashboard.wetterUrl !== "string") dashboard.wetterUrl = "";
+  // Vorbelegte Adresse des eigenen meteoblue-Widgets
+  const WETTER_STANDARD = "https://www.meteoblue.com/de/wetter/widget/meteogram/dorndorf_deutschland_2935733?geoloc=fixed&temperature_units=CELSIUS&windspeed_units=KNOT&precipitation_units=MILLIMETER&forecast_days=2&layout=dark&autowidth=auto&user_key=ad70389ce1ca8491&embed_key=d7233db11769a1a4&sig=5495bb14453d64497d716d1bfb4245c4c874e01f41ced77ee7884c9c58171dc9";
+
+  let dashboard = loadJSON(DB_KEY, { wetterUrl: WETTER_STANDARD });
+  if(typeof dashboard.wetterUrl !== "string") dashboard.wetterUrl = WETTER_STANDARD;
+  if(dashboard.wetterUrl === "" && dashboard.wetterGeleert !== true){
+    dashboard.wetterUrl = WETTER_STANDARD;   // beim ersten Start vorbelegen
+  }
   function saveDashboard(){ saveJSON(DB_KEY, dashboard); }
 
   const dbDatum = document.getElementById("dbDatum");
@@ -5756,30 +5788,55 @@
 
   document.getElementById("dbWetterLeeren").addEventListener("click", () => {
     dashboard.wetterUrl = "";
+    dashboard.wetterGeleert = true;      // nicht wieder vorbelegen
     saveDashboard();
     dbWetterUrl.value = "";
     renderWetter();
   });
 
-  function renderWetter(){
+  document.getElementById("dbWetterStandard").addEventListener("click", () => {
+    dashboard.wetterUrl = WETTER_STANDARD;
+    dashboard.wetterGeleert = false;
+    saveDashboard();
+    dbWetterUrl.value = WETTER_STANDARD;
+    dbWetterEinrichten.style.display = "none";
+    renderWetter();
+  });
+
+  // Widget neu laden — meteoblue liefert dann die aktuelle Vorhersage
+  document.getElementById("dbWetterNeu").addEventListener("click", () => {
+    const knopf = document.getElementById("dbWetterNeu");
+    knopf.textContent = "…";
+    renderWetter(true);
+    setTimeout(() => { knopf.textContent = "↻"; }, 800);
+  });
+
+  function renderWetter(neuLaden){
     dbWetterRahmen.innerHTML = "";
     if(!dashboard.wetterUrl){
       dbWetterRahmen.innerHTML = '<div class="empty-state">Noch kein Wetter eingerichtet — auf „⚙ Ort" tippen.</div>';
       return;
     }
     const rahmen = document.createElement("iframe");
-    // Adresse unverändert übernehmen (Vorgabe von meteoblue)
-    rahmen.src = dashboard.wetterUrl;
-    rahmen.setAttribute("loading", "lazy");
-    rahmen.setAttribute("scrolling", "no");
-    rahmen.style.height = "420px";
+    // Adresse unverändert übernehmen (Vorgabe von meteoblue).
+    // Beim Neuladen einen Zeitstempel anhängen, damit nicht die zwischen-
+    // gespeicherte Fassung erscheint.
+    rahmen.src = dashboard.wetterUrl + (neuLaden ? "#t=" + Date.now() : "");
+    rahmen.setAttribute("frameborder", "0");
+    rahmen.setAttribute("scrolling", "NO");
+    rahmen.setAttribute("allowtransparency", "true");
+    rahmen.setAttribute("sandbox",
+      "allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox");
+    rahmen.style.cssText = "width:100%;height:500px;border:0;overflow:hidden;";
     dbWetterRahmen.appendChild(rahmen);
 
     // Pflichtangabe: Verweis auf meteoblue
     const hinweis = document.createElement("div");
     hinweis.className = "hint";
     hinweis.style.marginTop = "6px";
-    hinweis.innerHTML = 'Wetterdaten: <a href="https://www.meteoblue.com" target="_blank" rel="noopener">meteoblue</a>';
+    // Dieser Verweis muss erhalten bleiben (Vorgabe von meteoblue)
+    hinweis.innerHTML = '<a href="https://www.meteoblue.com/de/wetter/woche/index" '
+      + 'target="_blank" rel="noopener">meteoblue</a>';
     dbWetterRahmen.appendChild(hinweis);
   }
 
