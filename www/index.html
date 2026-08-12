@@ -466,6 +466,11 @@
   .kal-tag.gewaehlt{background:var(--amber-dim);border-color:var(--amber);}
   .kal-tag.we{background:var(--panel);}
   .kal-tag.feiertag{background:rgba(255,92,92,0.09);}
+  .kal-tag.ferien{box-shadow:inset 0 -3px 0 rgba(95,180,255,0.55);}
+  .kal-tag-fer{
+    font-size:8px;color:var(--blue);line-height:1.1;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
   .kal-tag.gedrueckt{background:var(--amber-dim);}
   .kal-tag-nr{
     font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);
@@ -750,6 +755,48 @@
     .dtg-anzeige{font-size:16px;letter-spacing:0.8px;}
   }
 
+  /* ---------- Wetter (einfache Anzeige) ---------- */
+  .w-kopf{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:4px 2px 12px;
+  }
+  .w-jetzt{display:flex;align-items:center;gap:12px;}
+  .w-grad{font-family:var(--mono);font-size:34px;font-weight:600;color:var(--amber);line-height:1;}
+  .w-zeichen{font-size:34px;line-height:1;}
+  .w-ort{font-family:var(--cond);font-size:15px;font-weight:700;color:var(--text);}
+  .w-text{font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .w-werte{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-top:3px;}
+  .w-stunden{
+    display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .w-stunden::-webkit-scrollbar{display:none;}
+  .w-stunde{
+    flex-shrink:0;min-width:52px;text-align:center;
+    border:1px solid var(--border-soft);border-radius:6px;background:var(--panel-alt);
+    padding:7px 4px;
+  }
+  .w-stunde .zeit{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);}
+  .w-stunde .zei{font-size:17px;line-height:1.3;}
+  .w-stunde .gr{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--text);}
+  .w-stunde .rg{font-family:var(--mono);font-size:9px;color:var(--blue);}
+  .w-stunde.jetzt{border-color:var(--amber);}
+  .w-tage{margin-top:10px;}
+  .w-tag{
+    display:grid;grid-template-columns:42px 30px 1fr auto;gap:8px;align-items:center;
+    padding:6px 2px;border-top:1px solid var(--border-soft);
+    font-family:var(--mono);font-size:11.5px;
+  }
+  .w-tag .wt{color:var(--text-dim);}
+  .w-tag .sym{font-size:16px;text-align:center;}
+  .w-tag .rg{color:var(--blue);font-size:10px;}
+  .w-tag .tmp{color:var(--text);font-weight:600;}
+  .w-treffer{
+    border:1px solid var(--border-soft);border-radius:5px;background:var(--panel-alt);
+    padding:8px 10px;margin-bottom:5px;cursor:pointer;font-size:13px;
+  }
+  .w-treffer:active{background:var(--amber-dim);}
+
   ::selection{background:var(--amber-dim);}
 
   /* =========================================================
@@ -919,6 +966,17 @@
       </div>
 
       <div class="field" style="margin-bottom:16px;">
+        <label for="landAuswahl">Bundesland (Feiertage)</label>
+        <select id="landAuswahl"></select>
+        <div class="btn-row" style="margin-top:8px;">
+          <button type="button" class="btn toggle-pill" id="ferienToggle">○ Schulferien anzeigen</button>
+          <button type="button" class="btn small" id="ferienLaden">↻ Ferien laden</button>
+        </div>
+        <div class="hint" id="ferienStatus">Ferien werden beim Einschalten aus dem Netz geladen und gespeichert.</div>
+        <div class="hint">Bestimmt, welche gesetzlichen Feiertage im Kalender erscheinen und bei der Urlaubsberechnung nicht als Urlaubstag zählen.</div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px;">
         <label>Kalenderanzeige</label>
         <div class="btn-row" style="margin-top:0;">
           <button type="button" class="btn toggle-pill active" id="todoImKalToggle">● Aufgaben im Kalender</button>
@@ -938,7 +996,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 4.1 &middot; Stand 11.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 4.3 &middot; Stand 12.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -952,6 +1010,23 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v4.3 <span class="cl-date">12.08.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Ganztägige Termine markierten bei manchen Geräten den Folgetag mit. Meldet ein Kalender solche Termine ohne Kennzeichnung, liegen sie auf UTC-Mitternacht und reichten durch die Zeitzonenverschiebung in den nächsten Tag — sie werden nun an Lage und Dauer erkannt</li>
+          <li>Wetter neu: „Einfach" über Open-Meteo, ganz ohne Konto. Ort suchen oder eigenen Standort übernehmen, mit Stundenverlauf und Wochenübersicht. Das eigene meteoblue-Widget bleibt als zweite Möglichkeit</li>
+          <li>Schulferien des gewählten Bundeslands im Kalender, blau unterlegt — werden einmalig geladen und danach gespeichert</li>
+          <li>Neuer Reiter „Medizin": IGF-Termine, BFT-Punkterechner, AVU-IGF/WFV und Impfungen mit Gültigkeitsdauer und Ablaufdatum</li>
+          <li>IGF-Übersicht als Ausdruck oder PDF, mit Name, Dienstgrad und Einheit im Kopf; abgelaufene Fristen rot, bald ablaufende gelb hinterlegt. Versand als Datei über das Teilen-Menü</li>
+          <li>BFT-Punkte werden zwischen Grenzwert und Bestwert geschätzt — die amtlichen Tabellen sind nach Alter und Geschlecht gestaffelt und hier bewusst nicht abgebildet, alle Werte sind anpassbar</li>
+          <li>Erinnerungen auch für IGF, Untersuchungen und Impfungen (3 Monate, 1 Monat und 1 Woche vorher)</li>
+          <li>Datumsfelder setzen die Punkte beim Tippen selbst — 10082026 genügt</li>
+          <li>Vorschlagsliste im Feld „Art" öffnet nur über den Pfeil und schließt nach der Auswahl</li>
+          <li>Startwert im Überstundenkonto hinter einem Klappbereich; Zugänge und Abzüge stehen direkt in der Liste</li>
+          <li>Bei Lehrgängen stehen „gültig von" und „gültig bis" nebeneinander, die Dauer folgt darunter</li>
+          <li>Zurück-Taste und Zurück-Geste schließen offene Fenster statt die App zu beenden</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v4.1 <span class="cl-date">11.08.2026</span></div>
         <ul>
@@ -1292,6 +1367,7 @@
   <button class="tab-btn" data-tab="tabStart">Urlaub/Mehrarbeit</button>
   <button class="tab-btn" data-tab="tabAblauf">Lehrgänge</button>
   <button class="tab-btn" data-tab="tabTodo">To-do</button>
+  <button class="tab-btn" data-tab="tabMed">Medizin</button>
   <button class="tab-btn" data-tab="tabTools">Tools</button>
   <button class="tab-btn" data-tab="tabNotizen">Notizen</button>
 </div>
@@ -1388,10 +1464,7 @@
     <div class="panel">
       <div class="panel-head"><h2><span class="idx">02</span>Überstundenkonto</h2></div>
       <div class="panel-body">
-        <div class="konto-summary" id="ueberstundenSummary">
-          Aktueller Stand: <b id="sumUeberstunden">0</b> Stunden
-        </div>
-
+        <div class="panel-note" style="margin-bottom:6px;font-weight:600;color:var(--text-dim);">Stunden eintragen</div>
         <form id="ueberstundenForm">
           <div class="row c3" style="margin-bottom:12px;">
             <div class="field">
@@ -1414,8 +1487,31 @@
         </form>
 
         <div style="height:1px;background:var(--border-soft);margin:18px 0;"></div>
+
+        <div class="panel-note" style="margin-bottom:6px;font-weight:600;color:var(--text-dim);">Zugänge &amp; Abzüge</div>
         <div id="ueberstundenEmpty" class="empty-state">Noch keine Überstunden-Einträge erfasst.</div>
         <div id="ueberstundenList"></div>
+
+        <div style="height:1px;background:var(--border-soft);margin:18px 0;"></div>
+
+        <button type="button" class="btn small" id="oDetailsToggle">▸ Startwert anzeigen</button>
+
+        <div id="oDetails" style="display:none;margin-top:14px;">
+          <div class="row c2" style="margin-bottom:14px;">
+            <div class="field">
+              <label for="oStartwert">Startwert (Stunden)</label>
+              <input type="number" id="oStartwert" step="0.25" value="0">
+            </div>
+            <div class="field" style="display:flex;align-items:flex-end;">
+              <div class="hint" style="margin:0;">Ausgangsbestand, etwa der Übertrag aus dem Vorjahr. Wird zum Stand hinzugerechnet.</div>
+            </div>
+          </div>
+          <div class="konto-summary" id="ueberstundenSummary">
+            Startwert <b id="sumOStart">0</b> <span class="eq">+</span> Zugänge <b id="sumOPlus">0</b>
+            <span class="eq">−</span> Abzüge <b id="sumOMinus">0</b>
+            <span class="eq">=</span> Stand <b id="sumUeberstunden">0</b> Std
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1452,33 +1548,42 @@
       <div class="panel-head"><h2><span class="idx" id="formIdx">01</span><span id="formTitle">Neuer Eintrag</span></h2></div>
       <div class="panel-body">
         <form id="eintragForm">
-          <div class="row c3" style="margin-bottom:12px;">
-            <div class="field">
-              <label for="fArt">Art *</label>
-              <input type="text" id="fArt" list="artVorschlaege" placeholder="z. B. Erste Hilfe" required>
-              <datalist id="artVorschlaege">
-                <option value="Erste Hilfe">
-                <option value="Brandschutz">
-                <option value="Notfalltraining">
-                <option value="Fahrerlaubnis">
-                <option value="Unterweisung">
-                <option value="Zertifizierung">
-              </datalist>
+          <div class="field" style="margin-bottom:12px;">
+            <label for="fArt">Art *</label>
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="fArt" placeholder="z. B. Erste Hilfe" required style="flex:1;min-width:0;">
+              <button type="button" class="btn" id="fArtPfeil" title="Vorschläge" style="flex-shrink:0;">▾</button>
             </div>
+            <select id="fArtAuswahl" size="6" style="display:none;margin-top:6px;">
+              <option value="Erste Hilfe">Erste Hilfe</option>
+              <option value="Brandschutz">Brandschutz</option>
+              <option value="Notfalltraining">Notfalltraining</option>
+              <option value="Fahrerlaubnis">Fahrerlaubnis</option>
+              <option value="Unterweisung">Unterweisung</option>
+              <option value="Zertifizierung">Zertifizierung</option>
+            </select>
+          </div>
+
+          <div class="row c2" style="margin-bottom:12px;">
             <div class="field">
               <label for="fVon">Gültig von <span style="color:var(--text-faint);">(optional)</span></label>
               <input type="text" id="fVon" placeholder="TT.MM.JJJJ">
             </div>
             <div class="field">
-              <label>Dauer bis Ablauf <span style="color:var(--text-faint);">(optional)</span></label>
-              <div class="row c2" style="gap:6px;">
-                <input type="number" id="fDauerWert" min="1" placeholder="z. B. 2">
-                <select id="fDauerEinheit">
-                  <option value="T">Tage</option>
-                  <option value="M">Monate</option>
-                  <option value="J" selected>Jahre</option>
-                </select>
-              </div>
+              <label for="fBis">Gültig bis *</label>
+              <input type="text" id="fBis" placeholder="TT.MM.JJJJ" required>
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:12px;">
+            <label>Dauer bis Ablauf <span style="color:var(--text-faint);">(optional)</span></label>
+            <div class="row c2" style="gap:6px;">
+              <input type="number" id="fDauerWert" min="1" placeholder="z. B. 2">
+              <select id="fDauerEinheit">
+                <option value="T">Tage</option>
+                <option value="M">Monate</option>
+                <option value="J" selected>Jahre</option>
+              </select>
             </div>
           </div>
 
@@ -1488,11 +1593,7 @@
             <button type="button" class="btn small" id="calcApplyBtn">&rarr; in „Gültig bis" übernehmen</button>
           </div>
 
-          <div class="row c2" style="margin-bottom:12px;">
-            <div class="field">
-              <label for="fBis">Gültig bis *</label>
-              <input type="text" id="fBis" placeholder="TT.MM.JJJJ" required>
-            </div>
+          <div class="field" style="margin-bottom:12px;">
             <div class="field">
               <label for="fNotiz">Notiz</label>
               <input type="text" id="fNotiz" placeholder="Optional">
@@ -1543,7 +1644,7 @@
       </div>
       <div class="db-kachel">
         <div class="db-wert" id="dbLehrgang">—</div>
-        <div class="db-label">Lehrgänge &lt; 6 Mon.</div>
+        <div class="db-label">Fristen &lt; 6 Mon.</div>
       </div>
     </div>
 
@@ -1578,19 +1679,45 @@
       <div class="panel-body">
         <div id="dbWetterEinrichten" style="display:none;">
           <div class="field" style="margin-bottom:10px;">
-            <label for="dbWetterUrl">meteoblue-Widget-Adresse</label>
-            <input type="text" id="dbWetterUrl" placeholder="https://www.meteoblue.com/de/weather/widget/…">
+            <label>Anzeige</label>
+            <div class="seg-group" style="width:100%;">
+              <button type="button" class="seg-btn active" data-wq="openmeteo" style="flex:1;">Einfach</button>
+              <button type="button" class="seg-btn" data-wq="meteoblue" style="flex:1;">meteoblue</button>
+            </div>
+            <div class="hint">„Einfach" braucht kein Konto und zeigt die Vorhersage für einen beliebigen Ort.</div>
           </div>
-          <div class="btn-row" style="margin-top:0;">
-            <button class="btn add" type="button" id="dbWetterSpeichern">Übernehmen</button>
-            <button class="btn" type="button" id="dbWetterStandard">↺ Standardort</button>
-            <button class="btn" type="button" id="dbWetterLeeren">Entfernen</button>
+
+          <div id="wetterOrtFeld" style="margin-bottom:10px;">
+            <div class="field" style="margin-bottom:8px;">
+              <label for="wetterSuche">Ort suchen</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="wetterSuche" placeholder="z. B. Dorndorf" style="flex:1;min-width:0;">
+                <button class="btn" type="button" id="wetterSuchen" style="flex-shrink:0;">Suchen</button>
+              </div>
+            </div>
+            <div class="btn-row" style="margin-top:0;margin-bottom:8px;">
+              <button class="btn add" type="button" id="wetterHier">📍 Aktueller Standort</button>
+            </div>
+            <div id="wetterTreffer"></div>
+            <div class="hint" id="wetterOrtAnzeige"></div>
           </div>
-          <div class="panel-note">
-            So kommst du an die Adresse: bei <a href="https://www.meteoblue.com" target="_blank" rel="noopener">meteoblue.com</a>
-            anmelden (kostenlos), deinen Ort suchen, unter „Widget" das <b>Meteogramm</b> einrichten und aus dem
-            angezeigten HTML-Schnipsel die Adresse hinter <code>src="…"</code> hier einfügen.
-            Die Adresse wird unverändert übernommen, wie es die Nutzungsbedingungen von meteoblue verlangen.
+
+          <div id="wetterMbFeld" style="display:none;">
+            <div class="field" style="margin-bottom:10px;">
+              <label for="dbWetterUrl">meteoblue-Widget-Adresse</label>
+              <input type="text" id="dbWetterUrl" placeholder="https://www.meteoblue.com/de/wetter/widget/…">
+            </div>
+            <div class="btn-row" style="margin-top:0;">
+              <button class="btn add" type="button" id="dbWetterSpeichern">Übernehmen</button>
+              <button class="btn" type="button" id="dbWetterStandard">↺ Standardort</button>
+              <button class="btn" type="button" id="dbWetterLeeren">Entfernen</button>
+            </div>
+            <div class="panel-note">
+              Eigenes Widget: bei <a href="https://www.meteoblue.com" target="_blank" rel="noopener">meteoblue.com</a>
+              anmelden, Ort suchen, unter „Widget" das Meteogramm einrichten und die Adresse hinter
+              <code>src="…"</code> hier einfügen. Sie wird unverändert übernommen, wie es die
+              Nutzungsbedingungen verlangen.
+            </div>
           </div>
         </div>
         <div id="dbWetterRahmen">
@@ -1923,6 +2050,333 @@
         <div id="todoDoneList"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ============ TAB: MEDIZIN ============ -->
+<div class="tab-panel" id="tabMed">
+  <div class="grid" style="padding-top:14px;">
+
+    <!-- Person -->
+    <div class="panel">
+      <div class="panel-head"><h2><span class="idx">01</span>Person</h2></div>
+      <div class="panel-body">
+        <div class="row c2" style="margin-bottom:10px;">
+          <div class="field">
+            <label for="pName">Name</label>
+            <input type="text" id="pName" placeholder="Nachname, Vorname">
+          </div>
+          <div class="field">
+            <label for="pDienstgrad">Dienstgrad</label>
+            <input type="text" id="pDienstgrad" placeholder="z. B. Hauptfeldwebel">
+          </div>
+        </div>
+        <div class="row c2" style="margin-bottom:0;">
+          <div class="field">
+            <label for="pEinheit">Einheit <span style="color:var(--text-faint);">(optional)</span></label>
+            <input type="text" id="pEinheit" placeholder="z. B. HSG 64">
+          </div>
+          <div class="field">
+            <label for="pGeburt">Geburtsdatum <span style="color:var(--text-faint);">(optional)</span></label>
+            <input type="text" id="pGeburt" placeholder="TT.MM.JJJJ">
+          </div>
+        </div>
+        <div class="panel-note">Wird für den Ausdruck der IGF-Übersicht verwendet und nur auf diesem Gerät gespeichert.</div>
+      </div>
+    </div>
+
+    <!-- IGF -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">02</span>IGF — Individuelle Grundfertigkeiten</h2>
+        <button class="btn add" type="button" id="igfAddToggle">+ Termin</button>
+      </div>
+      <div class="panel-body">
+
+        <div id="igfForm" style="display:none;margin-bottom:16px;">
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="igfArt">Prüfung *</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="igfArt" placeholder="z. B. BFT" style="flex:1;min-width:0;">
+                <button type="button" class="btn" id="igfArtPfeil" style="flex-shrink:0;">▾</button>
+              </div>
+              <select id="igfArtAuswahl" size="7" style="display:none;margin-top:6px;">
+                <option value="BFT">BFT — Basis-Fitness-Test</option>
+                <option value="Schießausbildung">Schießausbildung</option>
+                <option value="Sanitätsausbildung">Sanitätsausbildung</option>
+                <option value="ABC-Selbst- und Kameradenhilfe">ABC-Selbst- und Kameradenhilfe</option>
+                <option value="Rettungsschwimmen">Rettungsschwimmen</option>
+                <option value="Gefechtsdienst">Gefechtsdienst</option>
+                <option value="Formaldienst">Formaldienst</option>
+                <option value="Rechtliche Grundlagen">Rechtliche Grundlagen</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="igfDatum">Datum *</label>
+              <input type="text" id="igfDatum" placeholder="TT.MM.JJJJ">
+            </div>
+          </div>
+
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="igfIntervall">Gültigkeit</label>
+              <select id="igfIntervall">
+                <option value="12M" selected>12 Monate</option>
+                <option value="24M">24 Monate</option>
+                <option value="36M">36 Monate</option>
+                <option value="frei">eigenes Datum</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="igfBis">Gültig bis</label>
+              <input type="text" id="igfBis" placeholder="TT.MM.JJJJ">
+            </div>
+          </div>
+
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="igfErgebnis">Ergebnis / Note</label>
+              <input type="text" id="igfErgebnis" placeholder="z. B. bestanden, 245 Punkte">
+            </div>
+            <div class="field">
+              <label for="igfNotiz">Notiz</label>
+              <input type="text" id="igfNotiz" placeholder="Stelle, Auflagen …">
+            </div>
+          </div>
+
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn add" type="button" id="igfSpeichern">Übernehmen</button>
+            <button class="btn" type="button" id="igfKalender">+ auch in Kalender</button>
+            <button class="btn" type="button" id="igfAbbrechen">Abbrechen</button>
+          </div>
+          <div style="height:1px;background:var(--border-soft);margin:16px 0;"></div>
+        </div>
+
+        <div id="igfEmpty" class="empty-state">Noch keine IGF-Termine erfasst.</div>
+        <div id="igfListe"></div>
+
+        <div class="btn-row" id="igfDruckRow" style="display:none;">
+          <button class="btn" type="button" id="igfDrucken">🖶 Drucken / als PDF</button>
+          <button class="btn" type="button" id="igfMail">✉ Per E-Mail</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BFT-Punkte -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">03</span>BFT-Punkterechner</h2>
+      </div>
+      <div class="panel-body">
+        <div class="row c3" style="margin-bottom:12px;">
+          <div class="field">
+            <label for="bftSprint">11×10 m Sprint (s)</label>
+            <input type="number" id="bftSprint" step="0.1" min="0" placeholder="z. B. 52.4">
+          </div>
+          <div class="field">
+            <label for="bftKlimm">Klimmhang (s)</label>
+            <input type="number" id="bftKlimm" step="0.1" min="0" placeholder="z. B. 12">
+          </div>
+          <div class="field">
+            <label for="bftLauf">1000 m Lauf</label>
+            <input type="text" id="bftLauf" placeholder="z. B. 512 für 5:12" inputmode="numeric">
+          </div>
+        </div>
+
+        <div class="konto-summary" id="bftErgebnis">Werte eintragen — die Bewertung erscheint hier.</div>
+
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn" type="button" id="bftGrenzen">⚙ Tabelle</button>
+          <button class="btn add" type="button" id="bftUebernehmen">Als IGF-Termin übernehmen</button>
+        </div>
+
+        <div id="bftGrenzenFeld" style="display:none;margin-top:14px;">
+          <div class="panel-note" style="margin-bottom:10px;">
+            <b>Bitte gegen die für dich gültige Vorschrift prüfen.</b> Die Punktetabellen des BFT
+            sind nach Alter und Geschlecht gestaffelt und werden hier <b>nicht</b> vollständig
+            abgebildet. Eingetragen sind nur die Grenzwerte zum Bestehen sowie die Punkte für
+            Bestleistung — beides frei anpassbar. Die Punktzahl ist eine lineare Schätzung
+            zwischen Grenzwert und Bestwert und ersetzt keine amtliche Auswertung.
+          </div>
+          <div class="row c2" style="margin-bottom:10px;">
+            <div class="field">
+              <label for="bftMaxSprint">Sprint: bestanden bis (s)</label>
+              <input type="number" id="bftMaxSprint" step="0.1" value="60">
+            </div>
+            <div class="field">
+              <label for="bftBestSprint">Sprint: Bestwert (s)</label>
+              <input type="number" id="bftBestSprint" step="0.1" value="43">
+            </div>
+          </div>
+          <div class="row c2" style="margin-bottom:10px;">
+            <div class="field">
+              <label for="bftMinKlimm">Klimmhang: bestanden ab (s)</label>
+              <input type="number" id="bftMinKlimm" step="0.1" value="5">
+            </div>
+            <div class="field">
+              <label for="bftBestKlimm">Klimmhang: Bestwert (s)</label>
+              <input type="number" id="bftBestKlimm" step="0.1" value="70">
+            </div>
+          </div>
+          <div class="row c2" style="margin-bottom:10px;">
+            <div class="field">
+              <label for="bftMaxLauf">1000 m: bestanden bis</label>
+              <input type="text" id="bftMaxLauf" value="6:30" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="bftBestLauf">1000 m: Bestwert</label>
+              <input type="text" id="bftBestLauf" value="3:30" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVU / WFV -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">04</span>AVU-IGF / WFV</h2>
+        <button class="btn add" type="button" id="avuAddToggle">+ Untersuchung</button>
+      </div>
+      <div class="panel-body">
+
+        <div id="avuForm" style="display:none;margin-bottom:16px;">
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="avuArt">Untersuchung *</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="avuArt" placeholder="z. B. Hörtest" style="flex:1;min-width:0;">
+                <button type="button" class="btn" id="avuArtPfeil" style="flex-shrink:0;">▾</button>
+              </div>
+              <select id="avuArtAuswahl" size="8" style="display:none;margin-top:6px;">
+                <option value="Hörtest">Hörtest</option>
+                <option value="Sehtest">Sehtest</option>
+                <option value="Blutentnahme">Blutentnahme</option>
+                <option value="EKG">EKG</option>
+                <option value="Belastungs-EKG">Belastungs-EKG</option>
+                <option value="Lungenfunktion">Lungenfunktion</option>
+                <option value="Zahnarzt">Zahnarzt</option>
+                <option value="Fliegertauglichkeit">Fliegertauglichkeit</option>
+                <option value="Wehrmedizinische Begutachtung">Wehrmedizinische Begutachtung</option>
+                <option value="G-Untersuchung">G-Untersuchung</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="avuDatum">Datum *</label>
+              <input type="text" id="avuDatum" placeholder="TT.MM.JJJJ">
+            </div>
+          </div>
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="avuIntervall">Gültigkeit</label>
+              <select id="avuIntervall">
+                <option value="6M">6 Monate</option>
+                <option value="12M" selected>12 Monate</option>
+                <option value="24M">24 Monate</option>
+                <option value="36M">36 Monate</option>
+                <option value="60M">60 Monate</option>
+                <option value="frei">eigenes Datum</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="avuBis">Gültig bis</label>
+              <input type="text" id="avuBis" placeholder="TT.MM.JJJJ">
+            </div>
+          </div>
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="avuBefund">Befund / Ergebnis</label>
+              <input type="text" id="avuBefund" placeholder="Freitext">
+            </div>
+            <div class="field">
+              <label for="avuStelle">Stelle</label>
+              <input type="text" id="avuStelle" placeholder="z. B. SanVersZ">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:12px;">
+            <label for="avuNotiz">Notiz / Zusatzfeld</label>
+            <input type="text" id="avuNotiz" placeholder="Freies Feld für eigene Angaben">
+          </div>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn add" type="button" id="avuSpeichern">Übernehmen</button>
+            <button class="btn" type="button" id="avuAbbrechen">Abbrechen</button>
+          </div>
+          <div style="height:1px;background:var(--border-soft);margin:16px 0;"></div>
+        </div>
+
+        <div id="avuEmpty" class="empty-state">Noch keine Untersuchungen erfasst.</div>
+        <div id="avuListe"></div>
+      </div>
+    </div>
+
+    <!-- Impfungen -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">05</span>Impfungen</h2>
+        <button class="btn add" type="button" id="impAddToggle">+ Impfung</button>
+      </div>
+      <div class="panel-body">
+
+        <div id="impForm" style="display:none;margin-bottom:16px;">
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="impArt">Impfung *</label>
+              <div style="display:flex;gap:6px;">
+                <input type="text" id="impArt" placeholder="z. B. Tetanus" style="flex:1;min-width:0;">
+                <button type="button" class="btn" id="impArtPfeil" style="flex-shrink:0;">▾</button>
+              </div>
+              <select id="impArtAuswahl" size="8" style="display:none;margin-top:6px;">
+                <option value="Tetanus" data-jahre="10">Tetanus (10 J.)</option>
+                <option value="Diphtherie" data-jahre="10">Diphtherie (10 J.)</option>
+                <option value="Polio" data-jahre="10">Polio (10 J.)</option>
+                <option value="Hepatitis A" data-jahre="10">Hepatitis A (10 J.)</option>
+                <option value="Hepatitis B" data-jahre="10">Hepatitis B (10 J.)</option>
+                <option value="FSME" data-jahre="5">FSME / Zecken (5 J.)</option>
+                <option value="Typhus" data-jahre="3">Typhus (3 J.)</option>
+                <option value="Tollwut" data-jahre="5">Tollwut (5 J.)</option>
+                <option value="Gelbfieber" data-jahre="0">Gelbfieber (unbegrenzt)</option>
+                <option value="Masern/Mumps/Röteln" data-jahre="0">Masern/Mumps/Röteln</option>
+                <option value="Influenza" data-jahre="1">Influenza (1 J.)</option>
+                <option value="COVID-19" data-jahre="1">COVID-19</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="impDatum">Geimpft am *</label>
+              <input type="text" id="impDatum" placeholder="TT.MM.JJJJ">
+            </div>
+          </div>
+          <div class="row c3" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="impJahre">Gültig (Jahre)</label>
+              <input type="number" id="impJahre" step="1" min="0" placeholder="z. B. 10">
+              <div class="hint">0 = unbegrenzt</div>
+            </div>
+            <div class="field">
+              <label for="impBis">Ablaufdatum</label>
+              <input type="text" id="impBis" placeholder="TT.MM.JJJJ">
+            </div>
+            <div class="field">
+              <label for="impDosis">Dosis / Charge</label>
+              <input type="text" id="impDosis" placeholder="optional">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:12px;">
+            <label for="impNotiz">Notiz</label>
+            <input type="text" id="impNotiz" placeholder="Impfstoff, Stelle, Besonderheiten …">
+          </div>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn add" type="button" id="impSpeichern">Übernehmen</button>
+            <button class="btn" type="button" id="impAbbrechen">Abbrechen</button>
+          </div>
+          <div style="height:1px;background:var(--border-soft);margin:16px 0;"></div>
+        </div>
+
+        <div id="impEmpty" class="empty-state">Noch keine Impfungen erfasst.</div>
+        <div id="impListe"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2321,26 +2775,70 @@
     r.setHours(0,0,0,0);
     return r;
   }
-  const feiertageBWCache = {};
-  function feiertageBW(year){
-    if(feiertageBWCache[year]) return feiertageBWCache[year];
-    const ostern = osterSonntag(year);
-    const liste = [
-      { name: "Neujahr", d: new Date(year, 0, 1) },
-      { name: "Heilige Drei Könige", d: new Date(year, 0, 6) },
-      { name: "Karfreitag", d: addTage(ostern, -2) },
-      { name: "Ostermontag", d: addTage(ostern, 1) },
-      { name: "Tag der Arbeit", d: new Date(year, 4, 1) },
-      { name: "Christi Himmelfahrt", d: addTage(ostern, 39) },
-      { name: "Pfingstmontag", d: addTage(ostern, 50) },
-      { name: "Fronleichnam", d: addTage(ostern, 60) },
-      { name: "Tag der Deutschen Einheit", d: new Date(year, 9, 3) },
-      { name: "Allerheiligen", d: new Date(year, 10, 1) },
-      { name: "1. Weihnachtsfeiertag", d: new Date(year, 11, 25) },
-      { name: "2. Weihnachtsfeiertag", d: new Date(year, 11, 26) }
-    ].map(f => { f.d.setHours(0,0,0,0); f.ts = f.d.getTime(); return f; });
-    feiertageBWCache[year] = liste;
+  /* Feiertage aller Bundesländer.
+     Aufbau: Kürzel -> Liste der Länder, in denen der Tag gesetzlicher Feiertag ist.
+     "*" bedeutet bundesweit. */
+  const BUNDESLAENDER = {
+    BW: "Baden-Württemberg", BY: "Bayern", BE: "Berlin", BB: "Brandenburg",
+    HB: "Bremen", HH: "Hamburg", HE: "Hessen", MV: "Mecklenburg-Vorpommern",
+    NI: "Niedersachsen", NW: "Nordrhein-Westfalen", RP: "Rheinland-Pfalz",
+    SL: "Saarland", SN: "Sachsen", ST: "Sachsen-Anhalt",
+    SH: "Schleswig-Holstein", TH: "Thüringen"
+  };
+
+  const FEIERTAGS_KEY = "feiertage_land_v1";
+  let feiertagsLand = loadJSON(FEIERTAGS_KEY, { land: "BW" });
+  if(!BUNDESLAENDER[feiertagsLand.land]) feiertagsLand.land = "BW";
+  function saveFeiertagsLand(){ saveJSON(FEIERTAGS_KEY, feiertagsLand); }
+
+  /* Buß- und Bettag: Mittwoch vor dem 23. November */
+  function bussUndBettag(jahr){
+    const d = new Date(jahr, 10, 23);
+    d.setDate(d.getDate() - ((d.getDay() + 4) % 7 || 7));
+    d.setHours(0,0,0,0);
+    return d;
+  }
+
+  const feiertageCache = {};
+  function feiertageListe(jahr, land){
+    const schluessel = jahr + "|" + land;
+    if(feiertageCache[schluessel]) return feiertageCache[schluessel];
+
+    const ostern = osterSonntag(jahr);
+    const alle = [
+      { name: "Neujahr",                   d: new Date(jahr, 0, 1),   laender: "*" },
+      { name: "Heilige Drei Könige",       d: new Date(jahr, 0, 6),   laender: ["BW","BY","ST"] },
+      { name: "Internationaler Frauentag", d: new Date(jahr, 2, 8),   laender: ["BE","MV"] },
+      { name: "Karfreitag",                d: addTage(ostern, -2),    laender: "*" },
+      { name: "Ostersonntag",              d: new Date(ostern),       laender: ["BB"] },
+      { name: "Ostermontag",               d: addTage(ostern, 1),     laender: "*" },
+      { name: "Tag der Arbeit",            d: new Date(jahr, 4, 1),   laender: "*" },
+      { name: "Christi Himmelfahrt",       d: addTage(ostern, 39),    laender: "*" },
+      { name: "Pfingstsonntag",            d: addTage(ostern, 49),    laender: ["BB"] },
+      { name: "Pfingstmontag",             d: addTage(ostern, 50),    laender: "*" },
+      { name: "Fronleichnam",              d: addTage(ostern, 60),    laender: ["BW","BY","HE","NW","RP","SL"] },
+      { name: "Mariä Himmelfahrt",         d: new Date(jahr, 7, 15),  laender: ["BY","SL"] },
+      { name: "Weltkindertag",             d: new Date(jahr, 8, 20),  laender: ["TH"] },
+      { name: "Tag der Deutschen Einheit", d: new Date(jahr, 9, 3),   laender: "*" },
+      { name: "Reformationstag",           d: new Date(jahr, 9, 31),  laender: ["BB","HB","HH","MV","NI","SN","ST","SH","TH"] },
+      { name: "Allerheiligen",             d: new Date(jahr, 10, 1),  laender: ["BW","BY","NW","RP","SL"] },
+      { name: "Buß- und Bettag",           d: bussUndBettag(jahr),    laender: ["SN"] },
+      { name: "1. Weihnachtsfeiertag",     d: new Date(jahr, 11, 25), laender: "*" },
+      { name: "2. Weihnachtsfeiertag",     d: new Date(jahr, 11, 26), laender: "*" }
+    ];
+
+    const liste = alle
+      .filter(f => f.laender === "*" || f.laender.indexOf(land) !== -1)
+      .map(f => { f.d.setHours(0,0,0,0); f.ts = f.d.getTime(); return f; });
+
+    feiertageCache[schluessel] = liste;
     return liste;
+  }
+
+  /* Die folgenden Namen bleiben aus Kompatibilität erhalten, nutzen aber
+     das eingestellte Bundesland. */
+  function feiertageBW(jahr){
+    return feiertageListe(jahr, feiertagsLand.land);
   }
   function istFeiertagBW(d){
     return feiertageBW(d.getFullYear()).some(f => f.ts === d.getTime());
@@ -3760,6 +4258,8 @@
 
   function renderKalender(){
     kalMonatEl.textContent = MONATE[kalAnsichtMonat] + " " + kalAnsichtJahr;
+    // Ferien für das angezeigte Jahr bei Bedarf nachladen
+    if(typeof ferienSicherstellen === "function") ferienSicherstellen(kalAnsichtJahr);
 
     const ersterDesMonats = new Date(kalAnsichtJahr, kalAnsichtMonat, 1);
     let startOffset = ersterDesMonats.getDay() - 1;
@@ -3779,7 +4279,14 @@
     const spannen = termine.map(t => {
       const start = new Date(t.start); start.setHours(0,0,0,0);
       let ende = t.end ? new Date(t.end) : new Date(t.start);
-      if(t.allDay && t.end) ende = new Date(ende.getTime() - 1);
+      /* Ganztägige Termine enden am Folgetag um 00:00 — dieser Tag gehört nicht
+         mehr dazu. Manche Kalender liefern solche Termine ohne die Kennzeichnung
+         "ganztägig", deshalb wird zusätzlich auf Mitternacht geprüft. */
+      const endetUmMitternacht = t.end
+        && ende.getHours() === 0 && ende.getMinutes() === 0
+        && ende.getSeconds() === 0 && ende.getMilliseconds() === 0
+        && ende.getTime() > t.start.getTime();
+      if(t.end && (t.allDay || endetUmMitternacht)) ende = new Date(ende.getTime() - 1);
       ende.setHours(0,0,0,0);
       if(ende < start) ende = new Date(start);
       return { termin: t, start, ende };
@@ -3820,6 +4327,7 @@
         const istFremd = tag.getMonth() !== kalAnsichtMonat;
         const wd = tag.getDay();
         const ftName = istFeiertagBW(tag) ? feiertagName(tag) : null;
+        const ferName = (typeof ferienFuerTag === "function") ? ferienFuerTag(tag) : null;
 
         const zelle = document.createElement("div");
         zelle.className = "kal-tag"
@@ -3827,7 +4335,8 @@
           + (k === heuteK ? " heute" : "")
           + (k === kalGewaehlt ? " gewaehlt" : "")
           + ((wd === 0 || wd === 6) ? " we" : "")
-          + (ftName ? " feiertag" : "");
+          + (ftName ? " feiertag" : "")
+          + (ferName ? " ferien" : "");
         zelle.setAttribute("data-tag", k);
 
         // Kalenderwoche klein oben links im Montagsfeld
@@ -3848,6 +4357,11 @@
           ft.className = "kal-tag-ft";
           ft.textContent = ftName;
           zelle.appendChild(ft);
+        }else if(ferName){
+          const fe = document.createElement("div");
+          fe.className = "kal-tag-fer";
+          fe.textContent = ferName;
+          zelle.appendChild(fe);
         }
         zeile.appendChild(zelle);
       }
@@ -3976,9 +4490,11 @@
       const dsel = new Date(+teile[0], +teile[1]-1, +teile[2]);
       const ftSel = istFeiertagBW(dsel) ? feiertagName(dsel) : null;
       kalTagDetail.style.display = "block";
+      const ferSel = (typeof ferienFuerTag === "function") ? ferienFuerTag(dsel) : null;
       kalTagTitel.textContent = dsel.toLocaleDateString("de-DE", { weekday:"short", day:"2-digit", month:"long", year:"numeric" })
         + " · KW " + kalenderwoche(dsel)
-        + (ftSel ? " · " + ftSel : "");
+        + (ftSel ? " · " + ftSel : "")
+        + (ferSel ? " · " + ferSel : "");
       const liste = proTag[kalGewaehlt] || [];
       kalTagEvents.innerHTML = "";
       if(!liste.length){
@@ -4957,7 +5473,21 @@
       letzteRohdaten = rohListe.slice(0, 3);   // für die Diagnose
 
       geraeteTermine = rohListe.map(e => {
-        const ganztags = !!e.isAllDay;
+        /* Manche Geräte melden ganztägige Termine ohne die Kennzeichnung
+           "isAllDay". Sie liegen dann auf UTC-Mitternacht und dauern ein
+           Vielfaches von 24 Stunden — daran lassen sie sich erkennen.
+           Ohne diese Prüfung reicht ein solcher Termin durch die
+           Zeitzonenverschiebung in den Folgetag hinein. */
+        let ganztags = !!e.isAllDay;
+        if(!ganztags && e.startDate && e.endDate){
+          const sd = new Date(e.startDate), ed = new Date(e.endDate);
+          const aufUtcMitternacht = sd.getUTCHours() === 0 && sd.getUTCMinutes() === 0
+            && ed.getUTCHours() === 0 && ed.getUTCMinutes() === 0;
+          const dauer = ed - sd;
+          if(aufUtcMitternacht && dauer >= 86400000 && dauer % 86400000 === 0){
+            ganztags = true;
+          }
+        }
         let start = new Date(e.startDate);
         let ende = e.endDate ? new Date(e.endDate) : null;
 
@@ -5450,7 +5980,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "4.1";
+  const APP_VERSION = "4.3";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -5510,7 +6040,8 @@
     try{
       const payload = {
         app: "Dienst-Cockpit", version: APP_VERSION, exportedAt: new Date().toISOString(),
-        ablaufregister: eintraege, urlaub, ueberstunden, todos, notizen, kalender, dashboard
+        ablaufregister: eintraege, urlaub, ueberstunden, todos, notizen, kalender, dashboard,
+        medizin, feiertagsLand
       };
       const json = JSON.stringify(payload, null, 2);
       const name = "DienstCockpit_v" + APP_VERSION + "_" + new Date().toISOString().slice(0,10) + ".json";
@@ -5559,6 +6090,18 @@
           if(!Array.isArray(notizen.eintraege)) notizen.eintraege = [];
           etwas = true;
         }
+        if(payload.medizin && typeof payload.medizin === "object"){
+          medizin = Object.assign({ person: {}, igf: [], avu: [], impfungen: [], bft: {} }, payload.medizin);
+          ["igf","avu","impfungen"].forEach(k => { if(!Array.isArray(medizin[k])) medizin[k] = []; });
+          if(!medizin.person) medizin.person = { name: "", dienstgrad: "", einheit: "", geburt: "" };
+          medizin.bft = Object.assign({ maxSprint: 60, bestSprint: 43, minKlimm: 5,
+            bestKlimm: 70, maxLauf: "6:30", bestLauf: "3:30" }, medizin.bft || {});
+          etwas = true;
+        }
+        if(payload.feiertagsLand && typeof payload.feiertagsLand === "object"){
+          if(BUNDESLAENDER[payload.feiertagsLand.land]) feiertagsLand = payload.feiertagsLand;
+          etwas = true;
+        }
         if(payload.dashboard && typeof payload.dashboard === "object"){
           dashboard = Object.assign({ wetterUrl: WETTER_STANDARD }, payload.dashboard);
           etwas = true;
@@ -5575,12 +6118,20 @@
         if(!etwas) throw new Error("kein gültiges Format");
 
         saveAblauf(); saveUrlaub(); saveUeberstunden(); saveTodos(); saveNotizen(); saveKalender();
-        saveDashboard();
+        saveDashboard(); saveMed(); saveFeiertagsLand();
         uAnspruch.value = urlaub.jahresanspruch;
         resetForm(); closeForm(); resetNotizForm();
         renderAblauf(); renderUrlaub(); renderUeberstunden();
         renderTodos(); renderNotizen(); renderQuellen(); renderEigene(); renderKalender();
-        renderWetter();
+        renderWetter(); renderIgf(); renderAvu(); renderImp();
+        Object.keys(personFelder).forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = medizin.person[personFelder[id]] || "";
+        });
+        Object.keys(BFT_FELDER).forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = medizin.bft[BFT_FELDER[id]];
+        });
         alert("Sicherung erfolgreich eingelesen.");
       }catch(e){
         alert("Einlesen fehlgeschlagen — die Datei scheint keine gültige Sicherung dieser App zu sein.\n\n"
@@ -5725,7 +6276,29 @@
       });
     });
 
-    // 3) Fällige Aufgaben
+    // 3) Medizinische Fristen: 3 Monate, 1 Monat und 1 Woche vorher
+    [["IGF", medizin.igf], ["Untersuchung", medizin.avu], ["Impfung", medizin.impfungen]]
+      .forEach(([bezeichnung, liste]) => {
+        (liste || []).forEach(u => {
+          const bis = parseDateDE(u.gueltigBis);
+          if(!bis) return;
+          [3, 1, 0].forEach((monate, idx) => {
+            const d = new Date(bis.getTime());
+            if(monate > 0) d.setMonth(d.getMonth() - monate);
+            else d.setDate(d.getDate() - 7);
+            d.setHours(9, 0, 0, 0);
+            if(d.getTime() <= jetzt) return;
+            geplant.push({
+              id: benId("med:" + bezeichnung + ":" + u.id + ":" + idx),
+              title: bezeichnung + " läuft ab: " + u.art,
+              body: "Gültig bis " + fmt(u.gueltigBis),
+              schedule: { at: d, allowWhileIdle: true }
+            });
+          });
+        });
+      });
+
+    // 4) Fällige Aufgaben
     (todos.eintraege || []).forEach(t => {
       if(t.erledigt || !t.faellig) return;
       const d = parseDateDE(t.faellig);
@@ -5947,67 +6520,290 @@
   const dbWetterUrl = document.getElementById("dbWetterUrl");
 
   /* ---------- Wetter ---------- */
+  /* Zwei Wege: "Einfach" über Open-Meteo (kein Konto, freie Ortswahl) oder
+     ein eigenes meteoblue-Widget. */
+  if(!dashboard.quelle) dashboard.quelle = dashboard.wetterUrl === WETTER_STANDARD ? "openmeteo" : "meteoblue";
+  if(!dashboard.ort) dashboard.ort = { name: "Dorndorf", breite: 50.7833, laenge: 10.0500 };
+
+  const wetterOrtFeld = document.getElementById("wetterOrtFeld");
+  const wetterMbFeld = document.getElementById("wetterMbFeld");
+  const wetterTreffer = document.getElementById("wetterTreffer");
+  const wetterOrtAnzeige = document.getElementById("wetterOrtAnzeige");
+  const wetterSuche = document.getElementById("wetterSuche");
+
+  function wetterQuelleUI(){
+    document.querySelectorAll("[data-wq]").forEach(b =>
+      b.classList.toggle("active", b.getAttribute("data-wq") === dashboard.quelle));
+    wetterOrtFeld.style.display = dashboard.quelle === "openmeteo" ? "block" : "none";
+    wetterMbFeld.style.display = dashboard.quelle === "meteoblue" ? "block" : "none";
+    if(wetterOrtAnzeige && dashboard.ort){
+      wetterOrtAnzeige.textContent = "Aktuell: " + dashboard.ort.name
+        + " (" + dashboard.ort.breite.toFixed(3) + ", " + dashboard.ort.laenge.toFixed(3) + ")";
+    }
+  }
+  document.querySelectorAll("[data-wq]").forEach(b => {
+    b.addEventListener("click", () => {
+      dashboard.quelle = b.getAttribute("data-wq");
+      saveDashboard();
+      wetterQuelleUI();
+      renderWetter(true);
+    });
+  });
+
   document.getElementById("dbWetterEinstellen").addEventListener("click", () => {
     const auf = dbWetterEinrichten.style.display !== "none";
     dbWetterEinrichten.style.display = auf ? "none" : "block";
-    if(!auf) dbWetterUrl.value = dashboard.wetterUrl || "";
-  });
-
-  document.getElementById("dbWetterSpeichern").addEventListener("click", () => {
-    let wert = dbWetterUrl.value.trim();
-    if(!wert){ alert("Bitte eine Adresse eintragen."); return; }
-
-    // Falls der ganze HTML-Schnipsel eingefügt wurde: Adresse herauslösen
-    const treffer = wert.match(/src\s*=\s*["']([^"']+)["']/i);
-    if(treffer) wert = treffer[1];
-    if(wert.startsWith("//")) wert = "https:" + wert;
-
-    if(!/^https:\/\/(www\.)?meteoblue\.com\//i.test(wert)){
-      alert("Das sieht nicht nach einer meteoblue-Adresse aus.\n\n"
-        + "Erwartet wird eine Adresse, die mit https://www.meteoblue.com/ beginnt.");
-      return;
+    if(!auf){
+      if(dbWetterUrl) dbWetterUrl.value = dashboard.wetterUrl || "";
+      wetterQuelleUI();
     }
-    dashboard.wetterUrl = wert;
-    saveDashboard();
-    dbWetterEinrichten.style.display = "none";
-    renderWetter();
   });
 
-  document.getElementById("dbWetterLeeren").addEventListener("click", () => {
-    dashboard.wetterUrl = "";
-    dashboard.wetterGeleert = true;      // nicht wieder vorbelegen
-    saveDashboard();
-    dbWetterUrl.value = "";
-    renderWetter();
+  /* Ortssuche über den Namensdienst von Open-Meteo (ohne Konto) */
+  document.getElementById("wetterSuchen").addEventListener("click", async () => {
+    const begriff = wetterSuche.value.trim();
+    if(!begriff){ wetterSuche.focus(); return; }
+    wetterTreffer.innerHTML = '<div class="hint">Suche läuft …</div>';
+    try{
+      const antwort = await fetch("https://geocoding-api.open-meteo.com/v1/search?name="
+        + encodeURIComponent(begriff) + "&count=8&language=de&format=json");
+      const daten = await antwort.json();
+      const orte = (daten && daten.results) || [];
+      if(!orte.length){
+        wetterTreffer.innerHTML = '<div class="hint">Kein Ort gefunden.</div>';
+        return;
+      }
+      wetterTreffer.innerHTML = "";
+      orte.forEach(o => {
+        const zeile = document.createElement("div");
+        zeile.className = "w-treffer";
+        const zusatz = [o.admin1, o.country].filter(Boolean).join(", ");
+        zeile.textContent = o.name + (zusatz ? " · " + zusatz : "");
+        zeile.addEventListener("click", () => {
+          dashboard.ort = { name: o.name, breite: o.latitude, laenge: o.longitude };
+          dashboard.quelle = "openmeteo";
+          saveDashboard();
+          wetterTreffer.innerHTML = "";
+          wetterSuche.value = "";
+          wetterQuelleUI();
+          dbWetterEinrichten.style.display = "none";
+          renderWetter(true);
+        });
+        wetterTreffer.appendChild(zeile);
+      });
+    }catch(e){
+      wetterTreffer.innerHTML = '<div class="hint">Die Suche ist nicht erreichbar. Besteht eine Netzverbindung?</div>';
+    }
+  });
+  wetterSuche.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){ e.preventDefault(); document.getElementById("wetterSuchen").click(); }
   });
 
-  document.getElementById("dbWetterStandard").addEventListener("click", () => {
-    dashboard.wetterUrl = WETTER_STANDARD;
-    dashboard.wetterGeleert = false;
-    saveDashboard();
-    dbWetterUrl.value = WETTER_STANDARD;
-    dbWetterEinrichten.style.display = "none";
-    renderWetter();
+  /* Eigener Standort */
+  document.getElementById("wetterHier").addEventListener("click", () => {
+    if(!navigator.geolocation){ alert("Standortbestimmung ist hier nicht verfügbar."); return; }
+    wetterTreffer.innerHTML = '<div class="hint">Standort wird bestimmt …</div>';
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const b = pos.coords.latitude, l = pos.coords.longitude;
+      let name = "Eigener Standort";
+      // Ortsnamen nachschlagen, aber ohne ihn geht es auch
+      try{
+        const a = await fetch("https://geocoding-api.open-meteo.com/v1/search?name="
+          + b.toFixed(3) + "," + l.toFixed(3) + "&count=1&language=de&format=json");
+        const d = await a.json();
+        if(d && d.results && d.results[0]) name = d.results[0].name;
+      }catch(e){}
+      dashboard.ort = { name: name, breite: b, laenge: l };
+      dashboard.quelle = "openmeteo";
+      saveDashboard();
+      wetterTreffer.innerHTML = "";
+      wetterQuelleUI();
+      dbWetterEinrichten.style.display = "none";
+      renderWetter(true);
+    }, () => {
+      wetterTreffer.innerHTML = '<div class="hint">Standort nicht verfügbar.</div>';
+    }, { enableHighAccuracy: false, timeout: 15000 });
   });
 
-  // Widget neu laden — meteoblue liefert dann die aktuelle Vorhersage
+  if(document.getElementById("dbWetterSpeichern")){
+    document.getElementById("dbWetterSpeichern").addEventListener("click", () => {
+      let wert = dbWetterUrl.value.trim();
+      if(!wert){ alert("Bitte eine Adresse eintragen."); return; }
+      const treffer = wert.match(/src\s*=\s*["']([^"']+)["']/i);
+      if(treffer) wert = treffer[1];
+      if(wert.startsWith("//")) wert = "https:" + wert;
+      if(!/^https:\/\/(www\.)?meteoblue\.com\//i.test(wert)){
+        alert("Das sieht nicht nach einer meteoblue-Adresse aus.");
+        return;
+      }
+      dashboard.wetterUrl = wert;
+      dashboard.quelle = "meteoblue";
+      dashboard.wetterGeleert = false;
+      saveDashboard();
+      dbWetterEinrichten.style.display = "none";
+      renderWetter(true);
+    });
+    document.getElementById("dbWetterStandard").addEventListener("click", () => {
+      dashboard.wetterUrl = WETTER_STANDARD;
+      dashboard.quelle = "meteoblue";
+      dashboard.wetterGeleert = false;
+      saveDashboard();
+      dbWetterUrl.value = WETTER_STANDARD;
+      dbWetterEinrichten.style.display = "none";
+      renderWetter(true);
+    });
+    document.getElementById("dbWetterLeeren").addEventListener("click", () => {
+      dashboard.wetterUrl = "";
+      dashboard.wetterGeleert = true;
+      dashboard.quelle = "openmeteo";
+      saveDashboard();
+      dbWetterUrl.value = "";
+      wetterQuelleUI();
+      renderWetter(true);
+    });
+  }
+
   document.getElementById("dbWetterNeu").addEventListener("click", () => {
     const knopf = document.getElementById("dbWetterNeu");
     knopf.textContent = "…";
     renderWetter(true);
-    setTimeout(() => { knopf.textContent = "↻"; }, 800);
+    setTimeout(() => { knopf.textContent = "↻"; }, 900);
   });
 
+  /* Wettercodes von Open-Meteo in Zeichen und Text übersetzen */
+  const WETTER_CODES = {
+    0:["☀️","klar"], 1:["🌤️","überwiegend klar"], 2:["⛅","teils bewölkt"], 3:["☁️","bedeckt"],
+    45:["🌫️","Nebel"], 48:["🌫️","Reifnebel"],
+    51:["🌦️","leichter Sprühregen"], 53:["🌦️","Sprühregen"], 55:["🌦️","starker Sprühregen"],
+    56:["🌧️","gefrierender Sprühregen"], 57:["🌧️","gefrierender Sprühregen"],
+    61:["🌦️","leichter Regen"], 63:["🌧️","Regen"], 65:["🌧️","starker Regen"],
+    66:["🌧️","gefrierender Regen"], 67:["🌧️","gefrierender Regen"],
+    71:["🌨️","leichter Schnee"], 73:["🌨️","Schnee"], 75:["❄️","starker Schnee"],
+    77:["🌨️","Schneegriesel"],
+    80:["🌦️","leichte Schauer"], 81:["🌧️","Schauer"], 82:["⛈️","starke Schauer"],
+    85:["🌨️","Schneeschauer"], 86:["🌨️","starke Schneeschauer"],
+    95:["⛈️","Gewitter"], 96:["⛈️","Gewitter mit Hagel"], 99:["⛈️","schweres Gewitter"]
+  };
+  function wetterZeichen(code){ return (WETTER_CODES[code] || ["❓","unbekannt"])[0]; }
+  function wetterText(code){ return (WETTER_CODES[code] || ["❓","unbekannt"])[1]; }
+
+  const WOCHENTAGE_KURZ = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  let wetterZwischen = null;    // letzter Abruf, um nicht dauernd neu zu laden
+
+  async function wetterEinfachZeigen(neuLaden){
+    const ort = dashboard.ort;
+    dbWetterRahmen.innerHTML = '<div class="hint">Wetter wird geladen …</div>';
+
+    // Höchstens 15 Minuten alte Daten wiederverwenden
+    const jetztMs = Date.now();
+    let daten = null;
+    if(!neuLaden && wetterZwischen && wetterZwischen.ort === ort.name
+       && jetztMs - wetterZwischen.zeit < 900000){
+      daten = wetterZwischen.daten;
+    }
+
+    if(!daten){
+      try{
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=" + ort.breite
+          + "&longitude=" + ort.laenge
+          + "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m"
+          + "&hourly=temperature_2m,weather_code,precipitation_probability"
+          + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset"
+          + "&timezone=auto&forecast_days=7";
+        const antwort = await fetch(url);
+        if(!antwort.ok) throw new Error("HTTP " + antwort.status);
+        daten = await antwort.json();
+        wetterZwischen = { ort: ort.name, zeit: jetztMs, daten: daten };
+      }catch(e){
+        dbWetterRahmen.innerHTML = '<div class="empty-state">Wetter nicht abrufbar. '
+          + 'Besteht eine Netzverbindung?<br><span class="hint">' + (e && e.message ? e.message : "") + '</span></div>';
+        return;
+      }
+    }
+
+    const jetzt = daten.current || {};
+    const std = daten.hourly || {};
+    const tage = daten.daily || {};
+
+    let html = '<div class="w-kopf">'
+      + '<div class="w-jetzt">'
+      +   '<span class="w-zeichen">' + wetterZeichen(jetzt.weather_code) + '</span>'
+      +   '<span class="w-grad">' + Math.round(jetzt.temperature_2m) + '°</span>'
+      + '</div>'
+      + '<div style="text-align:right;min-width:0;">'
+      +   '<div class="w-ort"></div>'
+      +   '<div class="w-text">' + wetterText(jetzt.weather_code) + '</div>'
+      +   '<div class="w-werte">gefühlt ' + Math.round(jetzt.apparent_temperature) + '°'
+      +     ' · Wind ' + Math.round(jetzt.wind_speed_10m) + ' km/h'
+      +     ' · ' + Math.round(jetzt.relative_humidity_2m) + ' %</div>'
+      + '</div></div>';
+
+    // Nächste 12 Stunden, beginnend bei der aktuellen
+    if(std.time && std.time.length){
+      const jetztStunde = new Date();
+      let start = 0;
+      for(let i = 0; i < std.time.length; i++){
+        if(new Date(std.time[i]) >= jetztStunde){ start = Math.max(0, i - 1); break; }
+      }
+      html += '<div class="w-stunden">';
+      for(let i = start; i < Math.min(start + 12, std.time.length); i++){
+        const d = new Date(std.time[i]);
+        const rg = std.precipitation_probability ? std.precipitation_probability[i] : null;
+        html += '<div class="w-stunde' + (i === start ? " jetzt" : "") + '">'
+          + '<div class="zeit">' + zwei2(d.getHours()) + '</div>'
+          + '<div class="zei">' + wetterZeichen(std.weather_code[i]) + '</div>'
+          + '<div class="gr">' + Math.round(std.temperature_2m[i]) + '°</div>'
+          + '<div class="rg">' + (rg !== null && rg > 0 ? rg + "%" : "&nbsp;") + '</div>'
+          + '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Wochenübersicht
+    if(tage.time && tage.time.length){
+      html += '<div class="w-tage">';
+      tage.time.forEach((tag, i) => {
+        const d = new Date(tag);
+        const heuteK = tagSchluessel(new Date());
+        const istHeute = tagSchluessel(d) === heuteK;
+        const rg = tage.precipitation_probability_max ? tage.precipitation_probability_max[i] : null;
+        html += '<div class="w-tag">'
+          + '<span class="wt">' + (istHeute ? "Heute" : WOCHENTAGE_KURZ[d.getDay()] + " " + zwei2(d.getDate()) + ".") + '</span>'
+          + '<span class="sym">' + wetterZeichen(tage.weather_code[i]) + '</span>'
+          + '<span class="rg">' + (rg !== null && rg > 0 ? rg + " %" : "") + '</span>'
+          + '<span class="tmp">' + Math.round(tage.temperature_2m_max[i]) + '° / '
+          + Math.round(tage.temperature_2m_min[i]) + '°</span>'
+          + '</div>';
+      });
+      html += '</div>';
+
+      if(tage.sunrise && tage.sunrise[0]){
+        const auf = new Date(tage.sunrise[0]), unter = new Date(tage.sunset[0]);
+        html += '<div class="w-werte" style="margin-top:8px;text-align:center;">'
+          + '↑ ' + zwei2(auf.getHours()) + ":" + zwei2(auf.getMinutes())
+          + '   ↓ ' + zwei2(unter.getHours()) + ":" + zwei2(unter.getMinutes()) + '</div>';
+      }
+    }
+
+    html += '<div class="hint" style="margin-top:8px;text-align:center;">Daten: '
+      + '<a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></div>';
+
+    dbWetterRahmen.innerHTML = html;
+    const ortEl = dbWetterRahmen.querySelector(".w-ort");
+    if(ortEl) ortEl.textContent = ort.name;
+  }
+
   function renderWetter(neuLaden){
+    if(dashboard.quelle === "openmeteo"){
+      wetterEinfachZeigen(neuLaden);
+      return;
+    }
     dbWetterRahmen.innerHTML = "";
     if(!dashboard.wetterUrl){
       dbWetterRahmen.innerHTML = '<div class="empty-state">Noch kein Wetter eingerichtet — auf „⚙ Ort" tippen.</div>';
       return;
     }
     const rahmen = document.createElement("iframe");
-    // Adresse unverändert übernehmen (Vorgabe von meteoblue).
-    // Beim Neuladen einen Zeitstempel anhängen, damit nicht die zwischen-
-    // gespeicherte Fassung erscheint.
     rahmen.src = dashboard.wetterUrl + (neuLaden ? "#t=" + Date.now() : "");
     rahmen.setAttribute("frameborder", "0");
     rahmen.setAttribute("scrolling", "NO");
@@ -6017,15 +6813,15 @@
     rahmen.style.cssText = "width:100%;height:500px;border:0;overflow:hidden;";
     dbWetterRahmen.appendChild(rahmen);
 
-    // Pflichtangabe: Verweis auf meteoblue
     const hinweis = document.createElement("div");
     hinweis.className = "hint";
     hinweis.style.marginTop = "6px";
-    // Dieser Verweis muss erhalten bleiben (Vorgabe von meteoblue)
     hinweis.innerHTML = '<a href="https://www.meteoblue.com/de/wetter/woche/index" '
       + 'target="_blank" rel="noopener">meteoblue</a>';
     dbWetterRahmen.appendChild(hinweis);
   }
+
+  wetterQuelleUI();
 
   /* ---------- Dashboard zeichnen ---------- */
   function renderDashboard(){
@@ -6046,6 +6842,15 @@
       if(st === "warnung") warnend++;
       if(st === "abgelaufen") abgelaufen++;
     });
+    // Medizinische Fristen zählen mit
+    [medizin.igf, medizin.avu, medizin.impfungen].forEach(liste => {
+      (liste || []).forEach(u => {
+        if(!u.gueltigBis) return;
+        const st = getStatus(u.gueltigBis).key;
+        if(st === "warnung") warnend++;
+        if(st === "abgelaufen") abgelaufen++;
+      });
+    });
     const lehrgangEl = document.getElementById("dbLehrgang");
     lehrgangEl.textContent = warnend + (abgelaufen ? " + " + abgelaufen : "");
     lehrgangEl.style.color = abgelaufen ? "var(--red)" : warnend ? "var(--amber)" : "var(--green)";
@@ -6060,7 +6865,11 @@
       if(t.istTodo) return false;
       const anfang = new Date(t.start); anfang.setHours(0,0,0,0);
       let letzter;
-      if(t.allDay && t.end){
+      const umMitternacht = t.end
+        && t.end.getHours() === 0 && t.end.getMinutes() === 0
+        && t.end.getSeconds() === 0 && t.end.getMilliseconds() === 0
+        && t.end.getTime() > t.start.getTime();
+      if(t.end && (t.allDay || umMitternacht)){
         letzter = new Date(t.end.getTime() - 1);   // exklusives Ende
       }else{
         letzter = new Date(t.end || t.start);
@@ -6672,6 +7481,1010 @@
   })();
 
   /* =========================================================
+     BUNDESLAND FÜR FEIERTAGE
+     ========================================================= */
+  (function landAuswahlAufbauen(){
+    const feld = document.getElementById("landAuswahl");
+    if(!feld) return;
+    Object.keys(BUNDESLAENDER).forEach(k => {
+      const o = document.createElement("option");
+      o.value = k;
+      o.textContent = BUNDESLAENDER[k];
+      if(k === feiertagsLand.land) o.selected = true;
+      feld.appendChild(o);
+    });
+    feld.addEventListener("change", () => {
+      feiertagsLand.land = feld.value;
+      saveFeiertagsLand();
+      // Ferien gehören zum Land — bei Wechsel neu laden
+      if(typeof ferien === "object" && ferien.an){
+        ferien.jahre = {}; ferien.land = feld.value; saveFerien();
+        const j = new Date().getFullYear();
+        ferienLaden(j).then(() => ferienLaden(j + 1)).then(() => {
+          ferienUI(); renderKalender();
+        }).catch(() => ferienUI());
+      }
+      renderKalender();
+      renderUrlaub();          // Werktage neu zählen
+      if(typeof renderDashboard === "function") renderDashboard();
+    });
+  })();
+
+  /* =========================================================
+     SCHULFERIEN
+     Die Ferientermine werden jährlich von den Ländern festgelegt und lassen
+     sich nicht berechnen. Sie werden daher einmalig aus dem offenen Dienst
+     OpenHolidays geladen und danach im Gerät gespeichert.
+     ========================================================= */
+  const FERIEN_KEY = "ferien_v1";
+  let ferien = loadJSON(FERIEN_KEY, { an: false, land: "", jahre: {} });
+  if(typeof ferien.an !== "boolean") ferien.an = false;
+  if(!ferien.jahre || typeof ferien.jahre !== "object") ferien.jahre = {};
+  function saveFerien(){ saveJSON(FERIEN_KEY, ferien); }
+
+  const ferienToggle = document.getElementById("ferienToggle");
+  const ferienStatus = document.getElementById("ferienStatus");
+
+  function ferienUI(){
+    if(!ferienToggle) return;
+    ferienToggle.classList.toggle("active", ferien.an);
+    ferienToggle.textContent = (ferien.an ? "● " : "○ ") + "Schulferien anzeigen";
+    const anzahl = Object.keys(ferien.jahre).reduce((n, j) => n + ferien.jahre[j].length, 0);
+    if(ferienStatus){
+      ferienStatus.textContent = anzahl
+        ? anzahl + " Ferienabschnitte gespeichert" + (ferien.land ? " für " + (BUNDESLAENDER[ferien.land] || ferien.land) : "")
+        : "Ferien werden beim Einschalten aus dem Netz geladen und gespeichert.";
+    }
+  }
+
+  async function ferienLaden(jahr){
+    const land = feiertagsLand.land;
+    // Bei einem Landwechsel die alten Daten verwerfen
+    if(ferien.land !== land){ ferien.jahre = {}; ferien.land = land; }
+
+    const von = jahr + "-01-01", bis = jahr + "-12-31";
+    const url = "https://openholidaysapi.org/SchoolHolidays"
+      + "?countryIsoCode=DE&subdivisionCode=DE-" + land
+      + "&languageIsoCode=DE&validFrom=" + von + "&validTo=" + bis;
+    const antwort = await fetch(url);
+    if(!antwort.ok) throw new Error("HTTP " + antwort.status);
+    const daten = await antwort.json();
+
+    const abschnitte = (Array.isArray(daten) ? daten : []).map(e => {
+      const name = (e.name && e.name[0] && e.name[0].text) ? e.name[0].text : "Ferien";
+      return { name: name, von: e.startDate, bis: e.endDate };
+    }).filter(a => a.von && a.bis);
+
+    ferien.jahre[String(jahr)] = abschnitte;
+    saveFerien();
+    return abschnitte.length;
+  }
+
+  async function ferienSicherstellen(jahr){
+    if(!ferien.an) return;
+    if(ferien.land === feiertagsLand.land && ferien.jahre[String(jahr)]) return;
+    try{ await ferienLaden(jahr); ferienUI(); renderKalender(); }
+    catch(e){ /* ohne Ferien weiterarbeiten */ }
+  }
+
+  /* Liefert den Ferienname für einen Tag, sonst null */
+  function ferienFuerTag(d){
+    if(!ferien.an) return null;
+    const liste = ferien.jahre[String(d.getFullYear())];
+    if(!liste) return null;
+    const ts = d.getTime();
+    for(const a of liste){
+      const von = new Date(a.von + "T00:00:00");
+      const bis = new Date(a.bis + "T00:00:00");
+      von.setHours(0,0,0,0); bis.setHours(0,0,0,0);
+      if(ts >= von.getTime() && ts <= bis.getTime()) return a.name;
+    }
+    return null;
+  }
+
+  if(ferienToggle){
+    ferienToggle.addEventListener("click", async () => {
+      ferien.an = !ferien.an;
+      saveFerien();
+      ferienUI();
+      if(ferien.an){
+        ferienStatus.textContent = "Ferien werden geladen …";
+        const jahr = new Date().getFullYear();
+        try{
+          let n = await ferienLaden(jahr);
+          n += await ferienLaden(jahr + 1);
+          ferienUI();
+          if(!n) ferienStatus.textContent = "Keine Ferientermine erhalten.";
+        }catch(e){
+          ferienStatus.textContent = "Ferien nicht abrufbar. Besteht eine Netzverbindung?";
+        }
+      }
+      renderKalender();
+    });
+  }
+  if(document.getElementById("ferienLaden")){
+    document.getElementById("ferienLaden").addEventListener("click", async () => {
+      ferienStatus.textContent = "Ferien werden geladen …";
+      const jahr = new Date().getFullYear();
+      ferien.jahre = {};
+      try{
+        await ferienLaden(jahr);
+        await ferienLaden(jahr + 1);
+        ferienUI();
+        renderKalender();
+      }catch(e){
+        ferienStatus.textContent = "Ferien nicht abrufbar: " + (e && e.message ? e.message : e);
+      }
+    });
+  }
+  ferienUI();
+
+  /* =========================================================
+     ZURÜCK-TASTE UND -GESTE
+     Schließt der Reihe nach die oberste offene Ebene, statt die App zu beenden.
+     ========================================================= */
+  (function zurueckBehandeln(){
+    function obersteEbeneSchliessen(){
+      // Reihenfolge: zuletzt geöffnet zuerst
+      const evOv = document.getElementById("evOverlay");
+      if(evOv && evOv.classList.contains("offen")){
+        evOv.classList.remove("offen");
+        document.body.style.overflow = "";
+        return true;
+      }
+      const nvOv = document.getElementById("nvOverlay");
+      if(nvOv && nvOv.classList.contains("offen")){
+        nvOv.classList.remove("offen");
+        document.body.style.overflow = "";
+        return true;
+      }
+      const cl = document.getElementById("changelogOverlay");
+      if(cl && cl.style.display !== "none" && cl.style.display !== ""){
+        cl.style.display = "none";
+        return true;
+      }
+      const me = document.getElementById("menueOverlay");
+      if(me && me.style.display !== "none" && me.style.display !== ""){
+        me.style.display = "none";
+        return true;
+      }
+      // Kalendereinstellungen
+      if(typeof kalEinstellungenBereich !== "undefined"
+         && kalEinstellungenBereich && kalEinstellungenBereich.style.display === "block"){
+        einstellungenZeigen(false);
+        return true;
+      }
+      // Maximierte Kalenderansicht
+      if(document.body.classList.contains("kal-max")){
+        document.body.classList.remove("kal-max");
+        setTimeout(renderKalender, 30);
+        return true;
+      }
+      // Ausgewählten Tag abwählen
+      if(typeof kalGewaehlt !== "undefined" && kalGewaehlt){
+        kalGewaehlt = null;
+        renderKalender();
+        return true;
+      }
+      // Nicht im ersten Reiter: dorthin zurück
+      const ersterReiter = document.querySelector('[data-tab="tabDashboard"]');
+      if(ersterReiter && !document.getElementById("tabDashboard").classList.contains("active")){
+        ersterReiter.click();
+        return true;
+      }
+      return false;   // nichts mehr offen -> App darf schließen
+    }
+
+    // In der App: Zurück-Taste und Wischgeste abfangen
+    const AppPlugin = (Cap && Cap.Plugins && Cap.Plugins.App) || null;
+    if(AppPlugin && AppPlugin.addListener){
+      AppPlugin.addListener("backButton", (info) => {
+        if(!obersteEbeneSchliessen()){
+          // Nichts offen: App in den Hintergrund legen statt hart beenden
+          if(AppPlugin.minimizeApp) AppPlugin.minimizeApp();
+          else if(AppPlugin.exitApp) AppPlugin.exitApp();
+        }
+      });
+    }
+
+    // Im Browser: Escape und die Zurück-Navigation
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape") obersteEbeneSchliessen();
+    });
+    try{
+      history.pushState({ dc: 1 }, "");
+      window.addEventListener("popstate", () => {
+        if(obersteEbeneSchliessen()){
+          history.pushState({ dc: 1 }, "");   // Eintrag wieder auffüllen
+        }
+      });
+    }catch(e){ /* ohne Verlaufseintrag weiterarbeiten */ }
+  })();
+
+  /* =========================================================
+     DATUMSFELDER: Punkte beim Tippen selbst setzen
+     ========================================================= */
+  function datumFeldAnbinden(el){
+    if(!el || el.dataset.datumGebunden) return;
+    el.dataset.datumGebunden = "1";
+    el.setAttribute("inputmode", "numeric");
+    el.setAttribute("maxlength", "10");
+
+    el.addEventListener("input", () => {
+      const vorher = el.value;
+      const cursorAmEnde = el.selectionStart === vorher.length;
+
+      // Nur Ziffern behalten, dann Punkte nach Tag und Monat einfügen
+      let z = vorher.replace(/\D/g, "").slice(0, 8);
+      let neu = z;
+      if(z.length > 4)      neu = z.slice(0,2) + "." + z.slice(2,4) + "." + z.slice(4);
+      else if(z.length > 2) neu = z.slice(0,2) + "." + z.slice(2);
+
+      if(neu !== vorher){
+        el.value = neu;
+        if(cursorAmEnde){
+          try{ el.setSelectionRange(neu.length, neu.length); }catch(e){}
+        }
+      }
+    });
+
+    // Beim Verlassen zweistellige Jahresangabe ergänzen
+    el.addEventListener("blur", () => {
+      const z = el.value.replace(/\D/g, "");
+      if(z.length === 6){
+        el.value = z.slice(0,2) + "." + z.slice(2,4) + ".20" + z.slice(4,6);
+        el.dispatchEvent(new Event("change"));
+      }
+    });
+  }
+
+  /* ---------- Vorschlagsliste im Feld „Art" ---------- */
+  (function artAuswahlAnbinden(){
+    const feld = document.getElementById("fArt");
+    const pfeil = document.getElementById("fArtPfeil");
+    const liste = document.getElementById("fArtAuswahl");
+    if(!feld || !pfeil || !liste) return;
+
+    // Nur der Pfeil öffnet die Liste, eine Auswahl schließt sie wieder
+    pfeil.addEventListener("click", () => {
+      liste.style.display = liste.style.display === "none" ? "block" : "none";
+    });
+    liste.addEventListener("change", () => {
+      if(liste.value){
+        feld.value = liste.value;
+        liste.style.display = "none";
+        liste.selectedIndex = -1;
+        feld.focus();
+      }
+    });
+    // Außerhalb tippen schließt ebenfalls
+    document.addEventListener("click", (e) => {
+      if(liste.style.display === "none") return;
+      if(e.target === pfeil || e.target === liste || liste.contains(e.target)) return;
+      liste.style.display = "none";
+    });
+  })();
+
+  /* ---------- Startwert im Überstundenkonto ein-/ausklappen ---------- */
+  (function oDetailsAnbinden(){
+    const knopf = document.getElementById("oDetailsToggle");
+    const feld = document.getElementById("oDetails");
+    if(!knopf || !feld) return;
+    knopf.addEventListener("click", () => {
+      const auf = feld.style.display !== "none";
+      feld.style.display = auf ? "none" : "block";
+      knopf.textContent = auf ? "▸ Startwert anzeigen" : "▾ Startwert ausblenden";
+    });
+  })();
+
+  /* Alle Datumsfelder erfassen — erkennbar am Platzhalter */
+  (function datumsFelderBinden(){
+    document.querySelectorAll('input[placeholder*="TT.MM"]').forEach(datumFeldAnbinden);
+  })();
+
+  /* =========================================================
+     MEDIZIN: Person, IGF, BFT-Punkte, AVU/WFV, Impfungen
+     ========================================================= */
+  const MED_KEY = "medizin_v1";
+  let medizin = loadJSON(MED_KEY, {
+    person: { name: "", dienstgrad: "", einheit: "", geburt: "" },
+    igf: [], avu: [], impfungen: [],
+    bft: { maxSprint: 60, bestSprint: 43, minKlimm: 5, bestKlimm: 70,
+           maxLauf: "6:30", bestLauf: "3:30" }
+  });
+  ["igf","avu","impfungen"].forEach(k => { if(!Array.isArray(medizin[k])) medizin[k] = []; });
+  if(!medizin.person) medizin.person = { name: "", dienstgrad: "", einheit: "", geburt: "" };
+  if(!medizin.bft) medizin.bft = { maxSprint: 60, bestSprint: 43, minKlimm: 5, bestKlimm: 70,
+                                    maxLauf: "6:30", bestLauf: "3:30" };
+  function saveMed(){ saveJSON(MED_KEY, medizin); }
+
+  /* ---------- Person ---------- */
+  const personFelder = { pName: "name", pDienstgrad: "dienstgrad",
+                          pEinheit: "einheit", pGeburt: "geburt" };
+  Object.keys(personFelder).forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.value = medizin.person[personFelder[id]] || "";
+    el.addEventListener("change", () => {
+      medizin.person[personFelder[id]] = el.value.trim();
+      saveMed();
+    });
+  });
+
+  /* ---------- Vorschlagslisten anbinden ---------- */
+  function vorschlagAnbinden(feldId, pfeilId, listeId, beiWahl){
+    const feld = document.getElementById(feldId);
+    const pfeil = document.getElementById(pfeilId);
+    const liste = document.getElementById(listeId);
+    if(!feld || !pfeil || !liste) return;
+    pfeil.addEventListener("click", () => {
+      liste.style.display = liste.style.display === "none" ? "block" : "none";
+    });
+    liste.addEventListener("change", () => {
+      if(!liste.value) return;
+      feld.value = liste.value;
+      const gewaehlt = liste.options[liste.selectedIndex];
+      liste.style.display = "none";
+      liste.selectedIndex = -1;
+      if(beiWahl) beiWahl(gewaehlt);
+      feld.focus();
+    });
+    document.addEventListener("click", (e) => {
+      if(liste.style.display === "none") return;
+      if(e.target === pfeil || liste.contains(e.target)) return;
+      liste.style.display = "none";
+    });
+  }
+
+  /* ---------- Ablaufdatum aus Intervall berechnen ---------- */
+  function bisAusIntervall(datumFeld, intervallFeld, zielFeld){
+    if(intervallFeld.value === "frei") return;
+    const d = parseDateDE(datumFeld.value);
+    if(!d) return;
+    const monate = parseInt(intervallFeld.value, 10);
+    if(!Number.isFinite(monate)) return;
+    zielFeld.value = toDEString(new Date(d.getFullYear(), d.getMonth() + monate, d.getDate()));
+  }
+
+  /* =========================================================
+     Gemeinsame Liste für IGF, AVU und Impfungen
+     ========================================================= */
+  function medListeZeichen(liste, behaelterId, leerId, kennung, aufbau){
+    const behaelter = document.getElementById(behaelterId);
+    const leer = document.getElementById(leerId);
+    if(!behaelter || !leer) return;
+
+    const sortiert = liste.slice().sort((a, b) => {
+      const da = parseDateDE(a.gueltigBis), db = parseDateDE(b.gueltigBis);
+      if(!da && !db) return (parseDateDE(b.datum)||0) - (parseDateDE(a.datum)||0);
+      if(!da) return 1;
+      if(!db) return -1;
+      return da - db;
+    });
+    leer.style.display = sortiert.length ? "none" : "block";
+    behaelter.innerHTML = "";
+
+    sortiert.forEach(e => {
+      const st = e.gueltigBis ? getStatus(e.gueltigBis) : { key: "unbekannt", label: "ohne Ablauf" };
+      const farbe = st.key === "abgelaufen" ? "var(--red)"
+                  : st.key === "warnung" ? "var(--amber)"
+                  : st.key === "gueltig" ? "var(--green)" : "var(--text-faint)";
+      const zeile = document.createElement("div");
+      zeile.className = "uu-zeile";
+      zeile.style.borderLeftColor = farbe;
+      zeile.innerHTML =
+          '<div style="min-width:0;">'
+        +   '<div class="uu-art"></div>'
+        +   '<div class="uu-meta"></div>'
+        +   '<div class="uu-notiz" style="display:none;"></div>'
+        + '</div>'
+        + '<div class="list-row-actions">'
+        +   '<button class="btn icon" data-' + kennung + '-edit="' + e.id + '">✎</button>'
+        +   '<button class="btn icon danger" data-' + kennung + '-weg="' + e.id + '">✕</button>'
+        + '</div>';
+
+      const artEl = zeile.querySelector(".uu-art");
+      artEl.textContent = e.art;
+      if(e.gueltigBis){
+        const marke = document.createElement("span");
+        marke.className = "badge " + st.key;
+        marke.textContent = st.label;
+        marke.style.marginLeft = "8px";
+        artEl.appendChild(marke);
+      }
+
+      // Restlaufzeit ergänzen
+      let rest = "";
+      const bis = parseDateDE(e.gueltigBis);
+      if(bis){
+        const heute = new Date(); heute.setHours(0,0,0,0);
+        const tage = tagDifferenz(bis, heute);
+        rest = tage < 0 ? " · seit " + Math.abs(tage) + " Tagen fällig"
+             : tage === 0 ? " · heute fällig"
+             : tage < 62 ? " · in " + tage + " Tagen"
+             : " · in " + Math.round(tage / 30.4) + " Monaten";
+      }
+      zeile.querySelector(".uu-meta").textContent = aufbau(e) + rest;
+
+      const notiz = [e.befund, e.stelle, e.ergebnis, e.dosis, e.notiz].filter(Boolean).join(" · ");
+      if(notiz){
+        const nz = zeile.querySelector(".uu-notiz");
+        nz.textContent = notiz;
+        nz.style.display = "block";
+      }
+      behaelter.appendChild(zeile);
+    });
+    return behaelter;
+  }
+
+  /* ---------- IGF ---------- */
+  const igfForm = document.getElementById("igfForm");
+  const igfArt = document.getElementById("igfArt");
+  const igfDatum = document.getElementById("igfDatum");
+  const igfIntervall = document.getElementById("igfIntervall");
+  const igfBis = document.getElementById("igfBis");
+  const igfErgebnisFeld = document.getElementById("igfErgebnis");
+  const igfNotiz = document.getElementById("igfNotiz");
+  let igfBearbeitet = null;
+
+  vorschlagAnbinden("igfArt", "igfArtPfeil", "igfArtAuswahl");
+  [igfDatum, igfIntervall].forEach(el =>
+    el.addEventListener("change", () => bisAusIntervall(igfDatum, igfIntervall, igfBis)));
+
+  document.getElementById("igfAddToggle").addEventListener("click", () => {
+    igfBearbeitet = null;
+    igfArt.value = ""; igfErgebnisFeld.value = ""; igfNotiz.value = ""; igfBis.value = "";
+    igfDatum.value = todayDE();
+    igfIntervall.value = "12M";
+    bisAusIntervall(igfDatum, igfIntervall, igfBis);
+    igfForm.style.display = "block";
+    igfArt.focus();
+  });
+  document.getElementById("igfAbbrechen").addEventListener("click", () => {
+    igfForm.style.display = "none"; igfBearbeitet = null;
+  });
+
+  function igfDatenLesen(){
+    const art = igfArt.value.trim();
+    if(!art){ alert("Bitte eine Prüfung eintragen."); igfArt.focus(); return null; }
+    if(!parseDateDE(igfDatum.value)){ alert("Bitte ein gültiges Datum (TT.MM.JJJJ) eintragen."); igfDatum.focus(); return null; }
+    if(igfBis.value.trim() && !parseDateDE(igfBis.value)){ alert('„Gültig bis" ist kein gültiges Datum.'); igfBis.focus(); return null; }
+    return {
+      art: art, datum: igfDatum.value.trim(), gueltigBis: igfBis.value.trim(),
+      intervall: igfIntervall.value, ergebnis: igfErgebnisFeld.value.trim(),
+      notiz: igfNotiz.value.trim()
+    };
+  }
+
+  document.getElementById("igfSpeichern").addEventListener("click", () => {
+    const daten = igfDatenLesen();
+    if(!daten) return;
+    if(igfBearbeitet){
+      const e = medizin.igf.find(x => x.id === igfBearbeitet);
+      if(e) Object.assign(e, daten);
+    }else{
+      medizin.igf.push(Object.assign({ id: newId() }, daten));
+    }
+    saveMed();
+    igfForm.style.display = "none";
+    igfBearbeitet = null;
+    renderIgf();
+    if(typeof benPlanen === "function") benPlanen();
+  });
+
+  /* Termin zusätzlich in den Kalender eintragen */
+  document.getElementById("igfKalender").addEventListener("click", async () => {
+    const daten = igfDatenLesen();
+    if(!daten) return;
+    const termin = {
+      id: newId(), uid: newId() + "@dienst-cockpit", sequence: 0,
+      titel: "IGF: " + daten.art,
+      von: daten.datum, bis: daten.datum, ganztags: true,
+      zeitVon: "", zeitBis: "", ort: "",
+      notiz: [daten.ergebnis, daten.notiz].filter(Boolean).join(" · "),
+      anhaenge: [], kalenderId: "", erstellt: todayDE()
+    };
+    if(istApp){
+      try{
+        termin.nativId = await nativTerminAnlegen(termin);
+        termin.nativ = true;
+      }catch(e){
+        alert("Der Termin konnte nicht im Gerätekalender gespeichert werden.\n\n"
+          + (e && e.message ? e.message : e));
+        return;
+      }
+    }
+    kalender.eigene.push(termin);
+    saveKalender();
+    if(!istApp) await icsAusgeben([termin], dateiName(termin));
+    if(typeof renderEigene === "function") renderEigene();
+    if(typeof renderKalender === "function") renderKalender();
+    alert("Termin im Kalender angelegt.");
+  });
+
+  function renderIgf(){
+    const behaelter = medListeZeichen(medizin.igf, "igfListe", "igfEmpty", "igf",
+      (e) => "Datum: " + fmt(e.datum) + (e.gueltigBis ? " · gültig bis " + fmt(e.gueltigBis) : ""));
+    document.getElementById("igfDruckRow").style.display = medizin.igf.length ? "flex" : "none";
+    if(!behaelter) return;
+    behaelter.querySelectorAll("[data-igf-edit]").forEach(b =>
+      b.addEventListener("click", () => {
+        const e = medizin.igf.find(x => x.id === b.getAttribute("data-igf-edit"));
+        if(!e) return;
+        igfBearbeitet = e.id;
+        igfArt.value = e.art; igfDatum.value = e.datum || "";
+        igfBis.value = e.gueltigBis || ""; igfIntervall.value = e.intervall || "frei";
+        igfErgebnisFeld.value = e.ergebnis || ""; igfNotiz.value = e.notiz || "";
+        igfForm.style.display = "block";
+        igfForm.scrollIntoView({ behavior: "smooth", block: "center" });
+      }));
+    behaelter.querySelectorAll("[data-igf-weg]").forEach(b =>
+      b.addEventListener("click", () => {
+        const e = medizin.igf.find(x => x.id === b.getAttribute("data-igf-weg"));
+        if(!e || !confirm('Eintrag „' + e.art + '" wirklich löschen?')) return;
+        medizin.igf = medizin.igf.filter(x => x.id !== e.id);
+        saveMed(); renderIgf();
+      }));
+  }
+
+  /* ---------- AVU / WFV ---------- */
+  const avuForm = document.getElementById("avuForm");
+  const avuArt = document.getElementById("avuArt");
+  const avuDatum = document.getElementById("avuDatum");
+  const avuIntervall = document.getElementById("avuIntervall");
+  const avuBis = document.getElementById("avuBis");
+  let avuBearbeitet = null;
+
+  vorschlagAnbinden("avuArt", "avuArtPfeil", "avuArtAuswahl");
+  [avuDatum, avuIntervall].forEach(el =>
+    el.addEventListener("change", () => bisAusIntervall(avuDatum, avuIntervall, avuBis)));
+
+  document.getElementById("avuAddToggle").addEventListener("click", () => {
+    avuBearbeitet = null;
+    avuArt.value = ""; avuBis.value = "";
+    ["avuBefund","avuStelle","avuNotiz"].forEach(id => document.getElementById(id).value = "");
+    avuDatum.value = todayDE();
+    avuIntervall.value = "12M";
+    bisAusIntervall(avuDatum, avuIntervall, avuBis);
+    avuForm.style.display = "block";
+    avuArt.focus();
+  });
+  document.getElementById("avuAbbrechen").addEventListener("click", () => {
+    avuForm.style.display = "none"; avuBearbeitet = null;
+  });
+
+  document.getElementById("avuSpeichern").addEventListener("click", () => {
+    const art = avuArt.value.trim();
+    if(!art){ alert("Bitte eine Untersuchung eintragen."); avuArt.focus(); return; }
+    if(!parseDateDE(avuDatum.value)){ alert("Bitte ein gültiges Datum eintragen."); avuDatum.focus(); return; }
+    const daten = {
+      art: art, datum: avuDatum.value.trim(), gueltigBis: avuBis.value.trim(),
+      intervall: avuIntervall.value,
+      befund: document.getElementById("avuBefund").value.trim(),
+      stelle: document.getElementById("avuStelle").value.trim(),
+      notiz: document.getElementById("avuNotiz").value.trim()
+    };
+    if(avuBearbeitet){
+      const e = medizin.avu.find(x => x.id === avuBearbeitet);
+      if(e) Object.assign(e, daten);
+    }else{
+      medizin.avu.push(Object.assign({ id: newId() }, daten));
+    }
+    saveMed();
+    avuForm.style.display = "none";
+    avuBearbeitet = null;
+    renderAvu();
+    if(typeof benPlanen === "function") benPlanen();
+  });
+
+  function renderAvu(){
+    const behaelter = medListeZeichen(medizin.avu, "avuListe", "avuEmpty", "avu",
+      (e) => "Datum: " + fmt(e.datum) + (e.gueltigBis ? " · gültig bis " + fmt(e.gueltigBis) : ""));
+    if(!behaelter) return;
+    behaelter.querySelectorAll("[data-avu-edit]").forEach(b =>
+      b.addEventListener("click", () => {
+        const e = medizin.avu.find(x => x.id === b.getAttribute("data-avu-edit"));
+        if(!e) return;
+        avuBearbeitet = e.id;
+        avuArt.value = e.art; avuDatum.value = e.datum || "";
+        avuBis.value = e.gueltigBis || ""; avuIntervall.value = e.intervall || "frei";
+        document.getElementById("avuBefund").value = e.befund || "";
+        document.getElementById("avuStelle").value = e.stelle || "";
+        document.getElementById("avuNotiz").value = e.notiz || "";
+        avuForm.style.display = "block";
+        avuForm.scrollIntoView({ behavior: "smooth", block: "center" });
+      }));
+    behaelter.querySelectorAll("[data-avu-weg]").forEach(b =>
+      b.addEventListener("click", () => {
+        const e = medizin.avu.find(x => x.id === b.getAttribute("data-avu-weg"));
+        if(!e || !confirm('Eintrag „' + e.art + '" wirklich löschen?')) return;
+        medizin.avu = medizin.avu.filter(x => x.id !== e.id);
+        saveMed(); renderAvu();
+      }));
+  }
+
+  /* ---------- Impfungen ---------- */
+  const impForm = document.getElementById("impForm");
+  const impArt = document.getElementById("impArt");
+  const impDatum = document.getElementById("impDatum");
+  const impJahre = document.getElementById("impJahre");
+  const impBis = document.getElementById("impBis");
+  let impBearbeitet = null;
+
+  // Bei der Auswahl die üblichen Gültigkeitsjahre übernehmen
+  vorschlagAnbinden("impArt", "impArtPfeil", "impArtAuswahl", (option) => {
+    const jahre = option && option.getAttribute("data-jahre");
+    if(jahre !== null && jahre !== undefined){
+      impJahre.value = jahre;
+      impBisBerechnen();
+    }
+  });
+
+  function impBisBerechnen(){
+    const d = parseDateDE(impDatum.value);
+    const jahre = parseInt(impJahre.value, 10);
+    if(!d || !Number.isFinite(jahre)) return;
+    if(jahre <= 0){ impBis.value = ""; return; }   // unbegrenzt
+    impBis.value = toDEString(new Date(d.getFullYear() + jahre, d.getMonth(), d.getDate()));
+  }
+  [impDatum, impJahre].forEach(el => el.addEventListener("change", impBisBerechnen));
+
+  document.getElementById("impAddToggle").addEventListener("click", () => {
+    impBearbeitet = null;
+    impArt.value = ""; impBis.value = ""; impJahre.value = "";
+    ["impDosis","impNotiz"].forEach(id => document.getElementById(id).value = "");
+    impDatum.value = todayDE();
+    impForm.style.display = "block";
+    impArt.focus();
+  });
+  document.getElementById("impAbbrechen").addEventListener("click", () => {
+    impForm.style.display = "none"; impBearbeitet = null;
+  });
+
+  document.getElementById("impSpeichern").addEventListener("click", () => {
+    const art = impArt.value.trim();
+    if(!art){ alert("Bitte eine Impfung eintragen."); impArt.focus(); return; }
+    if(!parseDateDE(impDatum.value)){ alert("Bitte ein gültiges Impfdatum eintragen."); impDatum.focus(); return; }
+    if(impBis.value.trim() && !parseDateDE(impBis.value)){ alert("Das Ablaufdatum ist kein gültiges Datum."); impBis.focus(); return; }
+    const daten = {
+      art: art, datum: impDatum.value.trim(),
+      jahre: impJahre.value !== "" ? Number(impJahre.value) : null,
+      gueltigBis: impBis.value.trim(),
+      dosis: document.getElementById("impDosis").value.trim(),
+      notiz: document.getElementById("impNotiz").value.trim()
+    };
+    if(impBearbeitet){
+      const e = medizin.impfungen.find(x => x.id === impBearbeitet);
+      if(e) Object.assign(e, daten);
+    }else{
+      medizin.impfungen.push(Object.assign({ id: newId() }, daten));
+    }
+    saveMed();
+    impForm.style.display = "none";
+    impBearbeitet = null;
+    renderImp();
+    if(typeof benPlanen === "function") benPlanen();
+  });
+
+  function renderImp(){
+    const behaelter = medListeZeichen(medizin.impfungen, "impListe", "impEmpty", "imp",
+      (e) => "Geimpft: " + fmt(e.datum)
+        + (e.gueltigBis ? " · gültig bis " + fmt(e.gueltigBis)
+                        : (e.jahre === 0 ? " · unbegrenzt gültig" : ""))
+        + (e.jahre ? " · " + e.jahre + " Jahre" : ""));
+    if(!behaelter) return;
+    behaelter.querySelectorAll("[data-imp-edit]").forEach(b =>
+      b.addEventListener("click", () => {
+        const e = medizin.impfungen.find(x => x.id === b.getAttribute("data-imp-edit"));
+        if(!e) return;
+        impBearbeitet = e.id;
+        impArt.value = e.art; impDatum.value = e.datum || "";
+        impJahre.value = (e.jahre === null || e.jahre === undefined) ? "" : e.jahre;
+        impBis.value = e.gueltigBis || "";
+        document.getElementById("impDosis").value = e.dosis || "";
+        document.getElementById("impNotiz").value = e.notiz || "";
+        impForm.style.display = "block";
+        impForm.scrollIntoView({ behavior: "smooth", block: "center" });
+      }));
+    behaelter.querySelectorAll("[data-imp-weg]").forEach(b =>
+      b.addEventListener("click", () => {
+        const e = medizin.impfungen.find(x => x.id === b.getAttribute("data-imp-weg"));
+        if(!e || !confirm('Impfung „' + e.art + '" wirklich löschen?')) return;
+        medizin.impfungen = medizin.impfungen.filter(x => x.id !== e.id);
+        saveMed(); renderImp();
+      }));
+  }
+
+  /* =========================================================
+     BFT-PUNKTERECHNER
+     Die amtlichen Punktetabellen sind nach Alter und Geschlecht gestaffelt und
+     hier NICHT abgebildet. Gerechnet wird linear zwischen dem Grenzwert zum
+     Bestehen (1 Punkt) und dem eingestellten Bestwert (100 Punkte). Das ist
+     eine Schätzung und ersetzt keine amtliche Auswertung.
+     ========================================================= */
+  const bftSprint = document.getElementById("bftSprint");
+  const bftKlimm = document.getElementById("bftKlimm");
+  const bftLauf = document.getElementById("bftLauf");
+  const bftErgebnis = document.getElementById("bftErgebnis");
+
+  const BFT_FELDER = {
+    bftMaxSprint: "maxSprint", bftBestSprint: "bestSprint",
+    bftMinKlimm: "minKlimm", bftBestKlimm: "bestKlimm",
+    bftMaxLauf: "maxLauf", bftBestLauf: "bestLauf"
+  };
+  Object.keys(BFT_FELDER).forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.value = medizin.bft[BFT_FELDER[id]];
+    el.addEventListener("change", () => {
+      const schluessel = BFT_FELDER[id];
+      if(schluessel === "maxLauf" || schluessel === "bestLauf"){
+        const sek = laufzeitSekunden(el.value);
+        medizin.bft[schluessel] = sek ? sekundenText(sek) : medizin.bft[schluessel];
+        el.value = medizin.bft[schluessel];
+      }else{
+        const z = parseFloat(String(el.value).replace(",", "."));
+        if(isFinite(z)) medizin.bft[schluessel] = z;
+        el.value = medizin.bft[schluessel];
+      }
+      saveMed();
+      bftBewerten();
+    });
+  });
+
+  function laufzeitSekunden(text){
+    const t = String(text || "").trim().replace(",", ".");
+    if(!t) return null;
+    let m = t.match(/^(\d{1,2})[:.](\d{1,2})$/);
+    if(m && +m[2] < 60) return +m[1] * 60 + +m[2];
+    m = t.match(/^(\d{1,2})(\d{2})$/);
+    if(m && +m[2] < 60) return +m[1] * 60 + +m[2];
+    if(/^\d+$/.test(t)) return +t;
+    return null;
+  }
+  function sekundenText(sek){
+    return Math.floor(sek / 60) + ":" + zwei2(Math.round(sek % 60));
+  }
+
+  /* Punkte zwischen Grenzwert und Bestwert schätzen (1 bis 100) */
+  function punkteSchaetzen(wert, grenze, best, kleinerIstBesser){
+    if(!isFinite(wert) || !isFinite(grenze) || !isFinite(best)) return null;
+    const spanne = kleinerIstBesser ? (grenze - best) : (best - grenze);
+    if(spanne <= 0) return null;
+    const fortschritt = kleinerIstBesser ? (grenze - wert) : (wert - grenze);
+    const p = Math.round(1 + (fortschritt / spanne) * 99);
+    return Math.max(0, Math.min(100, p));
+  }
+
+  document.getElementById("bftGrenzen").addEventListener("click", () => {
+    const feld = document.getElementById("bftGrenzenFeld");
+    feld.style.display = feld.style.display === "none" ? "block" : "none";
+  });
+
+  let bftLetzte = null;   // für die Übernahme als IGF-Termin
+
+  function bftBewerten(){
+    const g = medizin.bft;
+    const sprint = parseFloat(String(bftSprint.value).replace(",", "."));
+    const klimm = parseFloat(String(bftKlimm.value).replace(",", "."));
+    const lauf = laufzeitSekunden(bftLauf.value);
+    const maxLauf = laufzeitSekunden(g.maxLauf) || 390;
+    const bestLauf = laufzeitSekunden(g.bestLauf) || 210;
+
+    if(!isFinite(sprint) && !isFinite(klimm) && lauf === null){
+      bftErgebnis.textContent = "Werte eintragen — die Bewertung erscheint hier.";
+      bftLetzte = null;
+      return;
+    }
+
+    const teile = [];
+    let bestanden = 0, erfasst = 0, punkteSumme = 0, punkteZahl = 0;
+
+    function teil(name, anzeige, ok, punkte){
+      erfasst++;
+      if(ok) bestanden++;
+      if(punkte !== null){ punkteSumme += punkte; punkteZahl++; }
+      teile.push('<div class="bft-teil"><span>' + name + '</span>'
+        + '<span class="' + (ok ? "bft-ok" : "bft-fehl") + '">'
+        + anzeige + (punkte !== null ? "  ·  " + punkte + " P" : "")
+        + (ok ? "  ✓" : "  ✗") + '</span></div>');
+    }
+
+    if(isFinite(sprint)){
+      teil("11×10 m Sprint", sprint.toFixed(1) + " s",
+        sprint <= g.maxSprint,
+        punkteSchaetzen(sprint, g.maxSprint, g.bestSprint, true));
+    }
+    if(isFinite(klimm)){
+      teil("Klimmhang", klimm.toFixed(1) + " s",
+        klimm >= g.minKlimm,
+        punkteSchaetzen(klimm, g.minKlimm, g.bestKlimm, false));
+    }
+    if(lauf !== null){
+      teil("1000 m Lauf", sekundenText(lauf),
+        lauf <= maxLauf,
+        punkteSchaetzen(lauf, maxLauf, bestLauf, true));
+    }
+
+    const alleDa = erfasst === 3;
+    const gesamt = alleDa && bestanden === 3;
+    let kopf;
+    if(!alleDa){
+      kopf = '<div style="margin-bottom:8px;color:var(--text-dim);">'
+        + bestanden + " von " + erfasst + " erfassten Übungen erfüllt — noch nicht vollständig</div>";
+    }else{
+      kopf = '<div style="margin-bottom:8px;font-weight:600;color:'
+        + (gesamt ? "var(--green)" : "var(--red)") + ';">'
+        + (gesamt ? "Alle drei Anforderungen erfüllt" : "Nicht alle Anforderungen erfüllt")
+        + (punkteZahl === 3 ? " · " + punkteSumme + " von 300 Punkten" : "") + "</div>";
+    }
+    const fuss = '<div class="hint" style="margin-top:8px;">Punkte sind eine Schätzung '
+      + 'zwischen Grenzwert und Bestwert — keine amtliche Auswertung.</div>';
+    bftErgebnis.innerHTML = kopf + teile.join("") + fuss;
+
+    bftLetzte = {
+      sprint: isFinite(sprint) ? sprint : null,
+      klimm: isFinite(klimm) ? klimm : null,
+      lauf: lauf,
+      punkte: punkteZahl === 3 ? punkteSumme : null,
+      bestanden: gesamt
+    };
+  }
+  [bftSprint, bftKlimm, bftLauf].forEach(el => el.addEventListener("input", bftBewerten));
+
+  document.getElementById("bftUebernehmen").addEventListener("click", () => {
+    const teile = [];
+    if(bftLetzte){
+      if(bftLetzte.sprint !== null) teile.push("Sprint " + bftLetzte.sprint + " s");
+      if(bftLetzte.klimm !== null) teile.push("Klimmhang " + bftLetzte.klimm + " s");
+      if(bftLetzte.lauf !== null) teile.push("1000 m " + sekundenText(bftLetzte.lauf));
+    }
+    igfBearbeitet = null;
+    igfArt.value = "BFT";
+    igfDatum.value = todayDE();
+    igfIntervall.value = "12M";
+    bisAusIntervall(igfDatum, igfIntervall, igfBis);
+    igfErgebnisFeld.value = bftLetzte
+      ? (bftLetzte.bestanden ? "bestanden" : "nicht bestanden")
+        + (bftLetzte.punkte !== null ? " · " + bftLetzte.punkte + " P" : "")
+      : "";
+    igfNotiz.value = teile.join(" · ");
+    igfForm.style.display = "block";
+    igfForm.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  /* =========================================================
+     IGF-ÜBERSICHT DRUCKEN / VERSENDEN
+     ========================================================= */
+  function igfUebersichtHtml(){
+    const pr = medizin.person;
+    const heute = new Date();
+    const kopfZeilen = [
+      ["Name", pr.name || "—"],
+      ["Dienstgrad", pr.dienstgrad || "—"],
+      ["Einheit", pr.einheit || "—"],
+      ["Geburtsdatum", pr.geburt || "—"]
+    ];
+
+    function tabelle(titel, liste, spalten) {
+      if(!liste.length) return "";
+      const kopf = spalten.map(s => "<th>" + s[0] + "</th>").join("");
+      const zeilen = liste.slice().sort((a,b) => {
+        const da = parseDateDE(a.gueltigBis) || parseDateDE(a.datum) || 0;
+        const db = parseDateDE(b.gueltigBis) || parseDateDE(b.datum) || 0;
+        return da - db;
+      }).map(e => {
+        const st = e.gueltigBis ? getStatus(e.gueltigBis).key : "";
+        const klasse = st === "abgelaufen" ? ' class="ab"' : st === "warnung" ? ' class="wa"' : "";
+        return "<tr" + klasse + ">" + spalten.map(sp => "<td>" + (sp[1](e) || "—") + "</td>").join("") + "</tr>";
+      }).join("");
+      return "<h2>" + titel + "</h2><table><thead><tr>" + kopf + "</tr></thead><tbody>" + zeilen + "</tbody></table>";
+    }
+
+    function schutz(t){
+      return String(t == null ? "" : t)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    return '<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">'
+      + '<title>IGF-Übersicht' + (pr.name ? " — " + schutz(pr.name) : "") + '</title>'
+      + '<style>'
+      + 'body{font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111;margin:18mm 15mm;}'
+      + 'h1{font-size:16pt;margin:0 0 2mm;}'
+      + 'h2{font-size:12pt;margin:8mm 0 2mm;border-bottom:1px solid #999;padding-bottom:1mm;}'
+      + '.kopf{border:1px solid #999;padding:3mm;margin-bottom:4mm;}'
+      + '.kopf div{margin:0.8mm 0;}'
+      + '.kopf b{display:inline-block;min-width:32mm;}'
+      + 'table{width:100%;border-collapse:collapse;margin-bottom:3mm;}'
+      + 'th,td{border:1px solid #999;padding:1.6mm 2mm;text-align:left;font-size:10pt;}'
+      + 'th{background:#eee;}'
+      + 'tr.ab td{background:#fde8e8;}'
+      + 'tr.wa td{background:#fdf6e3;}'
+      + '.fuss{margin-top:6mm;font-size:8.5pt;color:#555;border-top:1px solid #ccc;padding-top:2mm;}'
+      + '@media print{body{margin:12mm;} .noprint{display:none;}}'
+      + '</style></head><body>'
+      + '<h1>IGF-Übersicht</h1>'
+      + '<div class="kopf">'
+      + kopfZeilen.map(z => "<div><b>" + z[0] + ":</b> " + schutz(z[1]) + "</div>").join("")
+      + '<div><b>Stand:</b> ' + toDEString(heute) + '</div>'
+      + '</div>'
+      + tabelle("Individuelle Grundfertigkeiten", medizin.igf, [
+          ["Prüfung", e => schutz(e.art)],
+          ["Datum", e => fmt(e.datum)],
+          ["Gültig bis", e => e.gueltigBis ? fmt(e.gueltigBis) : "—"],
+          ["Ergebnis", e => schutz(e.ergebnis)],
+          ["Notiz", e => schutz(e.notiz)]
+        ])
+      + tabelle("AVU-IGF / WFV", medizin.avu, [
+          ["Untersuchung", e => schutz(e.art)],
+          ["Datum", e => fmt(e.datum)],
+          ["Gültig bis", e => e.gueltigBis ? fmt(e.gueltigBis) : "—"],
+          ["Befund", e => schutz(e.befund)],
+          ["Stelle", e => schutz(e.stelle)]
+        ])
+      + tabelle("Impfungen", medizin.impfungen, [
+          ["Impfung", e => schutz(e.art)],
+          ["Geimpft am", e => fmt(e.datum)],
+          ["Gültig", e => e.jahre ? e.jahre + " Jahre" : (e.jahre === 0 ? "unbegrenzt" : "—")],
+          ["Ablauf", e => e.gueltigBis ? fmt(e.gueltigBis) : "—"],
+          ["Notiz", e => schutz([e.dosis, e.notiz].filter(Boolean).join(" · "))]
+        ])
+      + '<div class="fuss">Rot hinterlegt: abgelaufen &nbsp;·&nbsp; gelb hinterlegt: läuft in unter '
+      + 'sechs Monaten ab.<br>Erstellt mit Dienst-Cockpit. Persönliche Aufstellung ohne Gewähr — '
+      + 'ersetzt keine offizielle Nachweisführung.</div>'
+      + '</body></html>';
+  }
+
+  document.getElementById("igfDrucken").addEventListener("click", () => {
+    const html = igfUebersichtHtml();
+    /* Eigenes Fenster, damit die App selbst nicht gedruckt wird. In der App
+       ist das Fenster gesperrt — dann in einem Rahmen drucken. */
+    let fenster = null;
+    try{ fenster = window.open("", "_blank"); }catch(e){}
+    if(fenster && fenster.document){
+      fenster.document.write(html);
+      fenster.document.close();
+      setTimeout(() => { try{ fenster.focus(); fenster.print(); }catch(e){} }, 400);
+      return;
+    }
+    const rahmen = document.createElement("iframe");
+    rahmen.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
+    document.body.appendChild(rahmen);
+    rahmen.contentDocument.write(html);
+    rahmen.contentDocument.close();
+    setTimeout(() => {
+      try{
+        rahmen.contentWindow.focus();
+        rahmen.contentWindow.print();
+      }catch(e){
+        alert("Der Druckdialog konnte nicht geöffnet werden.\n\n"
+          + 'Über „✉ Per E-Mail" lässt sich die Übersicht stattdessen als Datei teilen.');
+      }
+      setTimeout(() => rahmen.remove(), 2000);
+    }, 500);
+  });
+
+  document.getElementById("igfMail").addEventListener("click", async () => {
+    const pr = medizin.person;
+    const name = "IGF-Uebersicht" + (pr.name ? "_" + pr.name.replace(/[^\wäöüÄÖÜß]/g, "_") : "")
+      + "_" + new Date().toISOString().slice(0,10) + ".html";
+    const html = igfUebersichtHtml();
+
+    // Als Datei teilen — von dort aus lässt sie sich per E-Mail versenden
+    const erfolg = await dateiAusgeben(html, name, "text/html;charset=utf-8");
+    if(!erfolg) return;
+    // Im Browser zusätzlich eine vorbereitete Mail anbieten
+    if(!istApp){
+      const betreff = encodeURIComponent("IGF-Übersicht"
+        + (pr.name ? " " + pr.name : "") + " · Stand " + toDEString(new Date()));
+      const text = encodeURIComponent("Anbei die IGF-Übersicht"
+        + (pr.name ? " von " + pr.name : "") + ".\n\n"
+        + "Die Datei wurde soeben heruntergeladen und muss noch angehängt werden.");
+      try{ window.location.href = "mailto:?subject=" + betreff + "&body=" + text; }catch(e){}
+    }
+  });
+
+  /* =========================================================
      Init
      ========================================================= */
   resetForm();
@@ -6684,6 +8497,10 @@
   renderEigene();
   renderKalender();
   renderWetter();
+  renderIgf();
+  renderAvu();
+  renderImp();
+  bftBewerten();
   renderDashboard();
 
   // Cockpit nur im Reiter "Urlaub/Mehrarbeit"; + Schaltfläche nur im Kalender
