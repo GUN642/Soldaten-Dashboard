@@ -140,6 +140,23 @@ zusätzlich die Auswahl **Urlaub / FvD** samt Schalter **Nur geplant**:
 
 ---
 
+## Eigenes Kontakt-Modul
+
+Im Ordner `native/` liegen zwei Java-Dateien, die der Build in das
+Android-Projekt kopiert:
+
+* `KontaktDatenPlugin.java` — liest Geburtstage, Jahrestage und eigene Anlässe
+  aus den Kontakten
+* `MainActivity.java` — meldet dieses Modul bei der App an
+
+Nötig ist das, weil Android diese Daten in der Kontakte-Datenbank speichert. Der
+Kalender „Wichtige Daten der Kontakte" ist nur eine Anzeige und liefert über die
+Kalender-Schnittstelle keine Einträge.
+
+**Beide Dateien müssen mit ins Repository**, sonst bricht der Build ab.
+
+---
+
 ## Änderungen an der App
 
 Du bearbeitest ausschließlich `www/index.html`. Nach jedem Hochladen einer neuen
