@@ -694,6 +694,62 @@
     .db-label{font-size:8px;}
   }
 
+  /* ---------- Zulu-Uhr und DTG ---------- */
+  .uhr-reihe{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .uhr-block{
+    border:1px solid var(--border);border-radius:6px;background:var(--panel-alt);
+    padding:12px;text-align:center;
+  }
+  .uhr-zeit{font-family:var(--mono);font-size:25px;font-weight:600;color:var(--amber);line-height:1.1;}
+  .uhr-label{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:0.8px;text-transform:uppercase;
+    color:var(--text-faint);margin-top:5px;
+  }
+  .uhr-datum{font-family:var(--mono);font-size:10.5px;color:var(--text-dim);margin-top:3px;}
+  .dtg-anzeige{
+    font-family:var(--mono);font-size:19px;font-weight:600;letter-spacing:1.2px;
+    color:var(--text);background:var(--panel-alt);
+    border:1px solid var(--border);border-radius:6px;
+    padding:13px;text-align:center;margin-bottom:10px;
+  }
+
+  /* ---------- Einheitenumrechner ---------- */
+  .eh-block{
+    border:1px solid var(--border-soft);border-radius:6px;background:var(--panel-alt);
+    padding:12px;margin-bottom:10px;
+  }
+  .eh-titel{
+    font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--text-faint);margin-bottom:8px;
+  }
+  .eh-reihe{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;}
+  .eh-pfeil{font-family:var(--mono);color:var(--amber);font-size:14px;}
+  .eh-einheit{
+    font-family:var(--mono);font-size:9.5px;color:var(--text-faint);
+    text-align:center;margin-top:3px;
+  }
+
+  /* ---------- Untersuchungen / Reisen ---------- */
+  .uu-zeile{
+    border:1px solid var(--border-soft);border-left:4px solid var(--text-faint);border-radius:5px;
+    padding:10px 12px;margin-bottom:8px;background:var(--panel-alt);
+    display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;
+  }
+  .uu-art{font-family:var(--cond);font-size:15px;font-weight:700;color:var(--text);}
+  .uu-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-dim);margin-top:3px;}
+  .uu-notiz{font-size:12px;color:var(--text-faint);margin-top:4px;font-style:italic;}
+  .bft-teil{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-family:var(--mono);font-size:12px;padding:3px 0;
+  }
+  .bft-ok{color:var(--green);}
+  .bft-fehl{color:var(--red);}
+
+  @media (max-width:480px){
+    .uhr-zeit{font-size:21px;}
+    .dtg-anzeige{font-size:16px;letter-spacing:0.8px;}
+  }
+
   ::selection{background:var(--amber-dim);}
 
   /* =========================================================
@@ -882,7 +938,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 3.8 &middot; Stand 10.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 4.1 &middot; Stand 11.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -896,6 +952,26 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v4.1 <span class="cl-date">11.08.2026</span></div>
+        <ul>
+          <li>Reiter „Dienst" mit Untersuchungen, BFT-Rechner und Dienstreisen wieder entfernt</li>
+          <li>Fehler behoben: Ein ganztägiger Termin von gestern erschien unter den heutigen Terminen. Bei ganztägigen Terminen bezeichnet das Ende den Folgetag — gestern 00:00 bis heute 00:00 grenzte damit an den heutigen Tag. Geprüft wird nun der letzte belegte Tag</li>
+          <li>App-Symbol deutlich größer, Hintergrund durchsichtig</li>
+        </ul>
+      </div>
+      <div class="cl-entry">
+        <div class="cl-version">v4.0 <span class="cl-date">10.08.2026</span></div>
+        <ul>
+          <li>Reiter „Dienst" (Untersuchungen, BFT, Dienstreisen) — mit v4.1 wieder entfernt</li>
+          <li><b>Neuer Reiter „Tools":</b> Zulu- und Ortszeit parallel als laufende Uhr, dazu die aktuelle Datums-Zeit-Gruppe zum Kopieren</li>
+          <li>DTG-Umrechnung in beide Richtungen, mit NATO-Zonenbuchstaben (Z, A für UTC+1, B für UTC+2)</li>
+          <li>Koordinatenumrechner Lat/Lon ↔ MGRS auf WGS84, zusätzlich UTM-Anzeige. Eingabe als Dezimalgrad oder Grad/Minuten/Sekunden, Genauigkeit von 1 m bis 1 km wählbar, Übernahme des eigenen Standorts möglich</li>
+          <li>Einheitenumrechner: Fuß/Meter, Pfund/Kilogramm, Seemeilen/Kilometer, Knoten/km-h, Fahrenheit/Celsius, inHg/hPa, Gallonen/Liter</li>
+          <li>Uhrzeiten und Laufzeiten werden tolerant gelesen (1300, 13.00, 512 für 5:12)</li>
+          <li>Alle neuen Bereiche sind in Sicherung und Wiederherstellung eingeschlossen</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v3.8 <span class="cl-date">10.08.2026</span></div>
         <ul>
@@ -1216,6 +1292,7 @@
   <button class="tab-btn" data-tab="tabStart">Urlaub/Mehrarbeit</button>
   <button class="tab-btn" data-tab="tabAblauf">Lehrgänge</button>
   <button class="tab-btn" data-tab="tabTodo">To-do</button>
+  <button class="tab-btn" data-tab="tabTools">Tools</button>
   <button class="tab-btn" data-tab="tabNotizen">Notizen</button>
 </div>
 
@@ -1846,6 +1923,110 @@
         <div id="todoDoneList"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ============ TAB: TOOLS ============ -->
+<div class="tab-panel" id="tabTools">
+  <div class="grid" style="padding-top:14px;">
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">01</span>Zulu-Zeit &amp; DTG</h2>
+      </div>
+      <div class="panel-body">
+        <div class="uhr-reihe">
+          <div class="uhr-block">
+            <div class="uhr-zeit" id="uhrZulu">--:--:--</div>
+            <div class="uhr-label">Zulu (UTC)</div>
+            <div class="uhr-datum" id="uhrZuluDatum"></div>
+          </div>
+          <div class="uhr-block">
+            <div class="uhr-zeit" id="uhrLokal">--:--:--</div>
+            <div class="uhr-label">Ortszeit <span id="uhrZone"></span></div>
+            <div class="uhr-datum" id="uhrLokalDatum"></div>
+          </div>
+        </div>
+
+        <div class="dtg-anzeige" id="dtgJetzt">—</div>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn small" type="button" id="dtgKopieren">Kopieren</button>
+        </div>
+
+        <div style="height:1px;background:var(--border-soft);margin:16px 0;"></div>
+
+        <div class="panel-note" style="margin-bottom:8px;font-weight:600;color:var(--text-dim);">Umrechnen</div>
+        <div class="row c2" style="margin-bottom:12px;">
+          <div class="field">
+            <label for="dtgEingabeZeit">Ortszeit / Datum</label>
+            <input type="text" id="dtgEingabeDatum" placeholder="TT.MM.JJJJ" inputmode="numeric" style="margin-bottom:6px;">
+            <input type="text" id="dtgEingabeZeit" placeholder="z. B. 1430" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label for="dtgEingabeDtg">DTG</label>
+            <input type="text" id="dtgEingabeDtg" placeholder="z. B. 101430ZAUG26">
+            <div class="hint">Beides möglich: links eintragen ergibt den DTG, rechts eintragen ergibt Datum und Ortszeit.</div>
+          </div>
+        </div>
+        <div class="konto-summary" id="dtgErgebnis">—</div>
+        <div class="panel-note">
+          Aufbau: Tag, Stunde, Minute, Zeitzonenbuchstabe, Monat, Jahr. „Z" steht für UTC,
+          „A" für UTC+1 (Winterzeit in Deutschland), „B" für UTC+2 (Sommerzeit).
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">02</span>Koordinaten</h2>
+        <button class="btn small" type="button" id="koStandort">📍 Standort</button>
+      </div>
+      <div class="panel-body">
+        <div class="row c2" style="margin-bottom:12px;">
+          <div class="field">
+            <label for="koBreite">Breite (Lat)</label>
+            <input type="text" id="koBreite" placeholder="52.516275 oder 52 30 58.6 N">
+          </div>
+          <div class="field">
+            <label for="koLaenge">Länge (Lon)</label>
+            <input type="text" id="koLaenge" placeholder="13.377704 oder 13 22 39.7 E">
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+          <button class="btn" type="button" id="koNachMgrs">↓ nach MGRS</button>
+        </div>
+
+        <div class="field" style="margin-bottom:12px;">
+          <label for="koMgrs">MGRS</label>
+          <input type="text" id="koMgrs" placeholder="33U UU 89918 19699">
+        </div>
+        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+          <button class="btn" type="button" id="koNachGeo">↑ nach Lat/Lon</button>
+        </div>
+
+        <div class="konto-summary" id="koErgebnis">—</div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn small" type="button" id="koKopieren">Kopieren</button>
+          <select id="koStellen" style="max-width:170px;">
+            <option value="5" selected>MGRS 1 m (5 Stellen)</option>
+            <option value="4">MGRS 10 m (4 Stellen)</option>
+            <option value="3">MGRS 100 m (3 Stellen)</option>
+            <option value="2">MGRS 1 km (2 Stellen)</option>
+          </select>
+        </div>
+        <div class="panel-note">
+          Bezugssystem WGS84. Eingabe als Dezimalgrad oder als Grad/Minuten/Sekunden.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">03</span>Einheiten</h2>
+      </div>
+      <div class="panel-body" id="einheitenFeld"></div>
+    </div>
+
   </div>
 </div>
 
@@ -5269,7 +5450,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "3.8";
+  const APP_VERSION = "4.1";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -5329,7 +5510,7 @@
     try{
       const payload = {
         app: "Dienst-Cockpit", version: APP_VERSION, exportedAt: new Date().toISOString(),
-        ablaufregister: eintraege, urlaub, ueberstunden, todos, notizen, kalender
+        ablaufregister: eintraege, urlaub, ueberstunden, todos, notizen, kalender, dashboard
       };
       const json = JSON.stringify(payload, null, 2);
       const name = "DienstCockpit_v" + APP_VERSION + "_" + new Date().toISOString().slice(0,10) + ".json";
@@ -5378,6 +5559,10 @@
           if(!Array.isArray(notizen.eintraege)) notizen.eintraege = [];
           etwas = true;
         }
+        if(payload.dashboard && typeof payload.dashboard === "object"){
+          dashboard = Object.assign({ wetterUrl: WETTER_STANDARD }, payload.dashboard);
+          etwas = true;
+        }
         if(payload.kalender && typeof payload.kalender === "object"){
           kalender = Object.assign({ quellen: [], eigene: [], farben: {}, fvdStunden: 8 }, payload.kalender);
           if(!Array.isArray(kalender.quellen)) kalender.quellen = [];
@@ -5390,10 +5575,12 @@
         if(!etwas) throw new Error("kein gültiges Format");
 
         saveAblauf(); saveUrlaub(); saveUeberstunden(); saveTodos(); saveNotizen(); saveKalender();
+        saveDashboard();
         uAnspruch.value = urlaub.jahresanspruch;
         resetForm(); closeForm(); resetNotizForm();
         renderAblauf(); renderUrlaub(); renderUeberstunden();
         renderTodos(); renderNotizen(); renderQuellen(); renderEigene(); renderKalender();
+        renderWetter();
         alert("Sicherung erfolgreich eingelesen.");
       }catch(e){
         alert("Einlesen fehlgeschlagen — die Datei scheint keine gültige Sicherung dieser App zu sein.\n\n"
@@ -5866,7 +6053,21 @@
     // Termine heute — ohne Aufgaben, die stehen unten gesondert
     const tagStart = new Date(heute);
     const tagEnde = new Date(heute.getTime() + 86399999);
-    const alle = terminFenster(tagStart, tagEnde).filter(t => !t.istTodo);
+    /* Bei ganztägigen Terminen bezeichnet das Ende den Folgetag: ein Termin von
+       gestern reicht bis heute 00:00 und überlappte dadurch mit dem heutigen Tag.
+       Deshalb den letzten belegten Tag prüfen statt die Zeitspanne. */
+    const alle = terminFenster(tagStart, tagEnde).filter(t => {
+      if(t.istTodo) return false;
+      const anfang = new Date(t.start); anfang.setHours(0,0,0,0);
+      let letzter;
+      if(t.allDay && t.end){
+        letzter = new Date(t.end.getTime() - 1);   // exklusives Ende
+      }else{
+        letzter = new Date(t.end || t.start);
+      }
+      letzter.setHours(0,0,0,0);
+      return anfang <= heute && letzter >= heute;
+    });
 
     dbTermine.innerHTML = "";
     if(!alle.length){
@@ -5958,6 +6159,517 @@
       m.style.color = saldo < 0 ? "var(--red)" : "var(--amber)";
     }
   }
+
+  /* =========================================================
+     ZULU-ZEIT UND DTG
+     ========================================================= */
+  const MONATE_KURZ = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+  /* Zeitzonenbuchstabe nach NATO: Z = UTC, A..M östlich, N..Y westlich.
+     Deutschland: Winterzeit A (UTC+1), Sommerzeit B (UTC+2). */
+  function zonenBuchstabe(versatzMinuten){
+    const stunden = Math.round(versatzMinuten / 60);
+    if(stunden === 0) return "Z";
+    const oestlich = "ABCDEFGHIKLM";     // J wird nicht verwendet
+    const westlich = "NOPQRSTUVWXY";
+    if(stunden > 0 && stunden <= 12) return oestlich.charAt(stunden - 1);
+    if(stunden < 0 && stunden >= -12) return westlich.charAt(-stunden - 1);
+    return "Z";
+  }
+  function versatzAusBuchstabe(b){
+    const B = String(b || "").toUpperCase();
+    if(B === "Z") return 0;
+    const oestlich = "ABCDEFGHIKLM";
+    const westlich = "NOPQRSTUVWXY";
+    let i = oestlich.indexOf(B);
+    if(i >= 0) return (i + 1) * 60;
+    i = westlich.indexOf(B);
+    if(i >= 0) return -(i + 1) * 60;
+    return null;
+  }
+  function zwei2(n){ return String(n).padStart(2, "0"); }
+
+  /* DTG aus einem Zeitpunkt bilden; "utc" = true erzeugt die Zulu-Form */
+  function dtgBilden(datum, alsUtc){
+    if(alsUtc){
+      return zwei2(datum.getUTCDate()) + zwei2(datum.getUTCHours()) + zwei2(datum.getUTCMinutes())
+        + "Z" + MONATE_KURZ[datum.getUTCMonth()] + String(datum.getUTCFullYear()).slice(-2);
+    }
+    const versatz = -datum.getTimezoneOffset();
+    return zwei2(datum.getDate()) + zwei2(datum.getHours()) + zwei2(datum.getMinutes())
+      + zonenBuchstabe(versatz) + MONATE_KURZ[datum.getMonth()] + String(datum.getFullYear()).slice(-2);
+  }
+
+  /* DTG einlesen: 101430ZAUG26, auch mit Leerzeichen */
+  function dtgLesen(text){
+    const t = String(text || "").toUpperCase().replace(/\s+/g, "");
+    const m = t.match(/^(\d{2})(\d{2})(\d{2})([A-Z])([A-Z]{3})(\d{2}|\d{4})$/);
+    if(!m) return null;
+    const tag = +m[1], std = +m[2], min = +m[3];
+    const versatz = versatzAusBuchstabe(m[4]);
+    const monat = MONATE_KURZ.indexOf(m[5]);
+    if(versatz === null || monat < 0) return null;
+    if(tag < 1 || tag > 31 || std > 23 || min > 59) return null;
+    let jahr = +m[6];
+    if(jahr < 100) jahr += 2000;
+    // Angegebene Zeit gilt in der genannten Zone -> nach UTC umrechnen
+    const alsUtc = Date.UTC(jahr, monat, tag, std, min) - versatz * 60000;
+    const d = new Date(alsUtc);
+    if(isNaN(d)) return null;
+    return { zeitpunkt: d, zone: m[4], versatz: versatz };
+  }
+
+  const uhrZulu = document.getElementById("uhrZulu");
+  const uhrLokal = document.getElementById("uhrLokal");
+  const uhrZuluDatum = document.getElementById("uhrZuluDatum");
+  const uhrLokalDatum = document.getElementById("uhrLokalDatum");
+  const uhrZone = document.getElementById("uhrZone");
+  const dtgJetzt = document.getElementById("dtgJetzt");
+
+  function uhrenAktualisieren(){
+    const j = new Date();
+    uhrZulu.textContent = zwei2(j.getUTCHours()) + ":" + zwei2(j.getUTCMinutes()) + ":" + zwei2(j.getUTCSeconds());
+    uhrLokal.textContent = zwei2(j.getHours()) + ":" + zwei2(j.getMinutes()) + ":" + zwei2(j.getSeconds());
+    uhrZuluDatum.textContent = zwei2(j.getUTCDate()) + "." + zwei2(j.getUTCMonth()+1) + "." + j.getUTCFullYear();
+    uhrLokalDatum.textContent = zwei2(j.getDate()) + "." + zwei2(j.getMonth()+1) + "." + j.getFullYear();
+    const versatz = -j.getTimezoneOffset();
+    uhrZone.textContent = "(" + zonenBuchstabe(versatz) + ", UTC"
+      + (versatz >= 0 ? "+" : "-") + Math.abs(Math.round(versatz/60)) + ")";
+    dtgJetzt.textContent = dtgBilden(j, true);
+  }
+  uhrenAktualisieren();
+  setInterval(uhrenAktualisieren, 1000);
+
+  function inZwischenablage(text, knopf){
+    const fertig = () => {
+      if(!knopf) return;
+      const alt = knopf.textContent;
+      knopf.textContent = "✓ kopiert";
+      setTimeout(() => { knopf.textContent = alt; }, 1200);
+    };
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(fertig, () => prompt("Zum Kopieren:", text));
+        return;
+      }
+    }catch(e){}
+    prompt("Zum Kopieren:", text);
+  }
+
+  document.getElementById("dtgKopieren").addEventListener("click", (e) => {
+    inZwischenablage(dtgJetzt.textContent, e.target);
+  });
+
+  /* ---------- DTG umrechnen ---------- */
+  const dtgEingabeDatum = document.getElementById("dtgEingabeDatum");
+  const dtgEingabeZeit = document.getElementById("dtgEingabeZeit");
+  const dtgEingabeDtg = document.getElementById("dtgEingabeDtg");
+  const dtgErgebnis = document.getElementById("dtgErgebnis");
+  zeitFeldAnbinden(dtgEingabeZeit);
+
+  function ausOrtszeitRechnen(){
+    const d = parseDateDE(dtgEingabeDatum.value);
+    const z = zeitNormieren(dtgEingabeZeit.value);
+    if(!d || !z){ dtgErgebnis.textContent = "Datum und Uhrzeit eintragen."; return; }
+    const [st, mi] = z.split(":").map(Number);
+    const zeitpunkt = new Date(d.getFullYear(), d.getMonth(), d.getDate(), st, mi, 0, 0);
+    dtgEingabeDtg.value = dtgBilden(zeitpunkt, true);
+    dtgErgebnis.innerHTML = "Zulu: <b>" + dtgBilden(zeitpunkt, true) + "</b>"
+      + " &middot; Ortszeit: <b>" + dtgBilden(zeitpunkt, false) + "</b>"
+      + "<br>UTC " + zwei2(zeitpunkt.getUTCDate()) + "." + zwei2(zeitpunkt.getUTCMonth()+1) + "."
+      + zeitpunkt.getUTCFullYear() + " " + zwei2(zeitpunkt.getUTCHours()) + ":" + zwei2(zeitpunkt.getUTCMinutes());
+  }
+  function ausDtgRechnen(){
+    const r = dtgLesen(dtgEingabeDtg.value);
+    if(!r){ dtgErgebnis.textContent = "DTG nicht lesbar. Aufbau: 101430ZAUG26"; return; }
+    const d = r.zeitpunkt;
+    dtgEingabeDatum.value = toDEString(d);
+    dtgEingabeZeit.value = zwei2(d.getHours()) + ":" + zwei2(d.getMinutes());
+    dtgErgebnis.innerHTML = "Ortszeit: <b>" + toDEString(d) + " " + zwei2(d.getHours()) + ":" + zwei2(d.getMinutes()) + "</b>"
+      + "<br>Zulu: <b>" + dtgBilden(d, true) + "</b>";
+  }
+  dtgEingabeDatum.addEventListener("change", ausOrtszeitRechnen);
+  dtgEingabeZeit.addEventListener("change", ausOrtszeitRechnen);
+  dtgEingabeDtg.addEventListener("change", ausDtgRechnen);
+
+  /* ==========================================================
+     Koordinatenumrechnung WGS84 <-> UTM <-> MGRS
+     ========================================================== */
+
+  var ERD_A = 6378137.0;                 // Große Halbachse WGS84
+  var ERD_F = 1 / 298.257223563;         // Abplattung
+  var ERD_E2 = ERD_F * (2 - ERD_F);      // Erste Exzentrizität zum Quadrat
+  var K0 = 0.9996;                       // Maßstabsfaktor UTM
+
+  function gradInBogen(g){ return g * Math.PI / 180; }
+  function bogenInGrad(b){ return b * 180 / Math.PI; }
+
+  /* Breitenband nach MGRS: C bis X, ohne I und O */
+  function breitenBand(breite){
+    var buchstaben = "CDEFGHJKLMNPQRSTUVWX";
+    if(breite < -80 || breite > 84) return null;
+    if(breite >= 72) return "X";                       // X umfasst 12 Grad
+    var index = Math.floor((breite + 80) / 8);
+    return buchstaben.charAt(index);
+  }
+
+  /* Geografische Koordinaten -> UTM */
+  function nachUtm(breite, laenge){
+    if(breite < -80 || breite > 84) return null;
+
+    var zone = Math.floor((laenge + 180) / 6) + 1;
+
+    // Sonderzonen Norwegen und Svalbard
+    if(breite >= 56 && breite < 64 && laenge >= 3 && laenge < 12) zone = 32;
+    if(breite >= 72 && breite < 84){
+      if(laenge >= 0  && laenge <  9) zone = 31;
+      else if(laenge >= 9  && laenge < 21) zone = 33;
+      else if(laenge >= 21 && laenge < 33) zone = 35;
+      else if(laenge >= 33 && laenge < 42) zone = 37;
+    }
+
+    var mittelMeridian = (zone - 1) * 6 - 180 + 3;
+    var phi = gradInBogen(breite);
+    var lam = gradInBogen(laenge - mittelMeridian);
+
+    var N = ERD_A / Math.sqrt(1 - ERD_E2 * Math.sin(phi) * Math.sin(phi));
+    var T = Math.tan(phi) * Math.tan(phi);
+    var C = (ERD_E2 / (1 - ERD_E2)) * Math.cos(phi) * Math.cos(phi);
+    var A = Math.cos(phi) * lam;
+
+    var e2 = ERD_E2;
+    var M = ERD_A * (
+        (1 - e2/4 - 3*e2*e2/64 - 5*e2*e2*e2/256) * phi
+      - (3*e2/8 + 3*e2*e2/32 + 45*e2*e2*e2/1024) * Math.sin(2*phi)
+      + (15*e2*e2/256 + 45*e2*e2*e2/1024) * Math.sin(4*phi)
+      - (35*e2*e2*e2/3072) * Math.sin(6*phi)
+    );
+
+    var ost = K0 * N * (A + (1 - T + C) * A*A*A/6
+            + (5 - 18*T + T*T + 72*C - 58*(e2/(1-e2))) * Math.pow(A,5)/120) + 500000.0;
+
+    var nord = K0 * (M + N * Math.tan(phi) * (A*A/2 + (5 - T + 9*C + 4*C*C) * Math.pow(A,4)/24
+             + (61 - 58*T + T*T + 600*C - 330*(e2/(1-e2))) * Math.pow(A,6)/720));
+
+    if(breite < 0) nord += 10000000.0;   // Südhalbkugel
+
+    return { zone: zone, band: breitenBand(breite), ost: ost, nord: nord, nord0: breite >= 0 };
+  }
+
+  /* UTM -> geografische Koordinaten */
+  function ausUtm(zone, nordHalb, ost, nord){
+    var e2 = ERD_E2;
+    var e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+
+    var x = ost - 500000.0;
+    var y = nordHalb ? nord : nord - 10000000.0;
+
+    var M = y / K0;
+    var mu = M / (ERD_A * (1 - e2/4 - 3*e2*e2/64 - 5*e2*e2*e2/256));
+
+    var phi1 = mu
+      + (3*e1/2 - 27*e1*e1*e1/32) * Math.sin(2*mu)
+      + (21*e1*e1/16 - 55*Math.pow(e1,4)/32) * Math.sin(4*mu)
+      + (151*e1*e1*e1/96) * Math.sin(6*mu)
+      + (1097*Math.pow(e1,4)/512) * Math.sin(8*mu);
+
+    var C1 = (e2/(1-e2)) * Math.cos(phi1) * Math.cos(phi1);
+    var T1 = Math.tan(phi1) * Math.tan(phi1);
+    var N1 = ERD_A / Math.sqrt(1 - e2 * Math.sin(phi1) * Math.sin(phi1));
+    var R1 = ERD_A * (1 - e2) / Math.pow(1 - e2 * Math.sin(phi1) * Math.sin(phi1), 1.5);
+    var D = x / (N1 * K0);
+
+    var breite = phi1 - (N1 * Math.tan(phi1) / R1) * (
+        D*D/2
+      - (5 + 3*T1 + 10*C1 - 4*C1*C1 - 9*(e2/(1-e2))) * Math.pow(D,4)/24
+      + (61 + 90*T1 + 298*C1 + 45*T1*T1 - 252*(e2/(1-e2)) - 3*C1*C1) * Math.pow(D,6)/720
+    );
+
+    var laenge = (D - (1 + 2*T1 + C1) * D*D*D/6
+      + (5 - 2*C1 + 28*T1 - 3*C1*C1 + 8*(e2/(1-e2)) + 24*T1*T1) * Math.pow(D,5)/120) / Math.cos(phi1);
+
+    var mittelMeridian = (zone - 1) * 6 - 180 + 3;
+    return { breite: bogenInGrad(breite), laenge: mittelMeridian + bogenInGrad(laenge) };
+  }
+
+  /* --- 100-km-Quadrate --- */
+  var SPALTEN_SATZ = ["ABCDEFGH", "JKLMNPQR", "STUVWXYZ"];
+  var ZEILEN_BUCHSTABEN = "ABCDEFGHJKLMNPQRSTUV";
+
+  function quadratBuchstaben(zone, ost, nord){
+    var satz = (zone - 1) % 3;
+    var spalteIndex = Math.floor(ost / 100000) - 1;          // 1..8 -> 0..7
+    var spalte = SPALTEN_SATZ[satz].charAt(spalteIndex);
+
+    var zeileWert = Math.floor(nord) % 2000000;
+    var zeileIndex = Math.floor(zeileWert / 100000);
+    // Ungerade Zonen beginnen bei A, gerade um 5 versetzt bei F
+    if(zone % 2 === 0) zeileIndex = (zeileIndex + 5) % 20;
+    var zeile = ZEILEN_BUCHSTABEN.charAt(zeileIndex);
+
+    return spalte + zeile;
+  }
+
+  /* WGS84 -> MGRS */
+  function nachMgrs(breite, laenge, stellen){
+    stellen = stellen || 5;
+    var u = nachUtm(breite, laenge);
+    if(!u || !u.band) return null;
+
+    var quadrat = quadratBuchstaben(u.zone, u.ost, u.nord);
+    var teiler = Math.pow(10, 5 - stellen);
+    var ostRest  = Math.floor((u.ost  % 100000) / teiler);
+    var nordRest = Math.floor((u.nord % 100000) / teiler);
+
+    function fuellen(z){
+      var t = String(z);
+      while(t.length < stellen) t = "0" + t;
+      return t;
+    }
+
+    return {
+      text: u.zone + u.band + " " + quadrat + " " + fuellen(ostRest) + " " + fuellen(nordRest),
+      zone: u.zone, band: u.band, quadrat: quadrat,
+      ost: fuellen(ostRest), nord: fuellen(nordRest)
+    };
+  }
+
+  /* MGRS -> WGS84 */
+  function ausMgrs(text){
+    var t = String(text || "").toUpperCase().replace(/\s+/g, "");
+    var m = t.match(/^(\d{1,2})([C-HJ-NP-X])([A-HJ-NP-Z])([A-HJ-NP-V])(\d*)$/);
+    if(!m) return null;
+
+    var zone = parseInt(m[1], 10);
+    var band = m[2];
+    var spalte = m[3];
+    var zeile = m[4];
+    var ziffern = m[5] || "";
+
+    if(zone < 1 || zone > 60) return null;
+    if(ziffern.length % 2 !== 0) return null;
+
+    var stellen = ziffern.length / 2;
+    var ostRest = 0, nordRest = 0;
+    if(stellen > 0){
+      var teiler = Math.pow(10, 5 - stellen);
+      ostRest  = parseInt(ziffern.slice(0, stellen), 10) * teiler;
+      nordRest = parseInt(ziffern.slice(stellen), 10) * teiler;
+    }
+
+    // Spalte zurückrechnen
+    var satz = (zone - 1) % 3;
+    var spalteIndex = SPALTEN_SATZ[satz].indexOf(spalte);
+    if(spalteIndex < 0) return null;
+    var ost = (spalteIndex + 1) * 100000 + ostRest;
+
+    // Zeile zurückrechnen
+    var zeileIndex = ZEILEN_BUCHSTABEN.indexOf(zeile);
+    if(zeileIndex < 0) return null;
+    if(zone % 2 === 0) zeileIndex = (zeileIndex - 5 + 20) % 20;
+
+    // Passenden 2000-km-Abschnitt über das Breitenband bestimmen
+    var bandIndex = "CDEFGHJKLMNPQRSTUVWX".indexOf(band);
+    var bandUnten = -80 + bandIndex * 8;
+    var nordHalb = bandUnten >= 0;
+
+    // Nordwert des Bandanfangs schätzen und passenden Abschnitt wählen
+    var hilfe = nachUtm(Math.max(-80, Math.min(84, bandUnten)), (zone - 1) * 6 - 180 + 3);
+    var basis = hilfe ? hilfe.nord : 0;
+
+    var nord = zeileIndex * 100000 + nordRest;
+    while(nord < basis - 100000) nord += 2000000;
+
+    var g = ausUtm(zone, nordHalb, ost, nord);
+
+    // Ergebnis muss im angegebenen Breitenband liegen, sonst Abschnitt anpassen
+    var versuche = 0;
+    while(breitenBand(g.breite) !== band && versuche < 3){
+      nord += 2000000;
+      g = ausUtm(zone, nordHalb, ost, nord);
+      versuche++;
+    }
+
+    return { breite: g.breite, laenge: g.laenge };
+  }
+
+
+  /* ---------- Eingabe von Koordinaten ---------- */
+  /* Nimmt Dezimalgrad ("52.5163") und Grad/Minuten/Sekunden
+     ("52 30 58.6 N", "52°30'58.6\"N", "N 52 30.98") */
+  function gradLesen(text, istBreite){
+    let t = String(text || "").trim().toUpperCase();
+    if(!t) return null;
+
+    let vorzeichen = 1;
+    if(/[SW]/.test(t)) vorzeichen = -1;
+    t = t.replace(/[NSEWO]/g, " ");
+    if(t.indexOf("-") !== -1) vorzeichen = -1;
+    t = t.replace(/[°'"´`]/g, " ").replace(/,/g, ".").replace(/-/g, " ");
+
+    const zahlen = t.split(/\s+/).filter(x => x !== "").map(Number);
+    if(!zahlen.length || zahlen.some(isNaN)) return null;
+
+    let wert;
+    if(zahlen.length === 1) wert = zahlen[0];
+    else if(zahlen.length === 2) wert = zahlen[0] + zahlen[1] / 60;
+    else wert = zahlen[0] + zahlen[1] / 60 + zahlen[2] / 3600;
+
+    wert = Math.abs(wert) * vorzeichen;
+    const grenze = istBreite ? 90 : 180;
+    if(wert < -grenze || wert > grenze) return null;
+    return wert;
+  }
+
+  /* Dezimalgrad als Grad/Minuten/Sekunden darstellen */
+  function gradSchreiben(wert, istBreite){
+    const richtung = istBreite ? (wert >= 0 ? "N" : "S") : (wert >= 0 ? "E" : "W");
+    const a = Math.abs(wert);
+    const g = Math.floor(a);
+    const mRest = (a - g) * 60;
+    const m = Math.floor(mRest);
+    const sek = (mRest - m) * 60;
+    return g + "° " + zwei2(m) + "' " + sek.toFixed(2).padStart(5, "0") + '" ' + richtung;
+  }
+
+  const koBreite = document.getElementById("koBreite");
+  const koLaenge = document.getElementById("koLaenge");
+  const koMgrs = document.getElementById("koMgrs");
+  const koErgebnis = document.getElementById("koErgebnis");
+  const koStellen = document.getElementById("koStellen");
+
+  function koAusgabe(breite, laenge, mgrsText){
+    const u = nachUtm(breite, laenge);
+    koErgebnis.innerHTML =
+        "<b>" + mgrsText + "</b><br>"
+      + breite.toFixed(6) + ", " + laenge.toFixed(6) + "<br>"
+      + gradSchreiben(breite, true) + "   " + gradSchreiben(laenge, false)
+      + (u ? "<br>UTM " + u.zone + u.band + " E " + Math.round(u.ost) + " N " + Math.round(u.nord) : "");
+  }
+
+  document.getElementById("koNachMgrs").addEventListener("click", () => {
+    const b = gradLesen(koBreite.value, true);
+    const l = gradLesen(koLaenge.value, false);
+    if(b === null || l === null){
+      koErgebnis.textContent = "Breite und Länge konnten nicht gelesen werden.";
+      return;
+    }
+    const m = nachMgrs(b, l, parseInt(koStellen.value, 10));
+    if(!m){
+      koErgebnis.textContent = "Außerhalb des MGRS-Bereichs (80° Süd bis 84° Nord).";
+      return;
+    }
+    koMgrs.value = m.text;
+    koBreite.value = b.toFixed(6);
+    koLaenge.value = l.toFixed(6);
+    koAusgabe(b, l, m.text);
+  });
+
+  document.getElementById("koNachGeo").addEventListener("click", () => {
+    const g = ausMgrs(koMgrs.value);
+    if(!g){
+      koErgebnis.textContent = "MGRS nicht lesbar. Aufbau: 33U UU 89918 19699";
+      return;
+    }
+    koBreite.value = g.breite.toFixed(6);
+    koLaenge.value = g.laenge.toFixed(6);
+    const m = nachMgrs(g.breite, g.laenge, parseInt(koStellen.value, 10));
+    koAusgabe(g.breite, g.laenge, m ? m.text : koMgrs.value);
+  });
+
+  koStellen.addEventListener("change", () => {
+    const b = gradLesen(koBreite.value, true);
+    const l = gradLesen(koLaenge.value, false);
+    if(b === null || l === null) return;
+    const m = nachMgrs(b, l, parseInt(koStellen.value, 10));
+    if(m){ koMgrs.value = m.text; koAusgabe(b, l, m.text); }
+  });
+
+  document.getElementById("koKopieren").addEventListener("click", (e) => {
+    inZwischenablage(koErgebnis.textContent, e.target);
+  });
+
+  document.getElementById("koStandort").addEventListener("click", () => {
+    if(!navigator.geolocation){ alert("Standortbestimmung ist hier nicht verfügbar."); return; }
+    koErgebnis.textContent = "Standort wird bestimmt …";
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const b = pos.coords.latitude, l = pos.coords.longitude;
+      koBreite.value = b.toFixed(6);
+      koLaenge.value = l.toFixed(6);
+      const m = nachMgrs(b, l, parseInt(koStellen.value, 10));
+      if(m) koMgrs.value = m.text;
+      koAusgabe(b, l, m ? m.text : "—");
+      if(pos.coords.accuracy){
+        koErgebnis.innerHTML += "<br>Genauigkeit etwa " + Math.round(pos.coords.accuracy) + " m";
+      }
+    }, (fehler) => {
+      koErgebnis.textContent = "Standort nicht verfügbar: " + (fehler && fehler.message ? fehler.message : "unbekannt");
+    }, { enableHighAccuracy: true, timeout: 15000 });
+  });
+
+  /* =========================================================
+     EINHEITEN
+     ========================================================= */
+  const EINHEITEN_PAARE = [
+    { titel: "Länge",        a: "Fuß (ft)",       b: "Meter (m)",        faktor: 0.3048 },
+    { titel: "Höhe",         a: "Fuß (ft)",       b: "Meter (m)",        faktor: 0.3048, id: "hoehe" },
+    { titel: "Gewicht",      a: "Pfund (lbs)",    b: "Kilogramm (kg)",   faktor: 0.45359237 },
+    { titel: "Strecke",      a: "Seemeilen (NM)", b: "Kilometer (km)",   faktor: 1.852 },
+    { titel: "Geschwindigkeit", a: "Knoten (kt)", b: "km/h",             faktor: 1.852 },
+    { titel: "Temperatur",   a: "Fahrenheit (°F)", b: "Celsius (°C)",    sonder: "temp" },
+    { titel: "Druck",        a: "inHg",           b: "hPa",              faktor: 33.8639 },
+    { titel: "Volumen",      a: "Gallonen (US)",  b: "Liter",            faktor: 3.785411784 }
+  ];
+
+  (function einheitenAufbauen(){
+    const feld = document.getElementById("einheitenFeld");
+    EINHEITEN_PAARE.forEach((paar, i) => {
+      const block = document.createElement("div");
+      block.className = "eh-block";
+      block.innerHTML =
+        '<div class="eh-titel"></div>'
+        + '<div class="eh-reihe">'
+        +   '<div><input type="text" inputmode="decimal" data-eh="' + i + '" data-seite="a" placeholder="0">'
+        +     '<div class="eh-einheit"></div></div>'
+        +   '<div class="eh-pfeil">⇄</div>'
+        +   '<div><input type="text" inputmode="decimal" data-eh="' + i + '" data-seite="b" placeholder="0">'
+        +     '<div class="eh-einheit"></div></div>'
+        + '</div>';
+      const titelEl = block.querySelector(".eh-titel");
+      if(titelEl) titelEl.textContent = paar.titel;
+      const beschriftungen = block.querySelectorAll(".eh-einheit");
+      if(beschriftungen[0]) beschriftungen[0].textContent = paar.a;
+      if(beschriftungen[1]) beschriftungen[1].textContent = paar.b;
+      feld.appendChild(block);
+    });
+
+    function rechnen(index, seite, wert){
+      const paar = EINHEITEN_PAARE[index];
+      const zahl = parseFloat(String(wert).replace(",", "."));
+      const gegenseite = seite === "a" ? "b" : "a";
+      const ziel = document.querySelector('[data-eh="' + index + '"][data-seite="' + gegenseite + '"]');
+      if(!ziel) return;
+      if(!isFinite(zahl)){ ziel.value = ""; return; }
+
+      let ergebnis;
+      if(paar.sonder === "temp"){
+        ergebnis = seite === "a" ? (zahl - 32) * 5 / 9 : zahl * 9 / 5 + 32;
+      }else{
+        ergebnis = seite === "a" ? zahl * paar.faktor : zahl / paar.faktor;
+      }
+      // Sinnvoll runden, ohne unnötige Nullen
+      const gerundet = Math.abs(ergebnis) >= 100 ? ergebnis.toFixed(1)
+                     : Math.abs(ergebnis) >= 1   ? ergebnis.toFixed(2)
+                     : ergebnis.toFixed(4);
+      ziel.value = String(parseFloat(gerundet));
+    }
+
+    feld.querySelectorAll("[data-eh]").forEach(el => {
+      el.addEventListener("input", () => {
+        rechnen(+el.getAttribute("data-eh"), el.getAttribute("data-seite"), el.value);
+      });
+    });
+  })();
 
   /* =========================================================
      Init
