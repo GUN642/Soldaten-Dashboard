@@ -1034,7 +1034,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 5.4 Beta &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 5.5 Beta &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -1048,6 +1048,13 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v5.5 Beta <span class="cl-date">13.08.2026</span></div>
+        <ul>
+          <li>Der Build prüft jetzt gleich zu Beginn, ob alle Projektdateien vorhanden sind, und nennt fehlende beim Namen — bisher fiel das erst nach Minuten beim Übersetzen auf, mit einer Meldung, die den Grund nicht erkennen ließ</li>
+          <li>Zusätzlich wird geprüft, ob die angemeldeten Module auch als Datei vorliegen</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v5.4 Beta <span class="cl-date">13.08.2026</span></div>
         <ul>
@@ -6241,7 +6248,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "5.4-beta";
+  const APP_VERSION = "5.5-beta";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
