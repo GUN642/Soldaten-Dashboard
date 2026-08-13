@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Aufbau des Widgets: Kopfzeile mit Datum, darunter bis zu acht Zeilen -->
+<!-- Aufbau des Widgets: Kopfzeile mit Datum, darunter bis zu acht Zeilen.
+     Alle Zeilen stehen unmittelbar hier, da Widgets mit eingebundenen
+     Layouts nicht zuverlaessig umgehen. Erlaubt sind zudem nur bestimmte
+     Elementtypen; deshalb TextView statt View fuer die Farbmarken. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -12,14 +15,13 @@
         android:padding="10dp"
         android:background="#D90E1319">
 
-        <!-- Kopfzeile: Antippen oeffnet die App -->
         <LinearLayout
             android:id="@+id/kopfBereich"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:baselineAligned="false"
-            android:paddingBottom="6dp">
+            android:paddingBottom="5dp">
 
             <TextView
                 android:id="@+id/datum"
@@ -39,7 +41,6 @@
                 android:layout_height="wrap_content"
                 android:textSize="10sp"
                 android:maxLines="1"
-                android:paddingStart="6dp"
                 android:paddingLeft="6dp"
                 android:textColor="#AAB4C2" />
         </LinearLayout>
@@ -49,20 +50,314 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="11sp"
-            android:paddingTop="8dp"
+            android:paddingTop="6dp"
             android:visibility="gone"
             android:textColor="#AAB4C2"
             android:text="Heute nichts eingetragen" />
 
-        <!-- Acht Zeilen; nicht belegte werden ausgeblendet -->
-        <include layout="@layout/agenda_zeile1" />
-        <include layout="@layout/agenda_zeile2" />
-        <include layout="@layout/agenda_zeile3" />
-        <include layout="@layout/agenda_zeile4" />
-        <include layout="@layout/agenda_zeile5" />
-        <include layout="@layout/agenda_zeile6" />
-        <include layout="@layout/agenda_zeile7" />
-        <include layout="@layout/agenda_zeile8" />
+        <LinearLayout
+            android:id="@+id/zeile1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <TextView
+                android:id="@+id/farbe1"
+                android:layout_width="4dp"
+                android:layout_height="15dp"
+                android:text=""
+                android:background="#8B96A5" />
+
+            <TextView
+                android:id="@+id/zeit1"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:paddingLeft="6dp"
+                android:textColor="#AAB4C2" />
+
+            <TextView
+                android:id="@+id/titel1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="4dp"
+                android:textColor="#F2F5F9" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/zeile2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <TextView
+                android:id="@+id/farbe2"
+                android:layout_width="4dp"
+                android:layout_height="15dp"
+                android:text=""
+                android:background="#8B96A5" />
+
+            <TextView
+                android:id="@+id/zeit2"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:paddingLeft="6dp"
+                android:textColor="#AAB4C2" />
+
+            <TextView
+                android:id="@+id/titel2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="4dp"
+                android:textColor="#F2F5F9" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/zeile3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <TextView
+                android:id="@+id/farbe3"
+                android:layout_width="4dp"
+                android:layout_height="15dp"
+                android:text=""
+                android:background="#8B96A5" />
+
+            <TextView
+                android:id="@+id/zeit3"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:paddingLeft="6dp"
+                android:textColor="#AAB4C2" />
+
+            <TextView
+                android:id="@+id/titel3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="4dp"
+                android:textColor="#F2F5F9" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/zeile4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <TextView
+                android:id="@+id/farbe4"
+                android:layout_width="4dp"
+                android:layout_height="15dp"
+                android:text=""
+                android:background="#8B96A5" />
+
+            <TextView
+                android:id="@+id/zeit4"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:paddingLeft="6dp"
+                android:textColor="#AAB4C2" />
+
+            <TextView
+                android:id="@+id/titel4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="4dp"
+                android:textColor="#F2F5F9" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/zeile5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <TextView
+                android:id="@+id/farbe5"
+                android:layout_width="4dp"
+                android:layout_height="15dp"
+                android:text=""
+                android:background="#8B96A5" />
+
+            <TextView
+                android:id="@+id/zeit5"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:paddingLeft="6dp"
+                android:textColor="#AAB4C2" />
+
+            <TextView
+                android:id="@+id/titel5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="4dp"
+                android:textColor="#F2F5F9" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/zeile6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <TextView
+                android:id="@+id/farbe6"
+                android:layout_width="4dp"
+                android:layout_height="15dp"
+                android:text=""
+                android:background="#8B96A5" />
+
+            <TextView
+                android:id="@+id/zeit6"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:paddingLeft="6dp"
+                android:textColor="#AAB4C2" />
+
+            <TextView
+                android:id="@+id/titel6"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="4dp"
+                android:textColor="#F2F5F9" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/zeile7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <TextView
+                android:id="@+id/farbe7"
+                android:layout_width="4dp"
+                android:layout_height="15dp"
+                android:text=""
+                android:background="#8B96A5" />
+
+            <TextView
+                android:id="@+id/zeit7"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:paddingLeft="6dp"
+                android:textColor="#AAB4C2" />
+
+            <TextView
+                android:id="@+id/titel7"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="4dp"
+                android:textColor="#F2F5F9" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/zeile8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <TextView
+                android:id="@+id/farbe8"
+                android:layout_width="4dp"
+                android:layout_height="15dp"
+                android:text=""
+                android:background="#8B96A5" />
+
+            <TextView
+                android:id="@+id/zeit8"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:paddingLeft="6dp"
+                android:textColor="#AAB4C2" />
+
+            <TextView
+                android:id="@+id/titel8"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingLeft="4dp"
+                android:textColor="#F2F5F9" />
+        </LinearLayout>
 
     </LinearLayout>
 </FrameLayout>

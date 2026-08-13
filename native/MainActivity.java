@@ -17,6 +17,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(KontaktDatenPlugin.class);
         registerPlugin(WidgetAnstossPlugin.class);
+        registerPlugin(DruckPlugin.class);
         super.onCreate(savedInstanceState);
         terminUebergeben(getIntent());
     }
