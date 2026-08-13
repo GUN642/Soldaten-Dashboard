@@ -1,4 +1,4 @@
-# Dienst-Cockpit — Android-App
+# Soldaten Dashboard — Android-App
 
 Urlaub, Überstunden, Ablaufdaten, To-do, Notizen und Kalender in einer App.
 Der Kalenderteil schreibt **direkt in den Gerätekalender** — liegt dort dein
@@ -17,7 +17,7 @@ Kalender (z. B. der deiner Frau) aktualisieren sich automatisch.
 ## Schritt 1 — Projekt auf GitHub hochladen
 
 1. Auf [github.com](https://github.com) einloggen → oben rechts **+** → **New repository**
-2. Name z. B. `dienst-cockpit`, Sichtbarkeit **Private**, dann **Create repository**
+2. Name z. B. `soldaten-dashboard`, Sichtbarkeit **Private**, dann **Create repository**
 3. Auf der folgenden Seite auf **uploading an existing file** klicken
 4. Den **gesamten Inhalt** dieses Ordners hineinziehen — wichtig: mitsamt der
    Unterordner `www`, `resources` und `.github`
@@ -37,7 +37,7 @@ Kalender (z. B. der deiner Frau) aktualisieren sich automatisch.
 3. Rechts auf **Run workflow** → nochmal **Run workflow**
 4. Warten (beim ersten Mal etwa 5–10 Minuten). Ein grüner Haken bedeutet: fertig.
 5. Den abgeschlossenen Lauf anklicken → unten unter **Artifacts** liegt
-   **Dienst-Cockpit-APK** → herunterladen
+   **Soldaten Dashboard-APK** → herunterladen
 
 Heraus kommt eine ZIP-Datei mit der `app-debug.apk` darin.
 

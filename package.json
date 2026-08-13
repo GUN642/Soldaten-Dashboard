@@ -1,7 +1,7 @@
 {
-  "name": "dienst-cockpit",
-  "version": "4.3.0",
-  "description": "Dienst-Cockpit — Urlaub, Überstunden, Ablaufdaten, Kalender",
+  "name": "soldaten-dashboard",
+  "version": "4.7.0",
+  "description": "Soldaten Dashboard — Urlaub, Überstunden, Lehrgänge, Kalender",
   "private": true,
   "scripts": {
     "sync": "cap sync android",
@@ -15,7 +15,8 @@
     "@capacitor/preferences": "^7.0.0",
     "@capacitor/filesystem": "^7.0.0",
     "@capacitor/share": "^7.0.0",
-    "@capacitor/app": "^7.0.0"
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/geolocation": "^7.0.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0",

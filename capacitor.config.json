@@ -1,6 +1,6 @@
 {
   "appId": "de.gun.dienstcockpit",
-  "appName": "Dienst-Cockpit",
+  "appName": "Soldaten Dashboard",
   "webDir": "www",
   "android": {
     "allowMixedContent": false
@@ -9,7 +9,10 @@
     "androidScheme": "https",
     "allowNavigation": [
       "*.meteoblue.com",
-      "meteoblue.com"
+      "meteoblue.com",
+      "*.open-meteo.com",
+      "open-meteo.com",
+      "openholidaysapi.org"
     ]
   },
   "plugins": {
