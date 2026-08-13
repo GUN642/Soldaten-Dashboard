@@ -493,7 +493,7 @@
   }
   .kal-balken{
     position:absolute;border-radius:999px;
-    height:13px;font-size:10px;line-height:13px;padding:0 5px;
+    height:12.5px;font-size:10px;line-height:12.5px;padding:0 5px;
     overflow:hidden;pointer-events:none;font-weight:500;
     /* Zu lange Titel werden schlicht abgeschnitten, ohne Auslassungspunkte */
     white-space:nowrap;text-overflow:clip;
@@ -1001,7 +1001,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 4.9 &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 5.0 &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -1015,6 +1015,16 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v5.0 <span class="cl-date">13.08.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Der eigene Standort erschien immer als „Berlin". Der Ortsname wurde aus der Zeitzone abgeleitet, und die lautet in ganz Deutschland „Europe/Berlin" — die Koordinaten waren dabei stets richtig. Jetzt wird der Name über eine Rückwärtssuche ermittelt, ersatzweise stehen die Koordinaten</li>
+          <li>Im hellen Modus erhält die Statusleiste dunkle Symbole, vorher waren sie weiß auf weißem Grund</li>
+          <li>Etwas geringerer Abstand zwischen den Terminen im Kalender</li>
+          <li>Schulferien sind von Anfang an eingeschaltet und werden beim ersten Start geladen</li>
+          <li>Der Build startet nur noch von Hand, nicht mehr bei jedem einzelnen Datei-Upload</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v4.9 <span class="cl-date">13.08.2026</span></div>
         <ul>
@@ -2753,6 +2763,22 @@
   const metaThemeColor = document.getElementById("metaThemeColor");
   function applyThemeColor(theme){
     if(metaThemeColor) metaThemeColor.setAttribute("content", theme === "light" ? "#ffffff" : "#0b0f14");
+
+    /* Android zeichnet die Symbole der Statusleiste hell oder dunkel. Im hellen
+       Modus wären weiße Symbole auf weißem Grund unsichtbar — daher umstellen. */
+    // Bewusst über window: die Konstante Cap wird erst weiter unten angelegt,
+    // das Theme wird aber schon beim Start gesetzt.
+    const C = window.Capacitor;
+    const SB = (C && C.Plugins && C.Plugins.StatusBar) || null;
+    if(SB){
+      try{
+        // "LIGHT" steht für dunkle Symbole auf hellem Grund, "DARK" umgekehrt
+        SB.setStyle({ style: theme === "light" ? "LIGHT" : "DARK" });
+        if(SB.setBackgroundColor){
+          SB.setBackgroundColor({ color: theme === "light" ? "#ffffff" : "#0b0f14" });
+        }
+      }catch(e){ /* ohne Anpassung weiterarbeiten */ }
+    }
   }
   document.querySelectorAll("[data-theme-btn]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -4271,7 +4297,7 @@
     kalGrid.querySelectorAll(".kal-balken-schicht").forEach(schicht => {
       const hoehe = schicht.clientHeight;
       if(hoehe <= 0) return;
-      const maxSpuren = Math.max(1, Math.floor(hoehe / 16));
+      const maxSpuren = Math.max(1, Math.floor(hoehe / 14));
 
       schicht.querySelectorAll(".kal-mehr-marke").forEach(m => m.remove());
 
@@ -4294,7 +4320,7 @@
         marke.className = "kal-mehr-marke";
         marke.textContent = "+" + ueberProSpalte[spalte];
         marke.style.left = "calc(" + (spalte * 100 / 7) + "% + 2px)";
-        marke.style.top = ((maxSpuren - 1) * 16 + 1) + "px";
+        marke.style.top = ((maxSpuren - 1) * 14 + 1) + "px";
         schicht.appendChild(marke);
       });
     });
@@ -4478,7 +4504,7 @@
         }
         balken.style.left = "calc(" + (vonSpalte * 100 / 7) + "% + 1px)";
         balken.style.width = "calc(" + ((bisSpalte - vonSpalte + 1) * 100 / 7) + "% - 3px)";
-        balken.style.top = (spur * 16) + "px";
+        balken.style.top = (spur * 14) + "px";
         balken.setAttribute("data-spur", spur);
         balken.setAttribute("data-von", vonSpalte);
         balken.setAttribute("data-bis", bisSpalte);
@@ -6051,7 +6077,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "4.9";
+  const APP_VERSION = "5.0";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -6732,14 +6758,18 @@
       return;
     }
 
-    // Ortsnamen nachschlagen, notfalls ohne
-    let name = "Eigener Standort";
+    /* Ortsnamen nachschlagen. Die Zeitzone eignet sich dafür nicht — sie lautet
+       in ganz Deutschland "Europe/Berlin", weshalb bisher immer Berlin erschien.
+       Daher ein Dienst zur Rückwärtssuche; schlägt er fehl, bleiben die
+       Koordinaten als Bezeichnung. */
+    let name = "Standort " + ort.breite.toFixed(3) + ", " + ort.laenge.toFixed(3);
     try{
-      const a = await fetch("https://api.open-meteo.com/v1/forecast?latitude="
-        + ort.breite + "&longitude=" + ort.laenge + "&current=temperature_2m&timezone=auto");
+      const a = await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="
+        + ort.breite + "&longitude=" + ort.laenge + "&localityLanguage=de");
       const d = await a.json();
-      if(d && d.timezone) name = String(d.timezone).split("/").pop().replace(/_/g, " ");
-    }catch(e){}
+      const gefunden = d && (d.city || d.locality || d.principalSubdivision);
+      if(gefunden) name = gefunden;
+    }catch(e){ /* ohne Namen weiterarbeiten */ }
 
     dashboard.ort = { name: name, breite: ort.breite, laenge: ort.laenge };
     dashboard.quelle = "openmeteo";
@@ -7636,8 +7666,8 @@
      OpenHolidays geladen und danach im Gerät gespeichert.
      ========================================================= */
   const FERIEN_KEY = "ferien_v1";
-  let ferien = loadJSON(FERIEN_KEY, { an: false, land: "", jahre: {} });
-  if(typeof ferien.an !== "boolean") ferien.an = false;
+  let ferien = loadJSON(FERIEN_KEY, { an: true, land: "", jahre: {} });
+  if(typeof ferien.an !== "boolean") ferien.an = true;
   if(!ferien.jahre || typeof ferien.jahre !== "object") ferien.jahre = {};
   function saveFerien(){ saveJSON(FERIEN_KEY, ferien); }
 
@@ -7737,6 +7767,15 @@
     });
   }
   ferienUI();
+
+  // Beim ersten Start die Ferien des laufenden und nächsten Jahres holen
+  if(ferien.an && !Object.keys(ferien.jahre).length){
+    const j = new Date().getFullYear();
+    ferienLaden(j).then(() => ferienLaden(j + 1)).then(() => {
+      ferienUI();
+      if(typeof renderKalender === "function") renderKalender();
+    }).catch(() => { /* ohne Ferien weiterarbeiten */ });
+  }
 
   /* =========================================================
      ZURÜCK-TASTE UND -GESTE
