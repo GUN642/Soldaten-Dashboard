@@ -62,11 +62,12 @@ if __name__ == "__main__":
     flaeche(hell, 1024, 0.96).save(os.path.join(res, "icon.png"), "PNG")
     # Adaptiv: kleiner, damit der runde Beschnitt die Arme nicht abschneidet
     flaeche(hell, 1024, 0.66).save(os.path.join(res, "icon-foreground.png"), "PNG")
-    Image.new("RGBA", (1024, 1024), DUNKEL).save(
+    # Durchsichtiger Hintergrund
+    Image.new("RGBA", (1024, 1024), (0, 0, 0, 0)).save(
         os.path.join(res, "icon-background.png"), "PNG")
 
     for name in ("splash.png", "splash-dark.png"):
-        sp = Image.new("RGBA", (2732, 2732), DUNKEL)
+        sp = Image.new("RGBA", (2732, 2732), (0, 0, 0, 0))
         k = flaeche(hell, int(2732 * 0.32), 1.0)
         sp.paste(k, ((2732 - k.width) // 2, (2732 - k.height) // 2), k)
         sp.save(os.path.join(res, name), "PNG")
