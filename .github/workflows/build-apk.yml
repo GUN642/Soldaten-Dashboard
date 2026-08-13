@@ -28,7 +28,7 @@ jobs:
       - name: Android SDK einrichten
         uses: android-actions/setup-android@v3
 
-      - name: Festen Signierschluessel einrichten
+      - name: Signierschluessel pruefen
         run: |
           if [ ! -f keystore/debug.keystore ]; then
             echo "FEHLER: keystore/debug.keystore fehlt im Projekt."
@@ -36,10 +36,11 @@ jobs:
             echo "Updates lassen sich nicht ueber die vorhandene App installieren."
             exit 1
           fi
+          # Zusaetzlich an den Standardort legen, falls etwas darauf zugreift
           mkdir -p ~/.android
           cp keystore/debug.keystore ~/.android/debug.keystore
-          echo "Signatur, die dieser Build verwendet:"
-          keytool -list -v -keystore ~/.android/debug.keystore -storepass android \
+          echo "Schluessel im Projekt:"
+          keytool -list -v -keystore keystore/debug.keystore -storepass android \
             | grep -E "SHA256:" | head -1
 
       - name: Abhaengigkeiten installieren
@@ -48,6 +49,13 @@ jobs:
       - name: Android-Projekt erzeugen
         run: npx cap add android
 
+      - name: Signatur fest in Gradle eintragen
+        run: |
+          python3 scripts/signatur-eintragen.py
+          echo "--- Auszug aus build.gradle ---"
+          grep -A10 "dienstcockpit-signatur" android/app/build.gradle
+          grep -A3 "buildTypes" android/app/build.gradle
+
       - name: Kalenderberechtigungen eintragen
         run: |
           MANIFEST=android/app/src/main/AndroidManifest.xml
@@ -55,7 +63,7 @@ jobs:
             echo "FEHLER: $MANIFEST nicht gefunden."
             exit 1
           fi
-          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM USE_EXACT_ALARM RECEIVE_BOOT_COMPLETED VIBRATE READ_CONTACTS INTERNET; do
+          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM USE_EXACT_ALARM RECEIVE_BOOT_COMPLETED VIBRATE READ_CONTACTS INTERNET ACCESS_COARSE_LOCATION ACCESS_FINE_LOCATION; do
             if grep -q "android.permission.$P" "$MANIFEST"; then
               echo "bereits vorhanden: $P"
             else
@@ -65,7 +73,7 @@ jobs:
           done
           echo "--- AndroidManifest.xml ---"
           cat "$MANIFEST"
-          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS; do
+          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS ACCESS_FINE_LOCATION; do
             grep -q "android.permission.$P" "$MANIFEST" || { echo "FEHLER: $P fehlt"; exit 1; }
           done
 
@@ -115,20 +123,34 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Signatur der fertigen APK pruefen
+      - name: Signatur und Version der APK pruefen
         run: |
           APK=android/app/build/outputs/apk/debug/app-debug.apk
           echo "=============================================="
-          echo " FINGERABDRUCK DER APK"
-          echo " Muss bei JEDEM Build gleich sein. Weicht er ab,"
-          echo " laesst sich das Update nicht darueber installieren."
+          echo " SIGNATUR DER FERTIGEN APK"
           echo "=============================================="
-          keytool -printcert -jarfile "$APK" | grep -E "SHA256:|Inhaber:|Owner:" | head -3
+          keytool -printcert -jarfile "$APK" | grep -E "SHA256:|Owner:|Inhaber:" | head -3
+          echo "----------------------------------------------"
+          echo " Erwartet wird dieser Fingerabdruck:"
+          keytool -list -v -keystore keystore/debug.keystore -storepass android \
+            | grep -E "SHA256:" | head -1
           echo "=============================================="
-          echo " Erwartet wird:"
-          echo " 42:6E:07:AE:3C:EE:9D:62:DB:D8:12:0D:C9:40:1E:BC:"
-          echo " 2C:20:69:D1:9B:F5:6F:77:4F:7F:D2:90:99:4A:69:94"
-          echo "=============================================="
+
+          # Beide Fingerabdruecke vergleichen und bei Abweichung abbrechen
+          IST=$(keytool -printcert -jarfile "$APK" | grep -E "SHA256:" | head -1 | tr -d ' ')
+          SOLL=$(keytool -list -v -keystore keystore/debug.keystore -storepass android \
+            | grep -E "SHA256:" | head -1 | tr -d ' ')
+          if [ "$IST" != "$SOLL" ]; then
+            echo "FEHLER: Die APK ist nicht mit dem Projektschluessel signiert."
+            echo "  in der APK: $IST"
+            echo "  erwartet:   $SOLL"
+            exit 1
+          fi
+          echo "Signatur stimmt mit dem Projektschluessel ueberein."
+
+          echo ""
+          echo " VERSION DER APK"
+          grep -E "versionCode|versionName" android/app/build.gradle
 
       - name: APK bereitstellen
         uses: actions/upload-artifact@v4
