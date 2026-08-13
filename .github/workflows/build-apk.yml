@@ -1,10 +1,9 @@
 name: APK bauen
 
+# Nur manueller Start: Reiter "Actions" -> "APK bauen" -> "Run workflow".
+# So laeuft der Build nicht bei jedem einzelnen Datei-Upload an und scheitert
+# nicht mehr an noch unvollstaendigen Dateien.
 "on":
-  push:
-    branches:
-      - main
-      - master
   workflow_dispatch:
 
 jobs:
