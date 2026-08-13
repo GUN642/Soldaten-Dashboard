@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0b0f14" id="metaThemeColor">
-<title>Dienst-Cockpit — Urlaub · Überstunden · Ablaufdaten</title>
+<title>Soldaten Dashboard — Urlaub · Überstunden · Ablaufdaten</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -101,12 +101,16 @@
     -webkit-tap-highlight-color:transparent;
   }
   .brand:active{opacity:0.7;}
-  .brand img{height:30px;width:auto;}
-  /* Auswahl mit gleichem Vorrang, sonst gewinnt ".brand img" und beide erscheinen */
+  .brand img{height:28px;width:auto;flex-shrink:0;}
+  /* Gleicher Vorrang, sonst erscheinen beide Fassungen */
   .brand img.logo-dunkel{display:block;}
   .brand img.logo-hell{display:none;}
   html[data-theme="light"] .brand img.logo-dunkel{display:none;}
   html[data-theme="light"] .brand img.logo-hell{display:block;}
+  .brand-name{
+    font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.3px;
+    color:var(--topbar-text);white-space:nowrap;
+  }
   .seiten-titel{
     font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.4px;
     color:var(--topbar-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -909,8 +913,9 @@
 
 <div class="topbar">
   <button class="brand" id="logoBtn" type="button" title="Hell/Dunkel wechseln">
-    <img class="logo-dunkel" src="logo-header.png" alt="Air Force CH-47 Team">
-    <img class="logo-hell" src="logo-header-light.png" alt="Air Force CH-47 Team">
+    <img class="logo-dunkel" src="logo-header.png" alt="">
+    <img class="logo-hell" src="logo-header-light.png" alt="">
+    <span class="brand-name">Soldaten Dashboard</span>
   </button>
   <div class="seiten-titel" id="seitenTitel">Kalender</div>
   <div class="kal-nav">
@@ -996,7 +1001,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 4.3 &middot; Stand 12.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 4.7 &middot; Stand 12.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -1010,6 +1015,37 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v4.7 <span class="cl-date">12.08.2026</span></div>
+        <ul>
+          <li>App-Symbol und Kopfzeile zeigen das vorgegebene Eiserne Kreuz, unverändert in der Form — nur der weiße Hintergrund ist freigestellt</li>
+          <li>Symbol in heller Ausführung auf dunklem Grund, damit es auf dem Startbildschirm klar hervortritt; in der Kopfzeile wechselt die Farbe mit hellem und dunklem Modus</li>
+        </ul>
+      </div>
+      <div class="cl-entry">
+        <div class="cl-version">v4.6 <span class="cl-date">12.08.2026</span></div>
+        <ul>
+          <li>Kreuz an die klassische Form angepasst: konkav geschwungene Armkanten und schmale Innenkontur</li>
+          <li>Vollständig aus eigenen Kurven gezeichnet — die Grundform des Tatzenkreuzes ist gemeinfrei, amtliche Hoheitszeichen werden nicht verwendet</li>
+          <li>In der Kopfzeile ohne Innenkontur, damit es in kleiner Größe klar bleibt; Farbe wechselt mit hellem und dunklem Modus</li>
+        </ul>
+      </div>
+      <div class="cl-entry">
+        <div class="cl-version">v4.5 <span class="cl-date">12.08.2026</span></div>
+        <ul>
+          <li>App-Symbol und Kopfzeile zeigen ein eigens gestaltetes Tatzenkreuz statt des amtlichen Hoheitszeichens — dessen Verwendung ist rechtlich geregelt, die Grundform des Tatzenkreuzes ist dagegen gemeinfrei</li>
+          <li>Kreuz in der Akzentfarbe der App, Hintergrund durchsichtig; in der Kopfzeile passt sich die Farbe dem hellen und dunklen Modus an</li>
+        </ul>
+      </div>
+      <div class="cl-entry">
+        <div class="cl-version">v4.4 <span class="cl-date">12.08.2026</span></div>
+        <ul>
+          <li>App heißt jetzt „Soldaten Dashboard"</li>
+          <li>Fehler behoben: „Aktueller Standort" schlug ohne Rückfrage fehl. Im WebView fragt der Browserweg die Berechtigung nicht selbst ab — die App nutzt dafür nun das Standort-Modul und fragt die Freigabe ordnungsgemäß an. Gilt für Wetter und Koordinaten</li>
+          <li>App-Symbol und Kopfzeile zeigen das Eiserne Kreuz, Hintergrund durchsichtig</li>
+          <li>Bei neuen Lehrgängen entfällt die Vorschlagsliste — das Feld „Art" ist reiner Freitext</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v4.3 <span class="cl-date">12.08.2026</span></div>
         <ul>
@@ -1550,18 +1586,7 @@
         <form id="eintragForm">
           <div class="field" style="margin-bottom:12px;">
             <label for="fArt">Art *</label>
-            <div style="display:flex;gap:6px;">
-              <input type="text" id="fArt" placeholder="z. B. Erste Hilfe" required style="flex:1;min-width:0;">
-              <button type="button" class="btn" id="fArtPfeil" title="Vorschläge" style="flex-shrink:0;">▾</button>
-            </div>
-            <select id="fArtAuswahl" size="6" style="display:none;margin-top:6px;">
-              <option value="Erste Hilfe">Erste Hilfe</option>
-              <option value="Brandschutz">Brandschutz</option>
-              <option value="Notfalltraining">Notfalltraining</option>
-              <option value="Fahrerlaubnis">Fahrerlaubnis</option>
-              <option value="Unterweisung">Unterweisung</option>
-              <option value="Zertifizierung">Zertifizierung</option>
-            </select>
+            <input type="text" id="fArt" placeholder="z. B. Erste Hilfe" required>
           </div>
 
           <div class="row c2" style="margin-bottom:12px;">
@@ -4807,7 +4832,7 @@
     let zeilen = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//Dienst-Cockpit//DE",
+      "PRODID:-//Soldaten Dashboard//DE",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH"
     ];
@@ -5329,7 +5354,7 @@
   if(alleExportBtn){
     alleExportBtn.addEventListener("click", async () => {
       if(!kalender.eigene.length) return;
-      await icsAusgeben(kalender.eigene, "DienstCockpit_Termine.ics");
+      await icsAusgeben(kalender.eigene, "SoldatenDashboard_Termine.ics");
     });
   }
 
@@ -5980,7 +6005,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "4.3";
+  const APP_VERSION = "4.7";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -6039,12 +6064,12 @@
   document.getElementById("exportBtn").addEventListener("click", async () => {
     try{
       const payload = {
-        app: "Dienst-Cockpit", version: APP_VERSION, exportedAt: new Date().toISOString(),
+        app: "Soldaten Dashboard", version: APP_VERSION, exportedAt: new Date().toISOString(),
         ablaufregister: eintraege, urlaub, ueberstunden, todos, notizen, kalender, dashboard,
         medizin, feiertagsLand
       };
       const json = JSON.stringify(payload, null, 2);
-      const name = "DienstCockpit_v" + APP_VERSION + "_" + new Date().toISOString().slice(0,10) + ".json";
+      const name = "SoldatenDashboard_v" + APP_VERSION + "_" + new Date().toISOString().slice(0,10) + ".json";
       const ok = await dateiAusgeben(json, name, "application/json");
       if(ok) menueOverlay.style.display = "none";
     }catch(e){
@@ -6519,6 +6544,43 @@
   const dbWetterEinrichten = document.getElementById("dbWetterEinrichten");
   const dbWetterUrl = document.getElementById("dbWetterUrl");
 
+  /* Standort ermitteln. In der App über das Geolocation-Plugin, denn im
+     WebView fragt navigator.geolocation die Berechtigung nicht selbst ab —
+     der Aufruf schlug deshalb ohne Rückfrage fehl. */
+  async function standortHolen(){
+    const GP = (Cap && Cap.Plugins && Cap.Plugins.Geolocation) || null;
+
+    if(istApp && GP){
+      try{
+        let rechte = await GP.checkPermissions();
+        if(rechte && rechte.location !== "granted"){
+          rechte = await GP.requestPermissions();
+        }
+        if(rechte && rechte.location !== "granted"){
+          throw new Error("Die Standortberechtigung wurde nicht erteilt.");
+        }
+        const pos = await GP.getCurrentPosition({
+          enableHighAccuracy: true, timeout: 15000
+        });
+        return { breite: pos.coords.latitude, laenge: pos.coords.longitude,
+                 genauigkeit: pos.coords.accuracy };
+      }catch(e){
+        throw new Error(e && e.message ? e.message : "Standort nicht verfügbar.");
+      }
+    }
+
+    // Browser
+    if(!navigator.geolocation) throw new Error("Standortbestimmung ist hier nicht verfügbar.");
+    return await new Promise((fertig, fehler) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => fertig({ breite: pos.coords.latitude, laenge: pos.coords.longitude,
+                          genauigkeit: pos.coords.accuracy }),
+        (f) => fehler(new Error(f && f.message ? f.message : "Standort nicht verfügbar.")),
+        { enableHighAccuracy: true, timeout: 15000 }
+      );
+    });
+  }
+
   /* ---------- Wetter ---------- */
   /* Zwei Wege: "Einfach" über Open-Meteo (kein Konto, freie Ortswahl) oder
      ein eigenes meteoblue-Widget. */
@@ -6600,29 +6662,34 @@
   });
 
   /* Eigener Standort */
-  document.getElementById("wetterHier").addEventListener("click", () => {
-    if(!navigator.geolocation){ alert("Standortbestimmung ist hier nicht verfügbar."); return; }
+  document.getElementById("wetterHier").addEventListener("click", async () => {
     wetterTreffer.innerHTML = '<div class="hint">Standort wird bestimmt …</div>';
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const b = pos.coords.latitude, l = pos.coords.longitude;
-      let name = "Eigener Standort";
-      // Ortsnamen nachschlagen, aber ohne ihn geht es auch
-      try{
-        const a = await fetch("https://geocoding-api.open-meteo.com/v1/search?name="
-          + b.toFixed(3) + "," + l.toFixed(3) + "&count=1&language=de&format=json");
-        const d = await a.json();
-        if(d && d.results && d.results[0]) name = d.results[0].name;
-      }catch(e){}
-      dashboard.ort = { name: name, breite: b, laenge: l };
-      dashboard.quelle = "openmeteo";
-      saveDashboard();
-      wetterTreffer.innerHTML = "";
-      wetterQuelleUI();
-      dbWetterEinrichten.style.display = "none";
-      renderWetter(true);
-    }, () => {
-      wetterTreffer.innerHTML = '<div class="hint">Standort nicht verfügbar.</div>';
-    }, { enableHighAccuracy: false, timeout: 15000 });
+    let ort;
+    try{
+      ort = await standortHolen();
+    }catch(e){
+      wetterTreffer.innerHTML = '<div class="hint">' + (e.message || "Standort nicht verfügbar.")
+        + '<br>Bei Bedarf in den Android-Einstellungen unter Apps → Berechtigungen den '
+        + 'Zugriff auf den Standort erlauben.</div>';
+      return;
+    }
+
+    // Ortsnamen nachschlagen, notfalls ohne
+    let name = "Eigener Standort";
+    try{
+      const a = await fetch("https://api.open-meteo.com/v1/forecast?latitude="
+        + ort.breite + "&longitude=" + ort.laenge + "&current=temperature_2m&timezone=auto");
+      const d = await a.json();
+      if(d && d.timezone) name = String(d.timezone).split("/").pop().replace(/_/g, " ");
+    }catch(e){}
+
+    dashboard.ort = { name: name, breite: ort.breite, laenge: ort.laenge };
+    dashboard.quelle = "openmeteo";
+    saveDashboard();
+    wetterTreffer.innerHTML = "";
+    wetterQuelleUI();
+    dbWetterEinrichten.style.display = "none";
+    renderWetter(true);
   });
 
   if(document.getElementById("dbWetterSpeichern")){
@@ -7398,22 +7465,25 @@
     inZwischenablage(koErgebnis.textContent, e.target);
   });
 
-  document.getElementById("koStandort").addEventListener("click", () => {
-    if(!navigator.geolocation){ alert("Standortbestimmung ist hier nicht verfügbar."); return; }
+  document.getElementById("koStandort").addEventListener("click", async () => {
     koErgebnis.textContent = "Standort wird bestimmt …";
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const b = pos.coords.latitude, l = pos.coords.longitude;
-      koBreite.value = b.toFixed(6);
-      koLaenge.value = l.toFixed(6);
-      const m = nachMgrs(b, l, parseInt(koStellen.value, 10));
-      if(m) koMgrs.value = m.text;
-      koAusgabe(b, l, m ? m.text : "—");
-      if(pos.coords.accuracy){
-        koErgebnis.innerHTML += "<br>Genauigkeit etwa " + Math.round(pos.coords.accuracy) + " m";
-      }
-    }, (fehler) => {
-      koErgebnis.textContent = "Standort nicht verfügbar: " + (fehler && fehler.message ? fehler.message : "unbekannt");
-    }, { enableHighAccuracy: true, timeout: 15000 });
+    let ort;
+    try{
+      ort = await standortHolen();
+    }catch(e){
+      koErgebnis.innerHTML = (e.message || "Standort nicht verfügbar.")
+        + '<br><span class="hint">Bei Bedarf in den Android-Einstellungen unter '
+        + 'Apps → Berechtigungen den Zugriff auf den Standort erlauben.</span>';
+      return;
+    }
+    koBreite.value = ort.breite.toFixed(6);
+    koLaenge.value = ort.laenge.toFixed(6);
+    const m = nachMgrs(ort.breite, ort.laenge, parseInt(koStellen.value, 10));
+    if(m) koMgrs.value = m.text;
+    koAusgabe(ort.breite, ort.laenge, m ? m.text : "—");
+    if(ort.genauigkeit){
+      koErgebnis.innerHTML += "<br>Genauigkeit etwa " + Math.round(ort.genauigkeit) + " m";
+    }
   });
 
   /* =========================================================
@@ -7737,33 +7807,6 @@
       }
     });
   }
-
-  /* ---------- Vorschlagsliste im Feld „Art" ---------- */
-  (function artAuswahlAnbinden(){
-    const feld = document.getElementById("fArt");
-    const pfeil = document.getElementById("fArtPfeil");
-    const liste = document.getElementById("fArtAuswahl");
-    if(!feld || !pfeil || !liste) return;
-
-    // Nur der Pfeil öffnet die Liste, eine Auswahl schließt sie wieder
-    pfeil.addEventListener("click", () => {
-      liste.style.display = liste.style.display === "none" ? "block" : "none";
-    });
-    liste.addEventListener("change", () => {
-      if(liste.value){
-        feld.value = liste.value;
-        liste.style.display = "none";
-        liste.selectedIndex = -1;
-        feld.focus();
-      }
-    });
-    // Außerhalb tippen schließt ebenfalls
-    document.addEventListener("click", (e) => {
-      if(liste.style.display === "none") return;
-      if(e.target === pfeil || e.target === liste || liste.contains(e.target)) return;
-      liste.style.display = "none";
-    });
-  })();
 
   /* ---------- Startwert im Überstundenkonto ein-/ausklappen ---------- */
   (function oDetailsAnbinden(){
@@ -8430,7 +8473,7 @@
           ["Notiz", e => schutz([e.dosis, e.notiz].filter(Boolean).join(" · "))]
         ])
       + '<div class="fuss">Rot hinterlegt: abgelaufen &nbsp;·&nbsp; gelb hinterlegt: läuft in unter '
-      + 'sechs Monaten ab.<br>Erstellt mit Dienst-Cockpit. Persönliche Aufstellung ohne Gewähr — '
+      + 'sechs Monaten ab.<br>Erstellt mit Soldaten Dashboard. Persönliche Aufstellung ohne Gewähr — '
       + 'ersetzt keine offizielle Nachweisführung.</div>'
       + '</body></html>';
   }
