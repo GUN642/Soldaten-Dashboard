@@ -1001,7 +1001,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 4.7 &middot; Stand 12.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 4.9 &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -1015,6 +1015,24 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v4.9 <span class="cl-date">13.08.2026</span></div>
+        <ul>
+          <li>Signatur wird jetzt ausdrücklich in die Gradle-Konfiguration eingetragen, statt sich auf Androids Voreinstellung für Debug-Builds zu verlassen — dort konnte Gradle je nach Umgebung einen eigenen Schlüssel erzeugen, wodurch die Signatur zwischen den Builds wechselte</li>
+          <li>Der Build vergleicht am Ende den Fingerabdruck der fertigen APK mit dem Projektschlüssel und bricht bei Abweichung ab, statt eine unbrauchbare Datei auszugeben</li>
+        </ul>
+      </div>
+      <div class="cl-entry">
+        <div class="cl-version">v4.8 <span class="cl-date">13.08.2026</span></div>
+        <ul>
+          <li>Reiter „Medizin" heißt jetzt „Akte"; neue Reihenfolge: Heute, Kalender, To-do, Notizen, Urlaub/Mehrarbeit, Akte, Tools</li>
+          <li>BFT-Bewertung nach der offiziellen Struktur: Mindestleistung ergibt 100 Basispunkte, Bestleistung 400, Zwischenwerte linear. Gesamtpunktzahl als Mittel der drei Disziplinen, dazu die Note von 1,00 bis 4,49 mit Wertungsstufe</li>
+          <li>Zuschläge berücksichtigt: weiblich 15 % auf Sprint und Lauf, 40 % auf Klimmhang; ab dem vollendeten 36. Lebensjahr 0,5 % je Lebensjahr. Die Mindestleistungen selbst bleiben unabhängig von Alter und Geschlecht</li>
+          <li>Wird eine Mindestleistung verfehlt, gilt der Test als nicht bestanden — dann wird keine Note ausgewiesen</li>
+          <li>Persönlicher Wohnort aus der Wettervorbelegung entfernt; ohne eigene Wahl steht Berlin, das Suchfeld nennt Ulm als Beispiel</li>
+          <li>Standort: klare Meldung, woran es scheitert — fehlendes Modul oder abgelehnte Berechtigung. Die Diagnose im Kalendermenü listet jetzt alle geladenen Module auf</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v4.7 <span class="cl-date">12.08.2026</span></div>
         <ul>
@@ -1400,12 +1418,11 @@
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="tabDashboard">Heute</button>
   <button class="tab-btn" data-tab="tabKalender">Kalender</button>
-  <button class="tab-btn" data-tab="tabStart">Urlaub/Mehrarbeit</button>
-  <button class="tab-btn" data-tab="tabAblauf">Lehrgänge</button>
   <button class="tab-btn" data-tab="tabTodo">To-do</button>
-  <button class="tab-btn" data-tab="tabMed">Medizin</button>
-  <button class="tab-btn" data-tab="tabTools">Tools</button>
   <button class="tab-btn" data-tab="tabNotizen">Notizen</button>
+  <button class="tab-btn" data-tab="tabStart">Urlaub/Mehrarbeit</button>
+  <button class="tab-btn" data-tab="tabMed">Akte</button>
+  <button class="tab-btn" data-tab="tabTools">Tools</button>
 </div>
 
 <!-- ============ TAB: STARTSEITE ============ -->
@@ -1716,7 +1733,7 @@
             <div class="field" style="margin-bottom:8px;">
               <label for="wetterSuche">Ort suchen</label>
               <div style="display:flex;gap:6px;">
-                <input type="text" id="wetterSuche" placeholder="z. B. Dorndorf" style="flex:1;min-width:0;">
+                <input type="text" id="wetterSuche" placeholder="z. B. Ulm" style="flex:1;min-width:0;">
                 <button class="btn" type="button" id="wetterSuchen" style="flex-shrink:0;">Suchen</button>
               </div>
             </div>
@@ -1734,8 +1751,7 @@
             </div>
             <div class="btn-row" style="margin-top:0;">
               <button class="btn add" type="button" id="dbWetterSpeichern">Übernehmen</button>
-              <button class="btn" type="button" id="dbWetterStandard">↺ Standardort</button>
-              <button class="btn" type="button" id="dbWetterLeeren">Entfernen</button>
+                <button class="btn" type="button" id="dbWetterLeeren">Entfernen</button>
             </div>
             <div class="panel-note">
               Eigenes Widget: bei <a href="https://www.meteoblue.com" target="_blank" rel="noopener">meteoblue.com</a>
@@ -2078,7 +2094,7 @@
   </div>
 </div>
 
-<!-- ============ TAB: MEDIZIN ============ -->
+<!-- ============ TAB: AKTE ============ -->
 <div class="tab-panel" id="tabMed">
   <div class="grid" style="padding-top:14px;">
 
@@ -2191,17 +2207,18 @@
     <!-- BFT-Punkte -->
     <div class="panel">
       <div class="panel-head">
-        <h2><span class="idx">03</span>BFT-Punkterechner</h2>
+        <h2><span class="idx">03</span>BFT-Bewertung</h2>
       </div>
       <div class="panel-body">
+
         <div class="row c3" style="margin-bottom:12px;">
           <div class="field">
             <label for="bftSprint">11×10 m Sprint (s)</label>
-            <input type="number" id="bftSprint" step="0.1" min="0" placeholder="z. B. 52.4">
+            <input type="number" id="bftSprint" step="0.01" min="0" placeholder="z. B. 52.40">
           </div>
           <div class="field">
             <label for="bftKlimm">Klimmhang (s)</label>
-            <input type="number" id="bftKlimm" step="0.1" min="0" placeholder="z. B. 12">
+            <input type="number" id="bftKlimm" step="0.1" min="0" placeholder="z. B. 22">
           </div>
           <div class="field">
             <label for="bftLauf">1000 m Lauf</label>
@@ -2209,50 +2226,75 @@
           </div>
         </div>
 
+        <div class="row c3" style="margin-bottom:12px;">
+          <div class="field">
+            <label for="bftAlter">Alter</label>
+            <input type="number" id="bftAlter" step="1" min="16" max="70" placeholder="Jahre">
+            <div class="hint">Zuschlag ab 36</div>
+          </div>
+          <div class="field">
+            <label for="bftGeschlecht">Geschlecht</label>
+            <select id="bftGeschlecht">
+              <option value="m" selected>männlich</option>
+              <option value="w">weiblich</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button class="btn" type="button" id="bftGrenzen" style="width:100%;">⚙ Werte</button>
+          </div>
+        </div>
+
         <div class="konto-summary" id="bftErgebnis">Werte eintragen — die Bewertung erscheint hier.</div>
 
         <div class="btn-row" style="margin-top:0;">
-          <button class="btn" type="button" id="bftGrenzen">⚙ Tabelle</button>
           <button class="btn add" type="button" id="bftUebernehmen">Als IGF-Termin übernehmen</button>
         </div>
 
         <div id="bftGrenzenFeld" style="display:none;margin-top:14px;">
           <div class="panel-note" style="margin-bottom:10px;">
-            <b>Bitte gegen die für dich gültige Vorschrift prüfen.</b> Die Punktetabellen des BFT
-            sind nach Alter und Geschlecht gestaffelt und werden hier <b>nicht</b> vollständig
-            abgebildet. Eingetragen sind nur die Grenzwerte zum Bestehen sowie die Punkte für
-            Bestleistung — beides frei anpassbar. Die Punktzahl ist eine lineare Schätzung
-            zwischen Grenzwert und Bestwert und ersetzt keine amtliche Auswertung.
+            Grundlage: Mindestleistung entspricht 100 Basispunkten, die Bestleistung
+            („sehr gute Leistung") 400 Punkten; Zwischenwerte werden linear gerechnet.
+            Frauen erhalten einen Zuschlag auf die Basispunkte (Sprint und Lauf 15 %,
+            Klimmhang 40 %), ab dem vollendeten 36. Lebensjahr zusätzlich 0,5 % je
+            Lebensjahr. Die Mindestleistungen selbst gelten unabhängig von Alter und
+            Geschlecht.
           </div>
           <div class="row c2" style="margin-bottom:10px;">
             <div class="field">
-              <label for="bftMaxSprint">Sprint: bestanden bis (s)</label>
-              <input type="number" id="bftMaxSprint" step="0.1" value="60">
+              <label for="bftMaxSprint">Sprint: 100 Punkte bei (s)</label>
+              <input type="number" id="bftMaxSprint" step="0.01" value="60">
             </div>
             <div class="field">
-              <label for="bftBestSprint">Sprint: Bestwert (s)</label>
-              <input type="number" id="bftBestSprint" step="0.1" value="43">
+              <label for="bftBestSprint">Sprint: 400 Punkte bei (s)</label>
+              <input type="number" id="bftBestSprint" step="0.01" value="41.99">
             </div>
           </div>
           <div class="row c2" style="margin-bottom:10px;">
             <div class="field">
-              <label for="bftMinKlimm">Klimmhang: bestanden ab (s)</label>
+              <label for="bftMinKlimm">Klimmhang: 100 Punkte bei (s)</label>
               <input type="number" id="bftMinKlimm" step="0.1" value="5">
             </div>
             <div class="field">
-              <label for="bftBestKlimm">Klimmhang: Bestwert (s)</label>
-              <input type="number" id="bftBestKlimm" step="0.1" value="70">
+              <label for="bftBestKlimm">Klimmhang: 400 Punkte bei (s)</label>
+              <input type="number" id="bftBestKlimm" step="0.1" value="65">
             </div>
           </div>
           <div class="row c2" style="margin-bottom:10px;">
             <div class="field">
-              <label for="bftMaxLauf">1000 m: bestanden bis</label>
+              <label for="bftMaxLauf">1000 m: 100 Punkte bei</label>
               <input type="text" id="bftMaxLauf" value="6:30" inputmode="numeric">
             </div>
             <div class="field">
-              <label for="bftBestLauf">1000 m: Bestwert</label>
-              <input type="text" id="bftBestLauf" value="3:30" inputmode="numeric">
+              <label for="bftBestLauf">1000 m: 400 Punkte bei</label>
+              <input type="text" id="bftBestLauf" value="4:30" inputmode="numeric">
             </div>
+          </div>
+          <div class="panel-note">
+            <b>Zum Wert für die Bestleistung im 1000-m-Lauf:</b> Für Sprint (41,99 s) und
+            Klimmhang (65 s) sind die Bestwerte öffentlich benannt, für den Lauf fand ich
+            keine belastbare Angabe. Die 4:30 sind daher geschätzt und hier anpassbar.
+            Maßgeblich ist stets die offizielle Wertung nach A1-224/0-1.
           </div>
         </div>
       </div>
@@ -5865,6 +5907,10 @@
       zeilen.push("");
       zeilen.push("KONTAKT-ANLÄSSE (Geburtstage, Jahrestage)");
       zeilen.push("  Zusatzmodul: " + (kontaktPlugin() ? "vorhanden" : "FEHLT"));
+      zeilen.push("");
+      zeilen.push("GELADENE MODULE");
+      zeilen.push("  " + ((Cap && Cap.Plugins) ? Object.keys(Cap.Plugins).sort().join(", ") : "keine"));
+      zeilen.push("  Standort: " + ((Cap && Cap.Plugins && Cap.Plugins.Geolocation) ? "vorhanden" : "FEHLT"));
       zeilen.push("  Anlässe gefunden: " + kontaktEreignisse.length);
       zeilen.push("  Einbeziehen: " + (nativCfg.kontaktdaten !== false ? "an" : "aus"));
       if(kontaktEreignisse.length){
@@ -6005,7 +6051,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "4.7";
+  const APP_VERSION = "4.9";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -6525,13 +6571,10 @@
      ========================================================= */
   const DB_KEY = "dashboard_v1";
   // Vorbelegte Adresse des eigenen meteoblue-Widgets
-  const WETTER_STANDARD = "https://www.meteoblue.com/de/wetter/widget/meteogram/dorndorf_deutschland_2935733?geoloc=fixed&temperature_units=CELSIUS&windspeed_units=KNOT&precipitation_units=MILLIMETER&forecast_days=2&layout=dark&autowidth=auto&user_key=ad70389ce1ca8491&embed_key=d7233db11769a1a4&sig=5495bb14453d64497d716d1bfb4245c4c874e01f41ced77ee7884c9c58171dc9";
+  const WETTER_STANDARD = "";   // keine Adresse vorbelegt
 
-  let dashboard = loadJSON(DB_KEY, { wetterUrl: WETTER_STANDARD });
-  if(typeof dashboard.wetterUrl !== "string") dashboard.wetterUrl = WETTER_STANDARD;
-  if(dashboard.wetterUrl === "" && dashboard.wetterGeleert !== true){
-    dashboard.wetterUrl = WETTER_STANDARD;   // beim ersten Start vorbelegen
-  }
+  let dashboard = loadJSON(DB_KEY, { wetterUrl: "" });
+  if(typeof dashboard.wetterUrl !== "string") dashboard.wetterUrl = "";
   function saveDashboard(){ saveJSON(DB_KEY, dashboard); }
 
   const dbDatum = document.getElementById("dbDatum");
@@ -6550,6 +6593,16 @@
   async function standortHolen(){
     const GP = (Cap && Cap.Plugins && Cap.Plugins.Geolocation) || null;
 
+    // In der App ohne Modul gibt es keine Berechtigungsabfrage — der
+    // Browserweg scheitert dort stumm. Deshalb klar benennen.
+    if(istApp && !GP){
+      const vorhanden = (Cap && Cap.Plugins) ? Object.keys(Cap.Plugins).join(", ") : "keine";
+      throw new Error("Das Standort-Modul fehlt in dieser Fassung der App.\n\n"
+        + "Vorhandene Module: " + vorhanden + "\n\n"
+        + "Beim Bauen muss die package.json mit @capacitor/geolocation "
+        + "verwendet worden sein.");
+    }
+
     if(istApp && GP){
       try{
         let rechte = await GP.checkPermissions();
@@ -6557,7 +6610,11 @@
           rechte = await GP.requestPermissions();
         }
         if(rechte && rechte.location !== "granted"){
-          throw new Error("Die Standortberechtigung wurde nicht erteilt.");
+          throw new Error("Die Standortberechtigung wurde nicht erteilt"
+            + (rechte.location ? " (Status: " + rechte.location + ")" : "") + ".\n\n"
+            + "Wurde sie dauerhaft abgelehnt, fragt Android nicht erneut — dann in den "
+            + "Android-Einstellungen unter Apps → Soldaten Dashboard → Berechtigungen "
+            + "den Standort freigeben.");
         }
         const pos = await GP.getCurrentPosition({
           enableHighAccuracy: true, timeout: 15000
@@ -6584,8 +6641,9 @@
   /* ---------- Wetter ---------- */
   /* Zwei Wege: "Einfach" über Open-Meteo (kein Konto, freie Ortswahl) oder
      ein eigenes meteoblue-Widget. */
-  if(!dashboard.quelle) dashboard.quelle = dashboard.wetterUrl === WETTER_STANDARD ? "openmeteo" : "meteoblue";
-  if(!dashboard.ort) dashboard.ort = { name: "Dorndorf", breite: 50.7833, laenge: 10.0500 };
+  if(!dashboard.quelle) dashboard.quelle = dashboard.wetterUrl ? "meteoblue" : "openmeteo";
+  // Kein persönlicher Ort als Voreinstellung — bis zur eigenen Wahl Berlin
+  if(!dashboard.ort) dashboard.ort = { name: "Berlin", breite: 52.5200, laenge: 13.4050 };
 
   const wetterOrtFeld = document.getElementById("wetterOrtFeld");
   const wetterMbFeld = document.getElementById("wetterMbFeld");
@@ -6707,15 +6765,6 @@
       dashboard.quelle = "meteoblue";
       dashboard.wetterGeleert = false;
       saveDashboard();
-      dbWetterEinrichten.style.display = "none";
-      renderWetter(true);
-    });
-    document.getElementById("dbWetterStandard").addEventListener("click", () => {
-      dashboard.wetterUrl = WETTER_STANDARD;
-      dashboard.quelle = "meteoblue";
-      dashboard.wetterGeleert = false;
-      saveDashboard();
-      dbWetterUrl.value = WETTER_STANDARD;
       dbWetterEinrichten.style.display = "none";
       renderWetter(true);
     });
@@ -7826,7 +7875,7 @@
   })();
 
   /* =========================================================
-     MEDIZIN: Person, IGF, BFT-Punkte, AVU/WFV, Impfungen
+     AKTE: Person, IGF, BFT-Punkte, AVU/WFV, Impfungen
      ========================================================= */
   const MED_KEY = "medizin_v1";
   let medizin = loadJSON(MED_KEY, {
@@ -8239,41 +8288,30 @@
   }
 
   /* =========================================================
-     BFT-PUNKTERECHNER
-     Die amtlichen Punktetabellen sind nach Alter und Geschlecht gestaffelt und
-     hier NICHT abgebildet. Gerechnet wird linear zwischen dem Grenzwert zum
-     Bestehen (1 Punkt) und dem eingestellten Bestwert (100 Punkte). Das ist
-     eine Schätzung und ersetzt keine amtliche Auswertung.
+     BFT-BEWERTUNG
+     Grundlage: Mindestleistung = 100 Basispunkte, Bestleistung = 400 Punkte,
+     Zwischenwerte linear. Zuschlag für Frauen auf die Basispunkte (Sprint und
+     Lauf 15 %, Klimmhang 40 %), ab dem vollendeten 36. Lebensjahr zusätzlich
+     0,5 % je Lebensjahr. Die Mindestleistungen gelten unabhängig von Alter
+     und Geschlecht — wird eine verfehlt, ist der Test nicht bestanden.
+     Maßgeblich bleibt die offizielle Wertung.
      ========================================================= */
   const bftSprint = document.getElementById("bftSprint");
   const bftKlimm = document.getElementById("bftKlimm");
   const bftLauf = document.getElementById("bftLauf");
+  const bftAlter = document.getElementById("bftAlter");
+  const bftGeschlecht = document.getElementById("bftGeschlecht");
   const bftErgebnis = document.getElementById("bftErgebnis");
+
+  if(medizin.bft.bestLauf === undefined) medizin.bft.bestLauf = "4:30";
+  if(medizin.bft.bestSprint === undefined) medizin.bft.bestSprint = 41.99;
+  if(medizin.bft.bestKlimm === undefined) medizin.bft.bestKlimm = 65;
 
   const BFT_FELDER = {
     bftMaxSprint: "maxSprint", bftBestSprint: "bestSprint",
     bftMinKlimm: "minKlimm", bftBestKlimm: "bestKlimm",
     bftMaxLauf: "maxLauf", bftBestLauf: "bestLauf"
   };
-  Object.keys(BFT_FELDER).forEach(id => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.value = medizin.bft[BFT_FELDER[id]];
-    el.addEventListener("change", () => {
-      const schluessel = BFT_FELDER[id];
-      if(schluessel === "maxLauf" || schluessel === "bestLauf"){
-        const sek = laufzeitSekunden(el.value);
-        medizin.bft[schluessel] = sek ? sekundenText(sek) : medizin.bft[schluessel];
-        el.value = medizin.bft[schluessel];
-      }else{
-        const z = parseFloat(String(el.value).replace(",", "."));
-        if(isFinite(z)) medizin.bft[schluessel] = z;
-        el.value = medizin.bft[schluessel];
-      }
-      saveMed();
-      bftBewerten();
-    });
-  });
 
   function laufzeitSekunden(text){
     const t = String(text || "").trim().replace(",", ".");
@@ -8289,14 +8327,73 @@
     return Math.floor(sek / 60) + ":" + zwei2(Math.round(sek % 60));
   }
 
-  /* Punkte zwischen Grenzwert und Bestwert schätzen (1 bis 100) */
-  function punkteSchaetzen(wert, grenze, best, kleinerIstBesser){
-    if(!isFinite(wert) || !isFinite(grenze) || !isFinite(best)) return null;
-    const spanne = kleinerIstBesser ? (grenze - best) : (best - grenze);
-    if(spanne <= 0) return null;
-    const fortschritt = kleinerIstBesser ? (grenze - wert) : (wert - grenze);
-    const p = Math.round(1 + (fortschritt / spanne) * 99);
-    return Math.max(0, Math.min(100, p));
+  Object.keys(BFT_FELDER).forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.value = medizin.bft[BFT_FELDER[id]];
+    el.addEventListener("change", () => {
+      const k = BFT_FELDER[id];
+      if(k === "maxLauf" || k === "bestLauf"){
+        const sek = laufzeitSekunden(el.value);
+        if(sek) medizin.bft[k] = sekundenText(sek);
+        el.value = medizin.bft[k];
+      }else{
+        const z = parseFloat(String(el.value).replace(",", "."));
+        if(isFinite(z)) medizin.bft[k] = z;
+        el.value = medizin.bft[k];
+      }
+      saveMed();
+      bftBewerten();
+    });
+  });
+
+  // Alter und Geschlecht merken
+  if(medizin.person.alter) bftAlter.value = medizin.person.alter;
+  if(medizin.person.geschlecht) bftGeschlecht.value = medizin.person.geschlecht;
+  bftAlter.addEventListener("change", () => {
+    medizin.person.alter = bftAlter.value ? Number(bftAlter.value) : null;
+    saveMed(); bftBewerten();
+  });
+  bftGeschlecht.addEventListener("change", () => {
+    medizin.person.geschlecht = bftGeschlecht.value;
+    saveMed(); bftBewerten();
+  });
+
+  /* Basispunkte: 100 bei Mindestleistung, 400 bei Bestleistung, linear */
+  function basisPunkte(wert, mindest, best){
+    if(!isFinite(wert) || !isFinite(mindest) || !isFinite(best)) return null;
+    const spanne = best - mindest;          // bei Zeiten negativ
+    if(spanne === 0) return null;
+    const punkte = 100 + ((wert - mindest) / spanne) * 300;
+    return Math.max(0, Math.round(punkte));
+  }
+
+  /* Zuschläge auf die Basispunkte */
+  function mitZuschlag(punkte, art){
+    if(punkte === null) return null;
+    let faktor = 1;
+    if(bftGeschlecht.value === "w"){
+      faktor += (art === "klimm") ? 0.40 : 0.15;
+    }
+    const alter = parseInt(bftAlter.value, 10);
+    if(Number.isFinite(alter) && alter >= 36){
+      faktor += (alter - 35) * 0.005;       // 0,5 % je Lebensjahr ab 36
+    }
+    return Math.round(punkte * faktor);
+  }
+
+  /* Note aus der Gesamtpunktzahl (1,00 bis 4,49) */
+  function bftNote(punkte){
+    if(punkte >= 400) return Math.max(1.00, 1.49 - (punkte - 400) / 100 * 0.49);
+    if(punkte >= 300) return 2.49 - (punkte - 300) / 100 * 0.99;
+    if(punkte >= 200) return 3.49 - (punkte - 200) / 100 * 0.99;
+    return 4.49 - (punkte - 100) / 100 * 0.99;
+  }
+  function noteWort(note){
+    if(note <= 1.49) return "sehr gute Leistung";
+    if(note <= 2.49) return "gute Leistung";
+    if(note <= 3.49) return "zufriedenstellende Leistung";
+    return "ausreichende Leistung";
   }
 
   document.getElementById("bftGrenzen").addEventListener("click", () => {
@@ -8304,7 +8401,7 @@
     feld.style.display = feld.style.display === "none" ? "block" : "none";
   });
 
-  let bftLetzte = null;   // für die Übernahme als IGF-Termin
+  let bftLetzte = null;
 
   function bftBewerten(){
     const g = medizin.bft;
@@ -8312,7 +8409,7 @@
     const klimm = parseFloat(String(bftKlimm.value).replace(",", "."));
     const lauf = laufzeitSekunden(bftLauf.value);
     const maxLauf = laufzeitSekunden(g.maxLauf) || 390;
-    const bestLauf = laufzeitSekunden(g.bestLauf) || 210;
+    const bestLauf = laufzeitSekunden(g.bestLauf) || 270;
 
     if(!isFinite(sprint) && !isFinite(klimm) && lauf === null){
       bftErgebnis.textContent = "Werte eintragen — die Bewertung erscheint hier.";
@@ -8320,57 +8417,78 @@
       return;
     }
 
-    const teile = [];
-    let bestanden = 0, erfasst = 0, punkteSumme = 0, punkteZahl = 0;
+    const zeilen = [];
+    let erfasst = 0, mindestErfuellt = 0, summe = 0, alleMitPunkten = true;
 
-    function teil(name, anzeige, ok, punkte){
+    function teil(name, anzeige, erfuellt, punkte){
       erfasst++;
-      if(ok) bestanden++;
-      if(punkte !== null){ punkteSumme += punkte; punkteZahl++; }
-      teile.push('<div class="bft-teil"><span>' + name + '</span>'
-        + '<span class="' + (ok ? "bft-ok" : "bft-fehl") + '">'
+      if(erfuellt) mindestErfuellt++;
+      if(punkte !== null) summe += punkte; else alleMitPunkten = false;
+      zeilen.push('<div class="bft-teil"><span>' + name + '</span>'
+        + '<span class="' + (erfuellt ? "bft-ok" : "bft-fehl") + '">'
         + anzeige + (punkte !== null ? "  ·  " + punkte + " P" : "")
-        + (ok ? "  ✓" : "  ✗") + '</span></div>');
+        + (erfuellt ? "  ✓" : "  ✗") + '</span></div>');
     }
 
     if(isFinite(sprint)){
-      teil("11×10 m Sprint", sprint.toFixed(1) + " s",
+      teil("11×10 m Sprint", sprint.toFixed(2) + " s",
         sprint <= g.maxSprint,
-        punkteSchaetzen(sprint, g.maxSprint, g.bestSprint, true));
-    }
+        mitZuschlag(basisPunkte(sprint, g.maxSprint, g.bestSprint), "sprint"));
+    }else{ alleMitPunkten = false; }
+
     if(isFinite(klimm)){
       teil("Klimmhang", klimm.toFixed(1) + " s",
         klimm >= g.minKlimm,
-        punkteSchaetzen(klimm, g.minKlimm, g.bestKlimm, false));
-    }
+        mitZuschlag(basisPunkte(klimm, g.minKlimm, g.bestKlimm), "klimm"));
+    }else{ alleMitPunkten = false; }
+
     if(lauf !== null){
       teil("1000 m Lauf", sekundenText(lauf),
         lauf <= maxLauf,
-        punkteSchaetzen(lauf, maxLauf, bestLauf, true));
+        mitZuschlag(basisPunkte(lauf, maxLauf, bestLauf), "lauf"));
+    }else{ alleMitPunkten = false; }
+
+    const vollstaendig = erfasst === 3;
+    const bestanden = vollstaendig && mindestErfuellt === 3;
+
+    let kopf;
+    if(!vollstaendig){
+      kopf = '<div style="margin-bottom:8px;color:var(--text-dim);">'
+        + mindestErfuellt + " von " + erfasst
+        + " erfassten Disziplinen erfüllt — noch nicht vollständig</div>";
+    }else if(!bestanden){
+      kopf = '<div style="margin-bottom:8px;font-weight:600;color:var(--red);">'
+        + "Nicht bestanden — Mindestleistung in einer Disziplin verfehlt</div>";
+    }else{
+      const gesamt = Math.round(summe / 3);          // Mittel der drei Disziplinen
+      const note = bftNote(gesamt);
+      kopf = '<div style="margin-bottom:8px;font-weight:600;color:var(--green);">'
+        + "Bestanden · " + gesamt + " Punkte · Note "
+        + note.toFixed(2).replace(".", ",")
+        + '</div><div style="margin-bottom:8px;color:var(--text-dim);">'
+        + noteWort(note) + "</div>";
     }
 
-    const alleDa = erfasst === 3;
-    const gesamt = alleDa && bestanden === 3;
-    let kopf;
-    if(!alleDa){
-      kopf = '<div style="margin-bottom:8px;color:var(--text-dim);">'
-        + bestanden + " von " + erfasst + " erfassten Übungen erfüllt — noch nicht vollständig</div>";
-    }else{
-      kopf = '<div style="margin-bottom:8px;font-weight:600;color:'
-        + (gesamt ? "var(--green)" : "var(--red)") + ';">'
-        + (gesamt ? "Alle drei Anforderungen erfüllt" : "Nicht alle Anforderungen erfüllt")
-        + (punkteZahl === 3 ? " · " + punkteSumme + " von 300 Punkten" : "") + "</div>";
+    // Hinweis auf Zuschläge, wenn sie greifen
+    const zusatz = [];
+    if(bftGeschlecht.value === "w") zusatz.push("Zuschlag weiblich");
+    const alter = parseInt(bftAlter.value, 10);
+    if(Number.isFinite(alter) && alter >= 36){
+      zusatz.push("Alterszuschlag " + ((alter - 35) * 0.5).toFixed(1).replace(".", ",") + " %");
     }
-    const fuss = '<div class="hint" style="margin-top:8px;">Punkte sind eine Schätzung '
-      + 'zwischen Grenzwert und Bestwert — keine amtliche Auswertung.</div>';
-    bftErgebnis.innerHTML = kopf + teile.join("") + fuss;
+    const fuss = '<div class="hint" style="margin-top:8px;">'
+      + (zusatz.length ? zusatz.join(" · ") + " · " : "")
+      + 'Berechnung nach öffentlich zugänglichen Angaben, ohne Gewähr — '
+      + 'maßgeblich ist die offizielle Wertung.</div>';
+
+    bftErgebnis.innerHTML = kopf + zeilen.join("") + fuss;
 
     bftLetzte = {
       sprint: isFinite(sprint) ? sprint : null,
       klimm: isFinite(klimm) ? klimm : null,
       lauf: lauf,
-      punkte: punkteZahl === 3 ? punkteSumme : null,
-      bestanden: gesamt
+      punkte: (vollstaendig && alleMitPunkten) ? Math.round(summe / 3) : null,
+      bestanden: bestanden
     };
   }
   [bftSprint, bftKlimm, bftLauf].forEach(el => el.addEventListener("input", bftBewerten));
@@ -8389,7 +8507,10 @@
     bisAusIntervall(igfDatum, igfIntervall, igfBis);
     igfErgebnisFeld.value = bftLetzte
       ? (bftLetzte.bestanden ? "bestanden" : "nicht bestanden")
-        + (bftLetzte.punkte !== null ? " · " + bftLetzte.punkte + " P" : "")
+        + (bftLetzte.punkte !== null
+            ? " · " + bftLetzte.punkte + " P · Note "
+              + bftNote(bftLetzte.punkte).toFixed(2).replace(".", ",")
+            : "")
       : "";
     igfNotiz.value = teile.join(" · ");
     igfForm.style.display = "block";
