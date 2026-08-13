@@ -111,6 +111,12 @@
     font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.3px;
     color:var(--topbar-text);white-space:nowrap;
   }
+  .beta-marke{
+    font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:1px;
+    color:var(--amber);border:1px solid var(--amber);border-radius:3px;
+    padding:1px 4px;background:rgba(255,176,32,0.10);
+    white-space:nowrap;flex-shrink:0;
+  }
   .seiten-titel{
     font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:0.4px;
     color:var(--topbar-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -916,6 +922,7 @@
     <img class="logo-dunkel" src="logo-header.png" alt="">
     <img class="logo-hell" src="logo-header-light.png" alt="">
     <span class="brand-name">Soldaten Dashboard</span>
+    <span class="beta-marke">BETA</span>
   </button>
   <div class="seiten-titel" id="seitenTitel">Kalender</div>
   <div class="kal-nav">
@@ -990,6 +997,32 @@
       </div>
 
       <div class="field" style="margin-bottom:16px;">
+        <label>Widget auf dem Startbildschirm</label>
+        <div class="row c2" style="margin-bottom:8px;">
+          <div class="field">
+            <label for="widgetModus" style="font-size:11px;">Darstellung</label>
+            <select id="widgetModus">
+              <option value="dunkel">Dunkel</option>
+              <option value="hell">Hell</option>
+              <option value="system">wie das Gerät</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="widgetDeckkraft" style="font-size:11px;">
+              Deckkraft <span id="widgetDeckWert" style="color:var(--amber);">85 %</span>
+            </label>
+            <input type="range" id="widgetDeckkraft" min="0" max="100" step="5" value="85"
+                   style="width:100%;padding:0;">
+          </div>
+        </div>
+        <div class="hint">
+          Das Widget zeigt die Termine und fälligen Aufgaben des Tages. Hinzufügen
+          wie üblich: auf dem Startbildschirm lange drücken → Widgets → Soldaten
+          Dashboard. Die Größe lässt sich nach dem Ablegen frei ziehen.
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px;">
         <label>Info</label>
         <div class="btn-row" style="margin-top:0;">
           <button class="btn" id="openChangelogBtn" type="button">&#128220; Changelog</button>
@@ -1001,7 +1034,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 5.3 &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 5.4 Beta &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -1015,6 +1048,17 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v5.4 Beta <span class="cl-date">13.08.2026</span></div>
+        <ul>
+          <li>Version ist in der Kopfzeile als Beta gekennzeichnet</li>
+          <li><b>Widget für den Startbildschirm:</b> zeigt Datum, Kalenderwoche und die Termine sowie fälligen Aufgaben des Tages, jeweils mit der Farbe des Kalenders und der Uhrzeit. Antippen des Datums öffnet die App, Antippen eines Eintrags zeigt die Details</li>
+          <li>Darstellung hell, dunkel oder nach Gerät wählbar, Deckkraft über einen Regler im Menü; Standardgröße volle Breite und zwei Reihen hoch, frei veränderbar</li>
+          <li>Fehler behoben: Der Druck der Akte scheiterte mit „ungültige Webadresse", und der Ausdruck blieb unverschließbar im Vordergrund. In der App wird die Übersicht jetzt als Datei ausgegeben und über das Teilen-Menü an eine App zum Drucken übergeben</li>
+          <li>Akte: ICCS mit den Lernfeldern 1 bis 6 ergänzt, samt Gültigkeit, Erinnerungen und Aufnahme in den Ausdruck</li>
+          <li>IGF: Leistungsmarsch und Kleiderschwimmen aufgenommen; Rettungsschwimmen, Gefechtsdienst, Formaldienst und Rechtliche Grundlagen entfernt</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v5.3 <span class="cl-date">13.08.2026</span></div>
         <ul>
@@ -2176,13 +2220,11 @@
               </div>
               <select id="igfArtAuswahl" size="7" style="display:none;margin-top:6px;">
                 <option value="BFT">BFT — Basis-Fitness-Test</option>
+                <option value="Leistungsmarsch">Leistungsmarsch</option>
+                <option value="Kleiderschwimmen">Kleiderschwimmen</option>
                 <option value="Schießausbildung">Schießausbildung</option>
                 <option value="Sanitätsausbildung">Sanitätsausbildung</option>
                 <option value="ABC-Selbst- und Kameradenhilfe">ABC-Selbst- und Kameradenhilfe</option>
-                <option value="Rettungsschwimmen">Rettungsschwimmen</option>
-                <option value="Gefechtsdienst">Gefechtsdienst</option>
-                <option value="Formaldienst">Formaldienst</option>
-                <option value="Rechtliche Grundlagen">Rechtliche Grundlagen</option>
               </select>
             </div>
             <div class="field">
@@ -2332,10 +2374,73 @@
       </div>
     </div>
 
+    <!-- ICCS -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="idx">04</span>ICCS — Lernfelder</h2>
+        <button class="btn add" type="button" id="iccsAddToggle">+ Eintrag</button>
+      </div>
+      <div class="panel-body">
+
+        <div id="iccsForm" style="display:none;margin-bottom:16px;">
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="iccsFeld">Lernfeld *</label>
+              <select id="iccsFeld">
+                <option value="Lernfeld 1">Lernfeld 1</option>
+                <option value="Lernfeld 2">Lernfeld 2</option>
+                <option value="Lernfeld 3">Lernfeld 3</option>
+                <option value="Lernfeld 4">Lernfeld 4</option>
+                <option value="Lernfeld 5">Lernfeld 5</option>
+                <option value="Lernfeld 6">Lernfeld 6</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="iccsDatum">Datum *</label>
+              <input type="text" id="iccsDatum" placeholder="TT.MM.JJJJ">
+            </div>
+          </div>
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="iccsIntervall">Gültigkeit</label>
+              <select id="iccsIntervall">
+                <option value="12M">12 Monate</option>
+                <option value="24M" selected>24 Monate</option>
+                <option value="36M">36 Monate</option>
+                <option value="frei">ohne Ablauf</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="iccsBis">Gültig bis</label>
+              <input type="text" id="iccsBis" placeholder="TT.MM.JJJJ">
+            </div>
+          </div>
+          <div class="row c2" style="margin-bottom:12px;">
+            <div class="field">
+              <label for="iccsErgebnis">Ergebnis</label>
+              <input type="text" id="iccsErgebnis" placeholder="z. B. bestanden">
+            </div>
+            <div class="field">
+              <label for="iccsNotiz">Notiz</label>
+              <input type="text" id="iccsNotiz" placeholder="Inhalt, Stelle …">
+            </div>
+          </div>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn add" type="button" id="iccsSpeichern">Übernehmen</button>
+            <button class="btn" type="button" id="iccsAbbrechen">Abbrechen</button>
+          </div>
+          <div style="height:1px;background:var(--border-soft);margin:16px 0;"></div>
+        </div>
+
+        <div id="iccsEmpty" class="empty-state">Noch keine Lernfelder erfasst.</div>
+        <div id="iccsListe"></div>
+      </div>
+    </div>
+
     <!-- AVU / WFV -->
     <div class="panel">
       <div class="panel-head">
-        <h2><span class="idx">04</span>AVU-IGF / WFV</h2>
+        <h2><span class="idx">05</span>AVU-IGF / WFV</h2>
         <button class="btn add" type="button" id="avuAddToggle">+ Untersuchung</button>
       </div>
       <div class="panel-body">
@@ -2412,7 +2517,7 @@
     <!-- Impfungen -->
     <div class="panel">
       <div class="panel-head">
-        <h2><span class="idx">05</span>Impfungen</h2>
+        <h2><span class="idx">06</span>Impfungen</h2>
         <button class="btn add" type="button" id="impAddToggle">+ Impfung</button>
       </div>
       <div class="panel-body">
@@ -3236,6 +3341,7 @@
 
     updateCockpit();
     if(typeof renderDashboard === "function") renderDashboard();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
   }
 
   /* =========================================================
@@ -3679,6 +3785,7 @@
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
     if(typeof renderDashboard === "function") renderDashboard();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
     if(typeof benPlanen === "function") benPlanen();
   });
 
@@ -3691,6 +3798,7 @@
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
     if(typeof renderDashboard === "function") renderDashboard();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
   }
   function removeTodo(id){
     if(!confirm("Diese Aufgabe wirklich löschen?")) return;
@@ -3699,6 +3807,7 @@
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
     if(typeof renderDashboard === "function") renderDashboard();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
   }
   document.getElementById("todoClearDoneBtn").addEventListener("click", () => {
     const anzahl = todos.eintraege.filter(t => t.erledigt).length;
@@ -3709,6 +3818,7 @@
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
     if(typeof renderDashboard === "function") renderDashboard();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
   });
 
   const PRIO_RANG = { hoch: 0, mittel: 1, niedrig: 2 };
@@ -4254,6 +4364,7 @@
       }
       renderKalender();
       if(typeof renderDashboard === "function") renderDashboard();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
       kalNeuLadenBtn.textContent = "↻";
     });
   }
@@ -5926,6 +6037,7 @@
       }
       renderKalender();
       if(typeof renderDashboard === "function") renderDashboard();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
     });
     updateKontaktdatenUI();
 
@@ -6129,7 +6241,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "5.3";
+  const APP_VERSION = "5.4-beta";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
@@ -6241,7 +6353,7 @@
         }
         if(payload.medizin && typeof payload.medizin === "object"){
           medizin = Object.assign({ person: {}, igf: [], avu: [], impfungen: [], bft: {} }, payload.medizin);
-          ["igf","avu","impfungen"].forEach(k => { if(!Array.isArray(medizin[k])) medizin[k] = []; });
+          ["igf","iccs","avu","impfungen"].forEach(k => { if(!Array.isArray(medizin[k])) medizin[k] = []; });
           if(!medizin.person) medizin.person = { name: "", dienstgrad: "", einheit: "", geburt: "" };
           medizin.bft = Object.assign({ maxSprint: 60, bestSprint: 43, minKlimm: 5,
             bestKlimm: 70, maxLauf: "6:30", bestLauf: "3:30" }, medizin.bft || {});
@@ -6272,7 +6384,7 @@
         resetForm(); closeForm(); resetNotizForm();
         renderAblauf(); renderUrlaub(); renderUeberstunden();
         renderTodos(); renderNotizen(); renderQuellen(); renderEigene(); renderKalender();
-        renderWetter(); renderIgf(); renderAvu(); renderImp();
+        renderWetter(); renderIgf(); renderIccs(); renderAvu(); renderImp();
         Object.keys(personFelder).forEach(id => {
           const el = document.getElementById(id);
           if(el) el.value = medizin.person[personFelder[id]] || "";
@@ -6426,7 +6538,8 @@
     });
 
     // 3) Medizinische Fristen: 3 Monate, 1 Monat und 1 Woche vorher
-    [["IGF", medizin.igf], ["Untersuchung", medizin.avu], ["Impfung", medizin.impfungen]]
+    [["IGF", medizin.igf], ["ICCS", medizin.iccs], ["Untersuchung", medizin.avu],
+     ["Impfung", medizin.impfungen]]
       .forEach(([bezeichnung, liste]) => {
         (liste || []).forEach(u => {
           const bis = parseDateDE(u.gueltigBis);
@@ -7041,7 +7154,7 @@
       if(st === "abgelaufen") abgelaufen++;
     });
     // Medizinische Fristen zählen mit
-    [medizin.igf, medizin.avu, medizin.impfungen].forEach(liste => {
+    [medizin.igf, medizin.iccs, medizin.avu, medizin.impfungen].forEach(liste => {
       (liste || []).forEach(u => {
         if(!u.gueltigBis) return;
         const st = getStatus(u.gueltigBis).key;
@@ -7708,6 +7821,7 @@
       renderKalender();
       renderUrlaub();          // Werktage neu zählen
       if(typeof renderDashboard === "function") renderDashboard();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
     });
   })();
 
@@ -8210,6 +8324,85 @@
       }));
   }
 
+  /* ---------- ICCS-Lernfelder ---------- */
+  if(!Array.isArray(medizin.iccs)) medizin.iccs = [];
+
+  const iccsForm = document.getElementById("iccsForm");
+  const iccsFeld = document.getElementById("iccsFeld");
+  const iccsDatum = document.getElementById("iccsDatum");
+  const iccsIntervall = document.getElementById("iccsIntervall");
+  const iccsBis = document.getElementById("iccsBis");
+  let iccsBearbeitet = null;
+
+  [iccsDatum, iccsIntervall].forEach(el =>
+    el.addEventListener("change", () => bisAusIntervall(iccsDatum, iccsIntervall, iccsBis)));
+
+  document.getElementById("iccsAddToggle").addEventListener("click", () => {
+    iccsBearbeitet = null;
+    iccsFeld.value = "Lernfeld 1";
+    iccsDatum.value = todayDE();
+    iccsIntervall.value = "24M";
+    iccsBis.value = "";
+    ["iccsErgebnis","iccsNotiz"].forEach(id => document.getElementById(id).value = "");
+    bisAusIntervall(iccsDatum, iccsIntervall, iccsBis);
+    iccsForm.style.display = "block";
+  });
+  document.getElementById("iccsAbbrechen").addEventListener("click", () => {
+    iccsForm.style.display = "none"; iccsBearbeitet = null;
+  });
+
+  document.getElementById("iccsSpeichern").addEventListener("click", () => {
+    if(!parseDateDE(iccsDatum.value)){
+      alert("Bitte ein gültiges Datum (TT.MM.JJJJ) eintragen."); iccsDatum.focus(); return;
+    }
+    const daten = {
+      art: "ICCS " + iccsFeld.value,
+      datum: iccsDatum.value.trim(),
+      gueltigBis: iccsIntervall.value === "frei" ? "" : iccsBis.value.trim(),
+      intervall: iccsIntervall.value,
+      ergebnis: document.getElementById("iccsErgebnis").value.trim(),
+      notiz: document.getElementById("iccsNotiz").value.trim()
+    };
+    if(iccsBearbeitet){
+      const e = medizin.iccs.find(x => x.id === iccsBearbeitet);
+      if(e) Object.assign(e, daten);
+    }else{
+      medizin.iccs.push(Object.assign({ id: newId() }, daten));
+    }
+    saveMed();
+    iccsForm.style.display = "none";
+    iccsBearbeitet = null;
+    renderIccs();
+    if(typeof benPlanen === "function") benPlanen();
+  });
+
+  function renderIccs(){
+    const behaelter = medListeZeichen(medizin.iccs, "iccsListe", "iccsEmpty", "iccs",
+      (e) => "Datum: " + fmt(e.datum) + (e.gueltigBis ? " · gültig bis " + fmt(e.gueltigBis) : " · ohne Ablauf"));
+    if(!behaelter) return;
+    behaelter.querySelectorAll("[data-iccs-edit]").forEach(b =>
+      b.addEventListener("click", () => {
+        const e = medizin.iccs.find(x => x.id === b.getAttribute("data-iccs-edit"));
+        if(!e) return;
+        iccsBearbeitet = e.id;
+        iccsFeld.value = String(e.art).replace("ICCS ", "");
+        iccsDatum.value = e.datum || "";
+        iccsBis.value = e.gueltigBis || "";
+        iccsIntervall.value = e.intervall || "frei";
+        document.getElementById("iccsErgebnis").value = e.ergebnis || "";
+        document.getElementById("iccsNotiz").value = e.notiz || "";
+        iccsForm.style.display = "block";
+        iccsForm.scrollIntoView({ behavior: "smooth", block: "center" });
+      }));
+    behaelter.querySelectorAll("[data-iccs-weg]").forEach(b =>
+      b.addEventListener("click", () => {
+        const e = medizin.iccs.find(x => x.id === b.getAttribute("data-iccs-weg"));
+        if(!e || !confirm('Eintrag „' + e.art + '" wirklich löschen?')) return;
+        medizin.iccs = medizin.iccs.filter(x => x.id !== e.id);
+        saveMed(); renderIccs();
+      }));
+  }
+
   /* ---------- AVU / WFV ---------- */
   const avuForm = document.getElementById("avuForm");
   const avuArt = document.getElementById("avuArt");
@@ -8670,6 +8863,13 @@
           ["Ergebnis", e => schutz(e.ergebnis)],
           ["Notiz", e => schutz(e.notiz)]
         ])
+      + tabelle("ICCS — Lernfelder", medizin.iccs, [
+          ["Lernfeld", e => schutz(e.art)],
+          ["Datum", e => fmt(e.datum)],
+          ["Gültig bis", e => e.gueltigBis ? fmt(e.gueltigBis) : "—"],
+          ["Ergebnis", e => schutz(e.ergebnis)],
+          ["Notiz", e => schutz(e.notiz)]
+        ])
       + tabelle("AVU-IGF / WFV", medizin.avu, [
           ["Untersuchung", e => schutz(e.art)],
           ["Datum", e => fmt(e.datum)],
@@ -8690,10 +8890,30 @@
       + '</body></html>';
   }
 
-  document.getElementById("igfDrucken").addEventListener("click", () => {
+  document.getElementById("igfDrucken").addEventListener("click", async () => {
     const html = igfUebersichtHtml();
-    /* Eigenes Fenster, damit die App selbst nicht gedruckt wird. In der App
-       ist das Fenster gesperrt — dann in einem Rahmen drucken. */
+
+    /* In der App gibt es keinen Druckdialog für Webinhalte: window.open wird
+       blockiert, und ein eingebetteter Rahmen legt sich über die Oberfläche,
+       ohne sich schließen zu lassen. Deshalb wird die Übersicht als Datei
+       ausgegeben — von dort aus übernimmt eine andere App das Drucken oder
+       Speichern als PDF. */
+    if(istApp){
+      const pr = medizin.person;
+      const name = "IGF-Uebersicht"
+        + (pr.name ? "_" + pr.name.replace(/[^\wäöüÄÖÜß]/g, "_") : "")
+        + "_" + new Date().toISOString().slice(0,10) + ".html";
+      const erfolg = await dateiAusgeben(html, name, "text/html;charset=utf-8");
+      if(erfolg){
+        alert("Die Übersicht wurde als Datei ausgegeben.\n\n"
+          + "Zum Drucken oder Speichern als PDF im geöffneten Menü eine App "
+          + "auswählen, die HTML anzeigen kann — etwa Chrome. Dort über das "
+          + "Menü „Teilen“ bzw. „Drucken“ das PDF erzeugen.");
+      }
+      return;
+    }
+
+    // Im Browser ein eigenes Fenster verwenden
     let fenster = null;
     try{ fenster = window.open("", "_blank"); }catch(e){}
     if(fenster && fenster.document){
@@ -8702,21 +8922,9 @@
       setTimeout(() => { try{ fenster.focus(); fenster.print(); }catch(e){} }, 400);
       return;
     }
-    const rahmen = document.createElement("iframe");
-    rahmen.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
-    document.body.appendChild(rahmen);
-    rahmen.contentDocument.write(html);
-    rahmen.contentDocument.close();
-    setTimeout(() => {
-      try{
-        rahmen.contentWindow.focus();
-        rahmen.contentWindow.print();
-      }catch(e){
-        alert("Der Druckdialog konnte nicht geöffnet werden.\n\n"
-          + 'Über „✉ Per E-Mail" lässt sich die Übersicht stattdessen als Datei teilen.');
-      }
-      setTimeout(() => rahmen.remove(), 2000);
-    }, 500);
+    alert("Der Druckdialog konnte nicht geöffnet werden.\n\n"
+      + "Bitte Pop-up-Fenster für diese Seite zulassen, oder die Übersicht "
+      + "über „✉ Per E-Mail“ als Datei ausgeben.");
   });
 
   document.getElementById("igfMail").addEventListener("click", async () => {
@@ -8740,6 +8948,160 @@
   });
 
   /* =========================================================
+     WIDGET FÜR DEN STARTBILDSCHIRM
+     Die App legt die Tagesübersicht im nativen Speicher ab; das Widget liest
+     sie von dort. So braucht es selbst keinen Zugriff auf Kalender oder
+     Kontakte. Aktualisiert wird bei jedem Start, bei Rückkehr in den
+     Vordergrund und nach Änderungen an Terminen oder Aufgaben.
+     ========================================================= */
+  const WIDGET_KEY = "widget_einstellungen_v1";
+  let widget = loadJSON(WIDGET_KEY, { modus: "dunkel", deckkraft: 85 });
+  if(["dunkel","hell","system"].indexOf(widget.modus) === -1) widget.modus = "dunkel";
+  if(typeof widget.deckkraft !== "number") widget.deckkraft = 85;
+  function saveWidget(){ saveJSON(WIDGET_KEY, widget); }
+
+  /* Tagesübersicht zusammenstellen und für das Widget ablegen */
+  async function widgetAktualisieren(){
+    const P = prefPlugin();
+    if(!P) return;
+
+    try{
+      const heute = new Date(); heute.setHours(0,0,0,0);
+      const tagEnde = new Date(heute.getTime() + 86399999);
+      const eintraege = [];
+
+      // Termine des Tages, ohne Aufgaben (die kommen gleich gesondert)
+      terminFenster(heute, tagEnde).forEach(t => {
+        if(t.istTodo) return;
+        const anfang = new Date(t.start); anfang.setHours(0,0,0,0);
+        let letzter = (t.allDay && t.end) ? new Date(t.end.getTime() - 1)
+                                          : new Date(t.end || t.start);
+        letzter.setHours(0,0,0,0);
+        if(anfang > heute || letzter < heute) return;
+
+        eintraege.push({
+          art: "termin",
+          zeit: t.allDay ? "" : zwei2(t.start.getHours()) + ":" + zwei2(t.start.getMinutes()),
+          bis: (!t.allDay && t.end) ? zwei2(t.end.getHours()) + ":" + zwei2(t.end.getMinutes()) : "",
+          titel: String(t.titel || "").slice(0, 60),
+          ort: String(t.ort || "").slice(0, 40),
+          farbe: terminFarbe(t),
+          ganztags: !!t.allDay,
+          kennung: String(t.uid || "")
+        });
+      });
+
+      // Offene Aufgaben: heute fällig oder überfällig
+      (todos.eintraege || []).forEach(t => {
+        if(t.erledigt || !t.faellig) return;
+        const d = parseDateDE(t.faellig);
+        if(!d || d > heute) return;
+        const ueberfaellig = d < heute;
+        eintraege.push({
+          art: "aufgabe",
+          zeit: t.uhrzeit || "",
+          bis: "",
+          titel: String(t.text || "").slice(0, 60),
+          ort: ueberfaellig ? "überfällig seit " + fmt(t.faellig) : "",
+          farbe: ueberfaellig ? "#ff5c5c" : (t.prio === "hoch" ? "#ff8a3d" : "#4dd0c4"),
+          ganztags: !t.uhrzeit,
+          kennung: "todo:" + t.id
+        });
+      });
+
+      // Nach Zeit sortieren, Ganztägiges zuerst
+      eintraege.sort((a, b) => {
+        if(a.ganztags !== b.ganztags) return a.ganztags ? -1 : 1;
+        return String(a.zeit).localeCompare(String(b.zeit));
+      });
+
+      const ft = istFeiertagBW(heute) ? feiertagName(heute) : null;
+      const fer = (typeof ferienFuerTag === "function") ? ferienFuerTag(heute) : null;
+
+      const inhalt = {
+        stand: Date.now(),
+        datum: heute.toLocaleDateString("de-DE",
+          { weekday: "long", day: "2-digit", month: "long" }),
+        kw: kalenderwoche(heute),
+        hinweis: ft || fer || "",
+        modus: widget.modus,
+        deckkraft: widget.deckkraft,
+        eintraege: eintraege.slice(0, 12)
+      };
+
+      await P.set({ key: "widget_agenda", value: JSON.stringify(inhalt) });
+
+      // Widget zum Neuzeichnen anstoßen
+      const WP = (Cap && Cap.Plugins && Cap.Plugins.WidgetAnstoss) || null;
+      if(WP && WP.aktualisieren){
+        try{ await WP.aktualisieren(); }catch(e){ /* Widget evtl. nicht gesetzt */ }
+      }
+    }catch(e){ /* das Widget ist zusätzlich, Fehler nicht weitertragen */ }
+  }
+
+  /* ---------- Einstellungen im Menü ---------- */
+  (function widgetEinstellungen(){
+    const modusFeld = document.getElementById("widgetModus");
+    const deckFeld = document.getElementById("widgetDeckkraft");
+    const deckWert = document.getElementById("widgetDeckWert");
+    if(!modusFeld || !deckFeld) return;
+
+    modusFeld.value = widget.modus;
+    deckFeld.value = widget.deckkraft;
+    if(deckWert) deckWert.textContent = widget.deckkraft + " %";
+
+    modusFeld.addEventListener("change", () => {
+      widget.modus = modusFeld.value;
+      saveWidget();
+      widgetAktualisieren();
+    });
+    deckFeld.addEventListener("input", () => {
+      widget.deckkraft = parseInt(deckFeld.value, 10);
+      if(deckWert) deckWert.textContent = widget.deckkraft + " %";
+    });
+    deckFeld.addEventListener("change", () => {
+      saveWidget();
+      widgetAktualisieren();
+    });
+  })();
+
+  /* Öffnet den Eintrag, der im Widget angetippt wurde. Wird von der App
+     aufgerufen, sobald die Oberfläche geladen ist. */
+  window.widgetTerminOeffnen = function(kennung){
+    if(!kennung) return;
+    try{
+      if(String(kennung).indexOf("todo:") === 0){
+        const knopf = document.querySelector('[data-tab="tabTodo"]');
+        if(knopf) knopf.click();
+        return;
+      }
+      const heute = new Date(); heute.setHours(0,0,0,0);
+      const treffer = terminFenster(heute, new Date(heute.getTime() + 86399999))
+        .find(t => String(t.uid) === String(kennung));
+      if(treffer && typeof terminDetailZeigen === "function"){
+        terminDetailZeigen(treffer, terminFarbe(treffer));
+      }else{
+        // Noch nicht eingelesen — nach dem Laden erneut versuchen
+        setTimeout(() => {
+          const t2 = terminFenster(heute, new Date(heute.getTime() + 86399999))
+            .find(t => String(t.uid) === String(kennung));
+          if(t2 && typeof terminDetailZeigen === "function"){
+            terminDetailZeigen(t2, terminFarbe(t2));
+          }
+        }, 1500);
+      }
+    }catch(e){ /* ohne Detailansicht weiterarbeiten */ }
+  };
+
+  // Falls die Kennung schon in der Adresse steht (Browser oder Neustart)
+  (function widgetAufrufBeimStart(){
+    try{
+      const kennung = new URLSearchParams(window.location.search).get("termin");
+      if(kennung) setTimeout(() => window.widgetTerminOeffnen(kennung), 800);
+    }catch(e){}
+  })();
+
+  /* =========================================================
      Init
      ========================================================= */
   resetForm();
@@ -8753,6 +9115,7 @@
   renderKalender();
   renderWetter();
   renderIgf();
+  renderIccs();
   renderAvu();
   renderImp();
   bftBewerten();
@@ -8804,6 +9167,8 @@
           await nativKalenderEinlesen();
           renderKalender();
           if(typeof renderDashboard === "function") renderDashboard();
+          if(typeof widgetAktualisieren === "function") widgetAktualisieren();
+    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
         }catch(e){ /* stillschweigend */ }
         laeuft = false;
       };
