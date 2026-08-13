@@ -1,6 +1,6 @@
 {
   "name": "soldaten-dashboard",
-  "version": "4.7.0",
+  "version": "4.9.0",
   "description": "Soldaten Dashboard — Urlaub, Überstunden, Lehrgänge, Kalender",
   "private": true,
   "scripts": {
