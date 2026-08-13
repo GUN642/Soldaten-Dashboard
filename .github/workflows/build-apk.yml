@@ -13,6 +13,9 @@ jobs:
       - name: Projekt auschecken
         uses: actions/checkout@v4
 
+      - name: Projektpaket entpacken (falls hochgeladen)
+        run: python3 scripts/paket-entpacken.py
+
       - name: Projektdateien pruefen
         run: python3 scripts/projekt-pruefen.py
 
