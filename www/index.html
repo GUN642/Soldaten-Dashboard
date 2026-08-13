@@ -1001,7 +1001,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage Baden-Württemberg ausgenommen.<br>
         Lehrgänge: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 5.0 &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 5.1 &middot; Stand 13.08.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:HSGCG002PN@bundeswehr.org">HSGCG002PN@bundeswehr.org</a>
       </div>
     </div>
@@ -1015,6 +1015,13 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v5.1 <span class="cl-date">13.08.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Der Reiter „Lehrgänge" fehlte in der Leiste. Beim Umstellen der Reihenfolge in v4.8 ist die Schaltfläche verloren gegangen — die Einträge selbst waren stets gespeichert und sind unverändert vorhanden</li>
+          <li>Hintergrund des App-Symbols wieder durchsichtig</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v5.0 <span class="cl-date">13.08.2026</span></div>
         <ul>
@@ -1431,6 +1438,7 @@
   <button class="tab-btn" data-tab="tabTodo">To-do</button>
   <button class="tab-btn" data-tab="tabNotizen">Notizen</button>
   <button class="tab-btn" data-tab="tabStart">Urlaub/Mehrarbeit</button>
+  <button class="tab-btn" data-tab="tabAblauf">Lehrgänge</button>
   <button class="tab-btn" data-tab="tabMed">Akte</button>
   <button class="tab-btn" data-tab="tabTools">Tools</button>
 </div>
@@ -6077,7 +6085,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "5.0";
+  const APP_VERSION = "5.1";
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
      denn der übliche Download funktioniert im Android-WebView nicht. */
