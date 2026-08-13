@@ -140,6 +140,28 @@ zusätzlich die Auswahl **Urlaub / FvD** samt Schalter **Nur geplant**:
 
 ---
 
+## Widget für den Startbildschirm
+
+Im Ordner `native/` liegen zusätzlich die Dateien für das Widget:
+
+* `AgendaWidget.java` — zeichnet die Tagesübersicht
+* `WidgetAnstossPlugin.java` — lässt die App das Widget aktualisieren
+* `agenda_widget.xml`, `agenda_zeile1..8.xml` — Aufbau der Anzeige
+* `agenda_widget_info.xml` — Größe und Verhalten
+
+Das Skript `scripts/widget-einrichten.py` kopiert diese Dateien beim Bauen an
+die richtige Stelle und meldet das Widget im Manifest an.
+
+Hinzufügen auf dem Gerät: Startbildschirm lange drücken → Widgets → Soldaten
+Dashboard. Darstellung und Deckkraft stellst du im Menü der App ein.
+
+Das Widget liest die Übersicht aus dem Gerätespeicher, den die App beschreibt.
+Es braucht daher selbst keinen Zugriff auf Kalender oder Kontakte. Aktualisiert
+wird beim Öffnen der App, bei Rückkehr in den Vordergrund und halbstündlich
+durch Android.
+
+---
+
 ## Eigenes Kontakt-Modul
 
 Im Ordner `native/` liegen zwei Java-Dateien, die der Build in das
