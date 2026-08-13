@@ -22,8 +22,7 @@ NOETIG = [
     ("native/agenda_widget.xml",          "Aufbau des Widgets"),
     ("native/agenda_widget_info.xml",     "Groesse des Widgets"),
 ]
-for i in range(1, 9):
-    NOETIG.append(("native/agenda_zeile%d.xml" % i, "Zeile %d des Widgets" % i))
+NOETIG.append(("native/DruckPlugin.java", "Druck ueber das Android-Druckmodul"))
 
 fehlend = [(pfad, zweck) for pfad, zweck in NOETIG if not os.path.isfile(pfad)]
 

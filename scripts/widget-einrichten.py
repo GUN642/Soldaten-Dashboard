@@ -26,6 +26,7 @@ java_dateien = [
     "MainActivity.java",
     "AgendaWidget.java",
     "WidgetAnstossPlugin.java",
+    "DruckPlugin.java",
 ]
 for name in java_dateien:
     quelle = os.path.join("native", name)
@@ -42,10 +43,8 @@ os.makedirs(layout, exist_ok=True)
 os.makedirs(xml, exist_ok=True)
 
 shutil.copy(os.path.join("native", "agenda_widget.xml"), layout)
-for i in range(1, 9):
-    shutil.copy(os.path.join("native", "agenda_zeile%d.xml" % i), layout)
 shutil.copy(os.path.join("native", "agenda_widget_info.xml"), xml)
-print("Layouts eingesetzt (1 Rahmen + 8 Zeilen + Beschreibung)")
+print("Layouts eingesetzt (Rahmen mit acht Zeilen + Beschreibung)")
 
 # ---- Texte ----
 if os.path.isfile(STRINGS):
