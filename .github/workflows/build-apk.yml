@@ -6,6 +6,12 @@ name: APK bauen
 "on":
   workflow_dispatch:
 
+# Noetig, damit dieser Workflow ein GitHub-Release anlegen darf (fuer die
+# automatische Update-Pruefung der App). Ohne dies bricht der Release-Schritt
+# mit einer Berechtigungsmeldung ab.
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -61,29 +67,16 @@ jobs:
           grep -A10 "dienstcockpit-signatur" android/app/build.gradle
           grep -A3 "buildTypes" android/app/build.gradle
 
-      - name: Kalenderberechtigungen eintragen
+      # Berechtigungen, Sicherungsregeln, Module und Widget werden alle von
+      # diesem einen Skript eingetragen. Die Berechtigungen standen frueher
+      # als sed-Schleife direkt hier - dadurch erhielt ein lokaler Build eine
+      # APK ohne Kalender-, Kontakt- und Benachrichtigungsrechte. Jetzt tun
+      # CI und lokaler Build dasselbe.
+      - name: Eigene Module, Widget, Berechtigungen und Sicherungsregeln einsetzen
         run: |
-          MANIFEST=android/app/src/main/AndroidManifest.xml
-          if [ ! -f "$MANIFEST" ]; then
-            echo "FEHLER: $MANIFEST nicht gefunden."
-            exit 1
-          fi
-          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM USE_EXACT_ALARM RECEIVE_BOOT_COMPLETED VIBRATE READ_CONTACTS INTERNET ACCESS_COARSE_LOCATION ACCESS_FINE_LOCATION; do
-            if grep -q "android.permission.$P" "$MANIFEST"; then
-              echo "bereits vorhanden: $P"
-            else
-              sed -i "s#</manifest>#    <uses-permission android:name=\"android.permission.$P\" />\n</manifest>#" "$MANIFEST"
-              echo "eingetragen: $P"
-            fi
-          done
+          python3 scripts/widget-einrichten.py
           echo "--- AndroidManifest.xml ---"
-          cat "$MANIFEST"
-          for P in READ_CALENDAR WRITE_CALENDAR POST_NOTIFICATIONS ACCESS_FINE_LOCATION; do
-            grep -q "android.permission.$P" "$MANIFEST" || { echo "FEHLER: $P fehlt"; exit 1; }
-          done
-
-      - name: Eigene Module und Widget einsetzen
-        run: python3 scripts/widget-einrichten.py
+          cat android/app/src/main/AndroidManifest.xml
 
       - name: App-Icon erzeugen (falls vorhanden)
         run: |
@@ -150,3 +143,23 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: GitHub-Release veroeffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+
+          # Falls dieselbe Version erneut gebaut wird: vorhandenes Release ersetzen
+          gh release delete "$TAG" --yes --cleanup-tag --repo "$GITHUB_REPOSITORY" 2>/dev/null || true
+
+          gh release create "$TAG" "$APK" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Soldaten Dashboard $VERSION" \
+            --notes "Build vom $(date +%d.%m.%Y). Aenderungen siehe Aenderungsprotokoll im Menue der App."
+
+          echo "Release $TAG veroeffentlicht. Die App findet Updates automatisch,"
+          echo "sobald im Menue unter 'Updates' dieses Repository eingetragen ist:"
+          echo "  $GITHUB_REPOSITORY"
