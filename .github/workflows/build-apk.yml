@@ -1,10 +1,23 @@
 name: APK bauen
 
-# Nur manueller Start: Reiter "Actions" -> "APK bauen" -> "Run workflow".
-# So laeuft der Build nicht bei jedem einzelnen Datei-Upload an und scheitert
-# nicht mehr an noch unvollstaendigen Dateien.
+# Startet bei jedem Push und zusaetzlich von Hand ueber den Reiter "Actions".
+# Der automatische Start war frueher abgeschaltet, weil beim Hochladen vieler
+# Dateien ueber die GitHub-Oberflaeche mehrere Commits entstanden und der Bau
+# auf einem noch unvollstaendigen Stand ansprang. Inzwischen wird in der Regel
+# nur noch www/index.html einzeln hochgeladen, damit entfaellt der Grund.
+# Aenderungen an reinen Textdateien (README, CLAUDE.md) loesen keinen Bau aus.
 "on":
   workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - "**.md"
+
+# Laedt man zweimal kurz hintereinander hoch, wird der aeltere Lauf abgebrochen.
+# Sonst laufen beide durch und legen nacheinander dasselbe Release an.
+concurrency:
+  group: apk-bau-${{ github.ref }}
+  cancel-in-progress: true
 
 # Noetig, damit dieser Workflow ein GitHub-Release anlegen darf (fuer die
 # automatische Update-Pruefung der App). Ohne dies bricht der Release-Schritt
