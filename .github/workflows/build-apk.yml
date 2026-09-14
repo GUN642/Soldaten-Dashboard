@@ -55,6 +55,13 @@ jobs:
 
       - name: Android SDK einrichten
         uses: android-actions/setup-android@v3
+        with:
+          # Voreinstellung der Action ist "tools platform-tools" - das alte,
+          # eigenstaendige "tools"-Paket hat Google inzwischen ersatzlos aus dem
+          # SDK-Repository entfernt (sdkmanager bricht seither mit "Failed to
+          # find package 'tools'" ab). Fuer den eigentlichen Gradle-Build wird
+          # es nicht gebraucht - platform-tools reicht.
+          packages: "platform-tools"
 
       # android/ wird erst weiter unten von "cap add android" erzeugt, daher kann
       # hier noch nicht ueber dessen Gradle-Dateien gehasht werden. package.json
