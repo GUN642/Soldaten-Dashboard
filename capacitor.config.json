@@ -22,6 +22,9 @@
       "showSpinner": false,
       "launchAutoHide": true,
       "launchShowDuration": 900
+    },
+    "CapacitorHttp": {
+      "enabled": true
     }
   }
 }

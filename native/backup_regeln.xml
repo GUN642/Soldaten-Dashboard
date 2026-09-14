@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sicherungsregeln fuer Android 11 und aelter (fullBackupContent).
+
+  Gesichert werden ausdruecklich NUR die SharedPreferences. Dort liegt der
+  vollstaendige Spiegel aller App-Daten, den die App bei jeder Aenderung
+  mitschreibt (siehe speicherSpiegeln/saveJSON in www/index.html).
+
+  Die WebView-Ablage (app_webview/Local Storage) wird bewusst NICHT
+  mitgesichert: Das ist eine LevelDB-Datenbank, die beim Zurueckspielen
+  inkonsistent werden kann. Sie wird nach der Wiederherstellung ohnehin
+  von speicherZurueckholen() aus dem Spiegel neu aufgebaut - genau dafuer
+  wurde der Spiegel gebaut.
+-->
+<full-backup-content>
+    <include domain="sharedpref" path="." />
+    <exclude domain="file" path="app_webview" />
+    <exclude domain="external" path="." />
+</full-backup-content>

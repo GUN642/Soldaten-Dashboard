@@ -1,0 +1,9 @@
+# Wird beim Bauen erzeugt, gehört nicht ins Projekt
+/android/
+/ios/
+node_modules/
+package-lock.json
+
+# Systemdateien
+.DS_Store
+Thumbs.db

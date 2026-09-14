@@ -3,7 +3,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/agenda_widget"
     android:minWidth="250dp"
-    android:minHeight="110dp"
+    android:minHeight="130dp"
     android:minResizeWidth="180dp"
     android:minResizeHeight="70dp"
     android:targetCellWidth="4"

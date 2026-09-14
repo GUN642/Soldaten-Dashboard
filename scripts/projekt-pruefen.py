@@ -15,14 +15,22 @@ NOETIG = [
     ("keystore/debug.keystore",           "Signierschluessel fuer Updates"),
     ("scripts/signatur-eintragen.py",     "Traegt die Signatur in Gradle ein"),
     ("scripts/widget-einrichten.py",      "Setzt Module und Widget ein"),
+    ("scripts/paket-entpacken.py",        "Entpackt ein hochgeladenes Paket"),
+    ("scripts/app-pruefen.js",            "Prueft die App auf Fehler"),
     ("native/MainActivity.java",          "Startpunkt der App"),
     ("native/KontaktDatenPlugin.java",    "Geburtstage aus den Kontakten"),
     ("native/AgendaWidget.java",          "Widget fuer den Startbildschirm"),
     ("native/WidgetAnstossPlugin.java",   "Aktualisierung des Widgets"),
+    ("native/AgendaWidgetService.java",   "Fuellt die Liste des Widgets"),
     ("native/agenda_widget.xml",          "Aufbau des Widgets"),
+    ("native/agenda_zeile.xml",           "Eine Zeile des Widgets"),
+    ("native/agenda_tag.xml",             "Tagesueberschrift im Widget"),
+    ("native/WiederholungPlugin.java",     "Liest wiederkehrende Termine direkt"),
     ("native/agenda_widget_info.xml",     "Groesse des Widgets"),
 ]
 NOETIG.append(("native/DruckPlugin.java", "Druck ueber das Android-Druckmodul"))
+NOETIG.append(("native/backup_regeln.xml", "Sicherung ins Google-Konto (bis Android 11)"))
+NOETIG.append(("native/datenregeln.xml",  "Sicherung ins Google-Konto (ab Android 12)"))
 
 fehlend = [(pfad, zweck) for pfad, zweck in NOETIG if not os.path.isfile(pfad)]
 
