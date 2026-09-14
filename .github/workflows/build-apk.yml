@@ -42,6 +42,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          # Es liegt bewusst kein package-lock.json im Projekt (siehe .gitignore),
+          # daher dient package.json selbst als Cache-Schluessel.
+          cache: "npm"
+          cache-dependency-path: package.json
 
       - name: Java einrichten
         uses: actions/setup-java@v4
@@ -51,6 +55,20 @@ jobs:
 
       - name: Android SDK einrichten
         uses: android-actions/setup-android@v3
+
+      # android/ wird erst weiter unten von "cap add android" erzeugt, daher kann
+      # hier noch nicht ueber dessen Gradle-Dateien gehasht werden. package.json
+      # legt die Capacitor-Version fest und damit auch, welches Gradle/welche
+      # Abhaengigkeiten das erzeugte Projekt zieht - als Cache-Schluessel reicht das.
+      - name: Gradle-Abhaengigkeiten cachen
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Signierschluessel pruefen
         run: |

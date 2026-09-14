@@ -1777,7 +1777,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.15 Beta &middot; Stand 13.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.16 Beta &middot; Stand 14.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1861,6 +1861,15 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.16 Beta <span class="cl-date">14.09.2026</span></div>
+        <ul>
+          <li>Speicherung beschleunigt: Beim Start werden die gesicherten Bereiche jetzt parallel
+            statt nacheinander aus dem nativen Speicher geholt, und jedes Speichern prüft den
+            eigenen Index nur noch einmal statt bei jedem einzelnen Vorgang neu nachzufragen.
+            Kein Unterschied im Verhalten, nur schneller.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.15 Beta <span class="cl-date">13.09.2026</span></div>
         <ul>
@@ -4563,6 +4572,12 @@
      erneut versucht, unabhängig vom Start. */
   let spiegelBereit = false;
 
+  /* Inhalt von SPIEGEL_INDEX, sobald einmal gelesen. Ohne diesen Cache
+     würde speicherSpiegeln() bei JEDEM Speichern einen weiteren nativen
+     Lese-Roundtrip machen, nur um zu prüfen, ob der Schlüssel schon
+     eingetragen ist — das läppert sich bei häufigen Speichervorgängen. */
+  let spiegelIndexCache = null;
+
   async function speicherZurueckholen(){
     /* Unmittelbar nach dem Start (insbesondere nach einem erzwungenen Neuladen
        der Seite, siehe MainActivity) kann die Capacitor-Brücke zu den nativen
@@ -4585,6 +4600,7 @@
           if(Array.isArray(gelesen)) ausIndex = gelesen;
         }
       }catch(e){ /* ohne Verzeichnis weiterarbeiten */ }
+      spiegelIndexCache = ausIndex.slice();
 
       const schluessel = ALLE_SCHLUESSEL.slice();
       ausIndex.forEach(k => { if(schluessel.indexOf(k) === -1) schluessel.push(k); });
@@ -4609,22 +4625,24 @@
         }catch(e){ return -1; }
       }
 
-      for(const k of schluessel){
+      // Die Schlüssel sind voneinander unabhängig — parallel statt nacheinander lesen,
+      // das spart beim Start eine Kette von ~20 einzelnen Bridge-Roundtrips.
+      await Promise.all(schluessel.map(async (k) => {
         try{
           const nativerWert = await P.get({ key: k });
           const nativerText = nativerWert && nativerWert.value;
-          if(!nativerText) continue;   // nichts zum Wiederherstellen vorhanden
+          if(!nativerText) return;   // nichts zum Wiederherstellen vorhanden
 
           const lokalerText = localStorage.getItem(k);
           if(lokalerText === null){
             localStorage.setItem(k, nativerText);      // fehlt komplett -> übernehmen
-            continue;
+            return;
           }
           if(inhaltsMenge(nativerText) > inhaltsMenge(lokalerText)){
             localStorage.setItem(k, nativerText);       // native Fassung ist reichhaltiger
           }
         }catch(e){ /* einzelnen Schlüssel überspringen */ }
-      }
+      }));
       spiegelBereit = true;
     }catch(e){
       // Konnte nicht gelesen werden: nichts überschreiben, nur weiterarbeiten
@@ -4637,14 +4655,17 @@
     if(!P) return;
     try{
       await P.set({ key: key, value: rohText });
-      const index = await P.get({ key: SPIEGEL_INDEX });
-      let liste = [];
-      if(index && index.value){
-        try{ liste = JSON.parse(index.value) || []; }catch(e){ liste = []; }
+      if(spiegelIndexCache === null){
+        // Noch kein Cache vorhanden (Aufruf vor abgeschlossenem speicherZurueckholen) -
+        // einmalig nachladen, danach reicht der Cache für alle weiteren Speichervorgänge.
+        try{
+          const index = await P.get({ key: SPIEGEL_INDEX });
+          spiegelIndexCache = (index && index.value) ? (JSON.parse(index.value) || []) : [];
+        }catch(e){ spiegelIndexCache = []; }
       }
-      if(liste.indexOf(key) === -1){
-        liste.push(key);
-        await P.set({ key: SPIEGEL_INDEX, value: JSON.stringify(liste) });
+      if(spiegelIndexCache.indexOf(key) === -1){
+        spiegelIndexCache.push(key);
+        await P.set({ key: SPIEGEL_INDEX, value: JSON.stringify(spiegelIndexCache) });
       }
     }catch(e){ /* Spiegelung ist zusätzlich, kein harter Fehler */ }
   }
@@ -9614,7 +9635,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.15-beta";
+  const APP_VERSION = "10.16-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
