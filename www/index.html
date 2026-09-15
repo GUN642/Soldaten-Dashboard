@@ -1777,7 +1777,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.16 Beta &middot; Stand 14.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.17 Beta &middot; Stand 15.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1861,6 +1861,22 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.17 Beta <span class="cl-date">15.09.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Ein monatlich wiederkehrender Termin am 29., 30. oder 31. (z. B.
+            Miete, Gehalt, ein monatlicher Diensttermin) sprang nach dem ersten kürzeren Monat
+            (z. B. Februar) dauerhaft auf ein falsches Datum, weil JavaScript beim Weiterrechnen
+            in den übernächsten Monat rutschte. Der fehlende Monat wird jetzt korrekt ausgelassen,
+            alle folgenden Monate liegen wieder auf dem richtigen Tag. Gleiches für jährliche
+            Termine am 29. Februar in Jahren ohne Schalttag.</li>
+          <li>Fehler behoben: Ein zweiwöchentlicher (oder allgemein: mehrwöchentlicher) Termin mit
+            Wochentagsangabe erschien jede Woche statt im angegebenen Abstand — das Intervall
+            wurde bei der Wochentagsprüfung nicht berücksichtigt.</li>
+          <li>Beide Fehler betrafen alle drei Kalenderquellen gleichermaßen: abonnierte Kalender,
+            selbst angelegte Termine und aus Google/Outlook/FamilyWall gelesene Gerätetermine.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.16 Beta <span class="cl-date">14.09.2026</span></div>
         <ul>
@@ -6484,6 +6500,13 @@
   }
   const BYDAY_NR = { SU:0, MO:1, TU:2, WE:3, TH:4, FR:5, SA:6 };
 
+  /* Montag der Kalenderwoche von d, ohne Uhrzeitanteil - Hilfsfunktion fuer den
+     Wochen-Abstand bei WEEKLY+BYDAY (siehe expandiereEvent). */
+  function wochenStart(d){
+    const wochentag = (d.getDay() + 6) % 7;   // Montag=0 ... Sonntag=6
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() - wochentag);
+  }
+
   function expandiereEvent(ev, fensterVon, fensterBis){
     // Liefert Liste von { start, end, allDay }
     const dauerMs = ev.end ? (ev.end - ev.start) : (ev.allDay ? 86400000 : 3600000);
@@ -6504,8 +6527,20 @@
     }
     const byday = r.BYDAY ? r.BYDAY.split(",").map(x => BYDAY_NR[x.slice(-2).toUpperCase()]).filter(x => x !== undefined) : null;
 
+    // Fester Anker fuer MONTHLY/YEARLY: jedes Vorkommen wird direkt aus dem
+    // Ursprungsdatum plus Monats-/Jahres-Vielfachem gebildet, statt cursor
+    // wiederholt mit setMonth()/setFullYear() weiterzuschieben. Sonst rollt
+    // JavaScript beim naechsten kuerzeren Monat automatisch in den
+    // uebernaechsten Monat (z. B. 31. Januar + 1 Monat -> 3. Maerz), und
+    // dieser Fehler pflanzt sich ueber alle Folgetermine fort.
+    const startTag = ev.start.getDate();
+    const startStunde = ev.start.getHours(), startMinute = ev.start.getMinutes(), startSekunde = ev.start.getSeconds();
+    const startWoche = wochenStart(ev.start);   // fuer den Wochen-Abstand bei WEEKLY+BYDAY
+
     const treffer = [];
     let cursor = new Date(ev.start);
+    let monatsSchritt = 0, jahresSchritt = 0;
+    let ungueltig = false;   // aktueller cursor faellt auf einen Tag, den der Zielmonat/-jahr nicht hat
     let n = 0;
     const hardStop = 2000;
     while(n < hardStop){
@@ -6513,9 +6548,10 @@
       if(count !== null && treffer.length >= count) break;
       if(cursor > fensterBis) break;
 
-      let passt = true;
-      if(freq === "WEEKLY" && byday && byday.length){
-        passt = byday.indexOf(cursor.getDay()) !== -1;
+      let passt = !ungueltig;
+      if(passt && freq === "WEEKLY" && byday && byday.length){
+        const wochenAbstand = tagDifferenz(wochenStart(cursor), startWoche) / 7;
+        passt = byday.indexOf(cursor.getDay()) !== -1 && (wochenAbstand % interval === 0);
       }
       if(passt){
         const ende = new Date(cursor.getTime() + dauerMs);
@@ -6529,8 +6565,21 @@
         if(byday && byday.length) cursor.setDate(cursor.getDate() + 1);
         else cursor.setDate(cursor.getDate() + 7 * interval);
       }
-      else if(freq === "MONTHLY") cursor.setMonth(cursor.getMonth() + interval);
-      else if(freq === "YEARLY") cursor.setFullYear(cursor.getFullYear() + interval);
+      else if(freq === "MONTHLY"){
+        monatsSchritt += interval;
+        cursor = new Date(ev.start.getFullYear(), ev.start.getMonth() + monatsSchritt,
+          startTag, startStunde, startMinute, startSekunde);
+        // Zielmonat hat weniger Tage als startTag -> JS rollt in den Folgemonat.
+        // Dieses eine Vorkommen auslassen statt es am falschen Tag zu zeigen;
+        // der naechste Schritt rechnet wieder vom Original-Tag aus weiter.
+        ungueltig = cursor.getDate() !== startTag;
+      }
+      else if(freq === "YEARLY"){
+        jahresSchritt += interval;
+        cursor = new Date(ev.start.getFullYear() + jahresSchritt, ev.start.getMonth(),
+          startTag, startStunde, startMinute, startSekunde);
+        ungueltig = cursor.getDate() !== startTag;   // z. B. 29. Februar in einem Nicht-Schaltjahr
+      }
       else break;
       n++;
     }
@@ -9635,7 +9684,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.16-beta";
+  const APP_VERSION = "10.17-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
