@@ -1778,7 +1778,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.18 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.19 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1862,6 +1862,22 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.19 Beta <span class="cl-date">18.09.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Wurde der App-Speicher der App auf dem Gerät geleert (z. B. über
+            „Cache leeren" in den Android-Einstellungen), konnte die Wiederherstellung aus der
+            Hintergrundsicherung bei umfangreichen Daten (viele Bildanhänge, z. B. in der Akte) am
+            begrenzten Platz im WebView-Speicher scheitern — betroffene Bereiche blieben dann leer,
+            ohne jeden Hinweis. Das meldet die App jetzt beim Start deutlich, und die eigentlich
+            noch vollständige Hintergrundsicherung wird für den Rest der Sitzung ausdrücklich vor
+            versehentlichem Überschreiben geschützt, statt durch einen beiläufigen Speichervorgang
+            mit dem leeren Zustand ersetzt zu werden.</li>
+          <li>Bildanhänge bei Aufgaben und eigenen Terminen werden jetzt wie bei Dokumenten und
+            Lehrgängen automatisch verkleinert, statt unverändert (bis 2 MB) gespeichert zu werden —
+            das verringert das Risiko, das Speicherlimit überhaupt zu erreichen.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.18 Beta <span class="cl-date">18.09.2026</span></div>
         <ul>
@@ -3695,7 +3711,9 @@
       <div class="field" style="margin-bottom:12px;">
         <label>Dateianhang <span style="color:var(--text-faint);">(optional)</span></label>
         <input type="file" id="nvAnhangDatei" style="padding:7px 10px;">
-        <div class="hint">Anhänge werden in dieser App gespeichert und beim Termin angezeigt. Sie werden nicht in den Gerätekalender übertragen.</div>
+        <div class="hint">Anhänge werden in dieser App gespeichert und beim Termin angezeigt. Sie werden nicht
+          in den Gerätekalender übertragen. Bilder werden vor dem Speichern automatisch verkleinert; andere
+          Dateien höchstens 2 MB.</div>
         <div id="nvAnhangListe" style="margin-top:8px;"></div>
       </div>
 
@@ -3767,7 +3785,8 @@
           <div class="field" style="margin-bottom:12px;">
             <label>Dateianhang <span style="color:var(--text-faint);">(optional)</span></label>
             <input type="file" id="tAnhangDatei" style="padding:7px 10px;">
-            <div class="hint">Bis 2 MB je Datei. Anhänge werden in der App gespeichert.</div>
+            <div class="hint">Foto oder Datei. Bilder werden vor dem Speichern automatisch verkleinert;
+              andere Dateien höchstens 2 MB.</div>
             <div id="tAnhangListe" style="margin-top:8px;"></div>
           </div>
 
@@ -4599,6 +4618,23 @@
     "dienstcockpit_theme_v1"         // hell oder dunkel
   ];
 
+  // Für die Warnung, falls ein Bereich beim Zurückholen nicht in den
+  // Gerätespeicher gepasst hat (siehe fehlgeschlageneBereicheMelden()).
+  const SCHLUESSEL_NAMEN = {
+    "ablaufregister_eintraege_v2": "Lehrgänge",
+    "dokumente_eintraege_v1": "Ausweise, Pässe, Führerschein",
+    "urlaub_konto_v1": "Urlaub",
+    "ueberstunden_konto_v1": "Mehrarbeit",
+    "todo_liste_v1": "Aufgaben",
+    "notizen_v1": "Notizen",
+    "checklisten_v1": "Checklisten",
+    "avz_zeitraeume_v1": "Auslandsverwendungszuschlag",
+    "kalender_v1": "Kalender (eigene Termine und Quellen)",
+    "dashboard_v1": "Wetter und Ort",
+    "medizin_v1": "Akte",
+    "widget_einstellungen_v1": "Widget"
+  };
+
   // Erst wenn der native Speicher gelesen wurde, darf zurückgeschrieben werden.
   // Sonst könnte ein leerer Start die dort liegende Sicherung überschreiben.
   /* Ob das Wiederherstellen beim Start erfolgreich war. Bewusst NICHT mehr
@@ -4615,6 +4651,30 @@
      Lese-Roundtrip machen, nur um zu prüfen, ob der Schlüssel schon
      eingetragen ist — das läppert sich bei häufigen Speichervorgängen. */
   let spiegelIndexCache = null;
+
+  /* Schlüssel, die beim Zurückholen trotz vorhandener nativer Sicherung nicht
+     in den (viel kleineren) WebView-Speicher gepasst haben — z. B. weil eine
+     Akte mit mehreren Bildanhängen zusammen mit dem Rest der App über das
+     localStorage-Limit von wenigen MB kommt. Für den Rest dieser Sitzung wird
+     für diese Schlüssel NICHT nach nativ gespiegelt: der laufende Bereich
+     zeigt dann zwar leer/unvollständig (siehe fehlgeschlageneBereicheMelden),
+     aber die eigentlich noch vollständige native Sicherung bleibt unangetastet,
+     statt durch einen beiläufigen Speichervorgang mit dem leeren Zustand
+     überschrieben zu werden. Nach einem Neustart (idealerweise mit mehr
+     freiem Speicherplatz) wird erneut versucht. */
+  const unvollstaendigeSchluessel = new Set();
+
+  function fehlgeschlageneBereicheMelden(schluessel){
+    if(!schluessel.length) return;
+    const namen = schluessel.map(k => SCHLUESSEL_NAMEN[k] || k);
+    setTimeout(() => {
+      alert("Hinweis: Der Gerätespeicher reichte beim Start nicht aus, um folgende Bereiche "
+        + "vollständig zu laden:\n\n• " + namen.join("\n• ")
+        + "\n\nDie Daten liegen weiterhin sicher im Hintergrund und werden NICHT gelöscht. "
+        + "Bitte in den betroffenen Bereichen große Bildanhänge entfernen oder verkleinern "
+        + "(z. B. in der Akte) und die App danach neu starten.");
+    }, 800);
+  }
 
   async function speicherZurueckholen(){
     /* Unmittelbar nach dem Start (insbesondere nach einem erzwungenen Neuladen
@@ -4665,6 +4725,7 @@
 
       // Die Schlüssel sind voneinander unabhängig — parallel statt nacheinander lesen,
       // das spart beim Start eine Kette von ~20 einzelnen Bridge-Roundtrips.
+      const nichtWiederhergestellt = [];
       await Promise.all(schluessel.map(async (k) => {
         try{
           const nativerWert = await P.get({ key: k });
@@ -4673,15 +4734,25 @@
 
           const lokalerText = localStorage.getItem(k);
           if(lokalerText === null){
-            localStorage.setItem(k, nativerText);      // fehlt komplett -> übernehmen
+            try{
+              localStorage.setItem(k, nativerText);      // fehlt komplett -> übernehmen
+            }catch(e){
+              // Passt nicht in den (viel kleineren) WebView-Speicher, meist
+              // QuotaExceededError. Bereich bleibt leer, native Sicherung
+              // aber unangetastet lassen und sichtbar melden statt still zu
+              // schweigen (siehe unvollstaendigeSchluessel weiter oben).
+              unvollstaendigeSchluessel.add(k);
+              nichtWiederhergestellt.push(k);
+            }
             return;
           }
           if(inhaltsMenge(nativerText) > inhaltsMenge(lokalerText)){
-            localStorage.setItem(k, nativerText);       // native Fassung ist reichhaltiger
+            try{ localStorage.setItem(k, nativerText); }catch(e){ /* ältere lokale Fassung bleibt erhalten */ }
           }
         }catch(e){ /* einzelnen Schlüssel überspringen */ }
       }));
       spiegelBereit = true;
+      fehlgeschlageneBereicheMelden(nichtWiederhergestellt);
     }catch(e){
       // Konnte nicht gelesen werden: nichts überschreiben, nur weiterarbeiten
       spiegelBereit = false;
@@ -4691,6 +4762,7 @@
   async function speicherSpiegeln(key, rohText){
     const P = prefPlugin();
     if(!P) return;
+    if(unvollstaendigeSchluessel.has(key)) return;
     try{
       await P.set({ key: key, value: rohText });
       if(spiegelIndexCache === null){
@@ -6040,18 +6112,17 @@
   tAnhangDatei.addEventListener("change", () => {
     const datei = tAnhangDatei.files[0];
     if(!datei) return;
-    if(datei.size > 2 * 1024 * 1024){
-      alert("Die Datei ist zu groß (" + groesseText(datei.size) + ").\n\nBitte höchstens 2 MB je Datei.");
-      tAnhangDatei.value = ""; return;
-    }
-    const leser = new FileReader();
-    leser.onload = () => {
-      tAnhaenge.push({ name: datei.name, groesse: datei.size, typ: datei.type, daten: leser.result });
+    // Wie bei den Dokumenten: Bilder werden auf eine sparsame Größe gerechnet
+    // statt roh gespeichert zu werden - sonst füllt sich der Speicher schnell
+    // (siehe dokDateiEinlesen()).
+    dokDateiEinlesen(datei).then(eintrag => {
+      tAnhaenge.push(eintrag);
       tRenderAnhaenge();
       tAnhangDatei.value = "";
-    };
-    leser.onerror = () => { alert("Die Datei konnte nicht gelesen werden."); tAnhangDatei.value = ""; };
-    leser.readAsDataURL(datei);
+    }).catch(e => {
+      alert(e && e.message ? e.message : "Die Datei konnte nicht übernommen werden.");
+      tAnhangDatei.value = "";
+    });
   });
   const todoOffenList = document.getElementById("todoOffenList");
   const todoOffenEmpty = document.getElementById("todoOffenEmpty");
@@ -7864,7 +7935,6 @@
 
   let nvGanztags = true;
   let nvAnhaenge = [];
-  const ANHANG_MAX = 2 * 1024 * 1024; // 2 MB je Datei
 
   function updateGanztagUI(){
     nvGanztagToggle.classList.toggle("active", nvGanztags);
@@ -8068,20 +8138,17 @@
   nvAnhangDatei.addEventListener("change", () => {
     const datei = nvAnhangDatei.files[0];
     if(!datei) return;
-    if(datei.size > ANHANG_MAX){
-      alert("Die Datei ist zu groß (" + groesseText(datei.size) + ").\n\n"
-        + "Anhänge werden im Gerätespeicher der App abgelegt; bitte höchstens 2 MB je Datei.");
-      nvAnhangDatei.value = "";
-      return;
-    }
-    const leser = new FileReader();
-    leser.onload = () => {
-      nvAnhaenge.push({ name: datei.name, groesse: datei.size, typ: datei.type, daten: leser.result });
+    // Wie bei den Dokumenten: Bilder werden auf eine sparsame Größe gerechnet
+    // statt roh gespeichert zu werden - sonst füllt sich der Speicher schnell
+    // (siehe dokDateiEinlesen()).
+    dokDateiEinlesen(datei).then(eintrag => {
+      nvAnhaenge.push(eintrag);
       renderAnhaenge();
       nvAnhangDatei.value = "";
-    };
-    leser.onerror = () => { alert("Die Datei konnte nicht gelesen werden."); nvAnhangDatei.value = ""; };
-    leser.readAsDataURL(datei);
+    }).catch(e => {
+      alert(e && e.message ? e.message : "Die Datei konnte nicht übernommen werden.");
+      nvAnhangDatei.value = "";
+    });
   });
 
   /* Uhrzeit tolerant einlesen: 1300, 13.00, 13 00, 13:00, 9, 930 ... -> "13:00" */
@@ -9737,7 +9804,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.18-beta";
+  const APP_VERSION = "10.19-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
