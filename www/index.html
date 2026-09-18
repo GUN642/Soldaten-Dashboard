@@ -1778,7 +1778,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.19 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.20 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1862,6 +1862,18 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.20 Beta <span class="cl-date">18.09.2026</span></div>
+        <ul>
+          <li>Fehler behoben: Der Kalender-Reiter blieb komplett leer (nicht einmal die
+            Tageszahlen erschienen), sobald im angezeigten Monat mindestens ein Termin lag —
+            durch den neuen Schriftgrößen-Regler (v10.18) überdeckte eine gleichnamige lokale
+            Variable versehentlich eine Funktion, wodurch das Zeichnen des Rasters mitten im
+            Aufbau abbrach. Da das Zurücklesen des Gerätekalenders beim Start denselben
+            Zeichenaufruf mit einschließt, blieb dabei je nach Zeitpunkt auch das Wetter auf der
+            Startseite aus, weil der dortige Programmablauf durch den Fehler vorzeitig abbrach.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.19 Beta <span class="cl-date">18.09.2026</span></div>
         <ul>
@@ -7199,18 +7211,22 @@
         const vonSpalte = Math.max(0, tagDifferenz(sp.start, wochenStart));
         const bisSpalte = Math.min(6, tagDifferenz(sp.ende, wochenStart));
 
-        const spurHoehe = 1;
+        // Anzahl der Spuren, die dieser Termin braucht (immer 1) - nicht zu
+        // verwechseln mit der Funktion spurHoehe() weiter unten, die die
+        // Pixelhöhe einer Spur liefert. Gleicher Name hier hätte die Funktion
+        // überdeckt und spurHoehe() beim Aufruf abstürzen lassen.
+        const benoetigteSpuren = 1;
 
         // Erste Stelle suchen, an der alle benötigten Spuren frei sind
         let spur = 0;
         while(spur < 60){
           let frei = true;
-          for(let k = 0; k < spurHoehe; k++){
+          for(let k = 0; k < benoetigteSpuren; k++){
             if(!spuren[spur + k]) spuren[spur + k] = [];
             if(!spuren[spur + k].every(b => bisSpalte < b.von || vonSpalte > b.bis)){ frei = false; break; }
           }
           if(frei){
-            for(let k = 0; k < spurHoehe; k++) spuren[spur + k].push({ von: vonSpalte, bis: bisSpalte });
+            for(let k = 0; k < benoetigteSpuren; k++) spuren[spur + k].push({ von: vonSpalte, bis: bisSpalte });
             break;
           }
           spur++;
@@ -9804,7 +9820,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.19-beta";
+  const APP_VERSION = "10.20-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
