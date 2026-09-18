@@ -1778,7 +1778,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.21 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.22 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1862,6 +1862,16 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.22 Beta <span class="cl-date">18.09.2026</span></div>
+        <ul>
+          <li>Kalender und Wetter erscheinen beim App-Start jetzt sofort: der zuletzt bekannte
+            Stand der Gerätetermine wird sofort angezeigt, während im Hintergrund frisch vom
+            Gerätekalender gelesen wird — das eigentliche Einlesen (u. a. wichtig für Löschungen
+            und Änderungen aus Outlook) läuft unverändert weiter und aktualisiert die Anzeige
+            lautlos, sobald es fertig ist.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.21 Beta <span class="cl-date">18.09.2026</span></div>
         <ul>
@@ -8630,6 +8640,33 @@
   let geraeteTermine = [];       // eingelesene Termine
   let zielKalenderId = "";
 
+  /* Reiner Lese-Beschleuniger: zeigt beim Start sofort den zuletzt bekannten
+     Stand der Geraetetermine, waehrend im Hintergrund frisch vom Geraet
+     gelesen wird (nativKalenderEinlesen braucht bei vielen Terminen spuerbar
+     einen Moment, bis Kalender und Wetter erscheinen). Die eigentliche,
+     massgebliche Abfrage laeuft unveraendert weiter und ueberschreibt diesen
+     Stand, sobald sie fertig ist - dieser Cache ersetzt sie nicht. */
+  const GERAETE_CACHE_KEY = "geraete_termine_cache_v1";
+
+  function geraeteCacheLaden(){
+    const cache = loadJSON(GERAETE_CACHE_KEY, null);
+    if(!cache || !Array.isArray(cache.termine) || !Array.isArray(cache.kalender)) return;
+    try{
+      const termine = cache.termine.map(e => Object.assign({}, e, {
+        start: e.start ? new Date(e.start) : null,
+        end: e.end ? new Date(e.end) : null
+      })).filter(e => e.start && !isNaN(e.start));
+      geraeteKalender = cache.kalender;
+      geraeteTermine = termine;
+    }catch(err){ /* Cache verwerfen, normaler Start laeuft trotzdem weiter */ }
+  }
+
+  function geraeteCacheSpeichern(){
+    try{
+      saveJSON(GERAETE_CACHE_KEY, { stand: Date.now(), kalender: geraeteKalender, termine: geraeteTermine });
+    }catch(err){ /* Cache ist nur eine Beschleunigung, kein harter Fehler */ }
+  }
+
   const NATIV_KEY = "nativ_einstellungen_v1";
   let nativCfg = loadJSON(NATIV_KEY, { zielKalenderId: "", versteckt: [], entfernt: [] });
   if(!Array.isArray(nativCfg.versteckt)) nativCfg.versteckt = [];
@@ -9018,6 +9055,7 @@
         + (kontaktEreignisse.length ? " · " + kontaktEreignisse.length + " Kontaktdaten" : "");
       renderNativAuswahl();
       renderKalender();
+      geraeteCacheSpeichern();
     }catch(e){
       alert("Kalender konnten nicht gelesen werden.\n\n" + (e && e.message ? e.message : e));
     }
@@ -9830,7 +9868,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.21-beta";
+  const APP_VERSION = "10.22-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
@@ -14744,6 +14782,12 @@
   /* =========================================================
      Init
      ========================================================= */
+  // Zuletzt bekannte Geraetetermine sofort uebernehmen, noch bevor das
+  // eigentliche, frische Einlesen (weiter unten, siehe nativKalenderEinlesen)
+  // angestossen wird - damit renderKalender()/renderDashboard() gleich beim
+  // ersten Durchlauf schon etwas zum Zeigen haben.
+  if(istApp) geraeteCacheLaden();
+
   resetForm();
   renderAblauf();
   dokFormZuruecksetzen();
