@@ -652,7 +652,7 @@
     padding:0 6px;flex-shrink:0;
   }
   .kal-wd{
-    font-family:var(--mono);font-size:10.5px;letter-spacing:0.8px;text-transform:uppercase;
+    font-family:var(--mono);font-size:calc(10.5px * var(--kal-skala, 1));letter-spacing:0.8px;text-transform:uppercase;
     color:var(--text-dim);text-align:center;padding:3px 0 2px;
   }
   .kal-body{
@@ -681,7 +681,7 @@
   /* Kalenderwoche sitzt platzsparend links oben im Montagsfeld */
   .kal-kw{
     position:absolute;left:2px;top:1px;
-    font-family:var(--mono);font-size:9px;color:var(--text-dim);
+    font-family:var(--mono);font-size:calc(9px * var(--kal-skala, 1));color:var(--text-dim);
     opacity:0.9;pointer-events:none;line-height:1;
   }
   .kal-tag{position:relative;}
@@ -698,31 +698,32 @@
   .kal-tag.ferien{box-shadow:inset 0 -3px 0 rgba(95,180,255,0.55);}
   .kal-tag-fer{
     position:absolute;left:2px;right:2px;bottom:1px;
-    font-size:8px;color:var(--blue);line-height:1.1;
+    font-size:calc(8px * var(--kal-skala, 1));color:var(--blue);line-height:1.1;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     pointer-events:none;opacity:0.85;
   }
   .kal-tag.gedrueckt{background:var(--amber-dim);}
   .kal-tag-nr{
-    font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);
+    font-family:var(--mono);font-size:calc(12px * var(--kal-skala, 1));font-weight:600;color:var(--text);
     line-height:1.1;text-align:right;padding-right:3px;
   }
   .kal-tag.we .kal-tag-nr{color:var(--text-faint);}
   .kal-tag-ft{
     position:absolute;left:2px;right:2px;bottom:1px;
-    font-size:8.5px;color:var(--red);line-height:1.1;
+    font-size:calc(8.5px * var(--kal-skala, 1));color:var(--red);line-height:1.1;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     pointer-events:none;
   }
 
   /* Balkenschicht: liegt über den Tageszellen einer Woche */
   .kal-balken-schicht{
-    position:absolute;left:0;right:0;top:14px;bottom:0;
+    position:absolute;left:0;right:0;top:calc(14px * var(--kal-skala, 1));bottom:0;
     pointer-events:none;overflow:hidden;
   }
   .kal-balken{
     position:absolute;border-radius:999px;
-    height:12.5px;font-size:10px;line-height:12.5px;padding:0 5px;
+    height:calc(12.5px * var(--kal-skala, 1));font-size:calc(10px * var(--kal-skala, 1));
+    line-height:calc(12.5px * var(--kal-skala, 1));padding:0 5px;
     overflow:hidden;pointer-events:none;font-weight:500;
     /* Zu lange Titel werden schlicht abgeschnitten, ohne Auslassungspunkte */
     white-space:nowrap;text-overflow:clip;
@@ -1777,7 +1778,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.17 Beta &middot; Stand 15.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.18 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1861,6 +1862,17 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.18 Beta <span class="cl-date">18.09.2026</span></div>
+        <ul>
+          <li>Neue Einstellung „Schriftgröße im Kalender" (70–150 %) unter den Kalendereinstellungen
+            bei den Kalenderquellen — betrifft Tageszahlen, Terminbalken und die Wochentagsleiste im
+            Monatsraster. Bei größerer Schrift passen weniger Termine in einen Tag, bevor „+N"
+            erscheint.</li>
+          <li>Widget: Wochentag und Monat in der Kopfzeile sowie in den Tagesüberschriften der Liste
+            erscheinen jetzt kurz („Fr, 18. Sep" statt „Freitag, 18. September").</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.17 Beta <span class="cl-date">15.09.2026</span></div>
         <ul>
@@ -3478,6 +3490,16 @@
         <button class="btn add" type="button" id="kalAddToggle">+ Kalender hinzufügen</button>
       </div>
       <div class="panel-body">
+
+        <div class="field" style="margin-bottom:16px;">
+          <label for="kalSchriftgroesse" style="font-size:11px;">
+            Schriftgröße im Kalender <span id="kalSchriftgroesseWert" style="color:var(--amber);">100 %</span>
+          </label>
+          <input type="range" id="kalSchriftgroesse" min="70" max="150" step="10" value="100"
+                 style="width:100%;padding:0;">
+          <div class="hint">Wirkt sich auf Tageszahlen, Terminbalken und die Wochentagsleiste im Monatsraster
+            aus. Bei größerer Schrift passen weniger Termine in einen Tag, bevor „+N" erscheint.</div>
+        </div>
 
         <div id="kalAddPanel" style="display:none;margin-bottom:18px;">
           <div class="row c2" style="margin-bottom:12px;">
@@ -6382,6 +6404,7 @@
   let kalender = loadJSON(KAL_KEY, { quellen: [], fvdStunden: 8 });
   if(!Array.isArray(kalender.quellen)) kalender.quellen = [];
   if(typeof kalender.fvdStunden !== "number") kalender.fvdStunden = 8;
+  if(typeof kalender.schriftgroesse !== "number") kalender.schriftgroesse = 100;
   if(!kalender.farben || typeof kalender.farben !== "object") kalender.farben = {};
 
   // Selbst gewählte Farben liegen in einem eigenen, sehr kleinen Speicher.
@@ -6765,6 +6788,19 @@
   const MONATE = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
   const WOCHENTAGE = ["Mo","Di","Mi","Do","Fr","Sa","So"];
 
+  /* Schriftgrößen-Skalierung fürs Monatsraster (Einstellung "Schriftgröße im
+     Kalender"). Über eine CSS-Variable steuert das die Textgrößen der
+     Tageszahlen, Terminbalken usw. (siehe .kal-* Regeln im <style>), und
+     zusätzlich die Spurhöhe hier in JS, mit der die Terminbalken pro Tag
+     übereinander gestapelt werden — sonst würde größere Schrift in der
+     weiterhin 14px hohen Spur abgeschnitten. */
+  function kalSkala(){ return (kalender.schriftgroesse || 100) / 100; }
+  function spurHoehe(){ return 14 * kalSkala(); }
+  function kalSkalaAnwenden(){
+    document.documentElement.style.setProperty("--kal-skala", String(kalSkala()));
+  }
+  kalSkalaAnwenden();
+
   let kalAnsichtJahr = new Date().getFullYear();
   let kalAnsichtMonat = new Date().getMonth();
   let kalGewaehlt = null;
@@ -6869,6 +6905,22 @@
   document.getElementById("kalEinstellungen").addEventListener("click", () => einstellungenZeigen(true));
   document.getElementById("kalEinstellungenZu").addEventListener("click", () => einstellungenZeigen(false));
 
+  // Schriftgröße im Kalender
+  (function schriftgroesseEinstellung(){
+    const feld = document.getElementById("kalSchriftgroesse");
+    const wert = document.getElementById("kalSchriftgroesseWert");
+    if(!feld) return;
+    feld.value = String(kalender.schriftgroesse);
+    if(wert) wert.textContent = kalender.schriftgroesse + " %";
+    feld.addEventListener("input", () => {
+      kalender.schriftgroesse = parseInt(feld.value, 10) || 100;
+      if(wert) wert.textContent = kalender.schriftgroesse + " %";
+      kalSkalaAnwenden();
+      renderKalender();
+    });
+    feld.addEventListener("change", saveKalender);
+  })();
+
   /* ---------- Wischen zwischen Monaten ---------- */
   (function wischen(){
     let x0 = null, y0 = null, t0 = 0;
@@ -6909,7 +6961,8 @@
     kalGrid.querySelectorAll(".kal-balken-schicht").forEach(schicht => {
       const hoehe = schicht.clientHeight;
       if(hoehe <= 0) return;
-      const maxSpuren = Math.max(1, Math.floor(hoehe / 14));
+      const sh = spurHoehe();
+      const maxSpuren = Math.max(1, Math.floor(hoehe / sh));
 
       schicht.querySelectorAll(".kal-mehr-marke").forEach(m => m.remove());
 
@@ -6932,7 +6985,7 @@
         marke.className = "kal-mehr-marke";
         marke.textContent = "+" + ueberProSpalte[spalte];
         marke.style.left = "calc(" + (spalte * 100 / 7) + "% + 2px)";
-        marke.style.top = ((maxSpuren - 1) * 14 + 1) + "px";
+        marke.style.top = ((maxSpuren - 1) * sh + 1) + "px";
         schicht.appendChild(marke);
       });
     });
@@ -7108,7 +7161,7 @@
         }
         balken.style.left = "calc(" + (vonSpalte * 100 / 7) + "% + 1px)";
         balken.style.width = "calc(" + ((bisSpalte - vonSpalte + 1) * 100 / 7) + "% - 3px)";
-        balken.style.top = (spur * 14) + "px";
+        balken.style.top = (spur * spurHoehe()) + "px";
         balken.setAttribute("data-spur", spur);
         balken.setAttribute("data-von", vonSpalte);
         balken.setAttribute("data-bis", bisSpalte);
@@ -9684,7 +9737,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.17-beta";
+  const APP_VERSION = "10.18-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
@@ -10675,6 +10728,7 @@
   function wetterText(code){ return (WETTER_CODES[code] || ["❓","unbekannt"])[1]; }
 
   const WOCHENTAGE_KURZ = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  const MONATSNAMEN_KURZ = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
 
   /* Wird seit der Umstellung auf best_match nicht mehr aufgerufen. Bleibt
      stehen, falls wieder von Hand gemischt werden soll. */
@@ -13224,8 +13278,7 @@
         eintraege.push({
           art: "tag",
           tag: schluessel,
-          titel: tag.toLocaleDateString("de-DE",
-            { weekday: "long", day: "2-digit", month: "2-digit" }),
+          titel: WOCHENTAGE_KURZ[tag.getDay()] + ", " + tag.getDate() + ". " + MONATSNAMEN_KURZ[tag.getMonth()],
           ort: ft || fer || "",
           zeit: "", farbe: "", ganztags: false, kennung: ""
         });

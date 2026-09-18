@@ -25,6 +25,17 @@ public class AgendaWidget extends AppWidgetProvider {
     private static final String SCHLUESSEL = "widget_agenda";
     private static final String TAGESWECHSEL = "de.gun.dienstcockpit.TAGESWECHSEL";
 
+    /* Kurzformen ohne Punkt, wie im Rest der App (siehe WOCHENTAGE_KURZ in
+       www/index.html) - Javas eigene Locale-Kurzformen ("EEE"/"MMM" mit
+       Locale.GERMANY) liefern stattdessen "Fr." bzw. "Sept.", das weicht vom
+       übrigen Erscheinungsbild ab. Calendar.DAY_OF_WEEK zaehlt 1=Sonntag. */
+    private static final String[] WOCHENTAGE_KURZ = { "So","Mo","Di","Mi","Do","Fr","Sa" };
+    private static final String[] MONATE_KURZ = { "Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez" };
+
+    private static String kurzDatum(java.util.Calendar c){
+        return c.get(java.util.Calendar.DAY_OF_MONTH) + ". " + MONATE_KURZ[c.get(java.util.Calendar.MONTH)];
+    }
+
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
         for (int id : ids) {
@@ -136,16 +147,12 @@ public class AgendaWidget extends AppWidgetProvider {
 
         String datumText;
         if (anzahlTage > 1) {
-            java.text.SimpleDateFormat kurz =
-                    new java.text.SimpleDateFormat("dd. MMMM", java.util.Locale.GERMANY);
-            String von = kurz.format(jetzt.getTime());
             java.util.Calendar bis = (java.util.Calendar) jetzt.clone();
             bis.add(java.util.Calendar.DAY_OF_MONTH, anzahlTage - 1);
-            datumText = von + " – " + kurz.format(bis.getTime());
+            datumText = kurzDatum(jetzt) + " – " + kurzDatum(bis);
         } else {
-            java.text.SimpleDateFormat lang =
-                    new java.text.SimpleDateFormat("EEEE, dd. MMMM", java.util.Locale.GERMANY);
-            datumText = lang.format(jetzt.getTime());
+            String wochentag = WOCHENTAGE_KURZ[jetzt.get(java.util.Calendar.DAY_OF_WEEK) - 1];
+            datumText = wochentag + ", " + kurzDatum(jetzt);
         }
         if (daten == null) {
             datumText = "Soldaten Dashboard";
