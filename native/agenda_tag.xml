@@ -17,7 +17,7 @@
         android:textSize="13sp"
         android:textStyle="bold"
         android:maxLines="1"
-        android:textColor="#FFB020" />
+        android:textColor="#ff453a" />
 
     <TextView
         android:id="@+id/tagZusatz"

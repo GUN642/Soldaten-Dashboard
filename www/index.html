@@ -1778,7 +1778,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.20 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.21 Beta &middot; Stand 18.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1862,6 +1862,16 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.21 Beta <span class="cl-date">18.09.2026</span></div>
+        <ul>
+          <li>Widget: Die Kopfzeile mit Tag und Datum entfällt jetzt, sobald mehrere Tage
+            angezeigt werden — jeder Tag trägt in der Liste ohnehin schon sein eigenes Datum,
+            die Kalenderwoche bleibt weiterhin sichtbar.</li>
+          <li>Widget: Die Tagesüberschriften in der Liste sind jetzt im Rot des Nothing-Themes
+            statt Gelb-Orange gehalten.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.20 Beta <span class="cl-date">18.09.2026</span></div>
         <ul>
@@ -9820,7 +9830,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.20-beta";
+  const APP_VERSION = "10.21-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,

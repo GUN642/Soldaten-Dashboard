@@ -145,20 +145,23 @@ public class AgendaWidget extends AppWidgetProvider {
         int anzahlTage = daten != null ? Math.max(1, daten.optInt("tage", 1)) : 1;
         java.util.Calendar jetzt = java.util.Calendar.getInstance();
 
-        String datumText;
-        if (anzahlTage > 1) {
-            java.util.Calendar bis = (java.util.Calendar) jetzt.clone();
-            bis.add(java.util.Calendar.DAY_OF_MONTH, anzahlTage - 1);
-            datumText = kurzDatum(jetzt) + " – " + kurzDatum(bis);
+        /* Bei mehreren Tagen entfaellt die Kopfzeile mit Tag und Datum - jeder
+           Tag traegt in der Liste ohnehin schon seine eigene Ueberschrift
+           (siehe AgendaWidgetService), ein Datumsbereich hier waere doppelt. */
+        if (anzahlTage > 1 && daten != null) {
+            ansicht.setViewVisibility(R.id.datum, android.view.View.GONE);
         } else {
-            String wochentag = WOCHENTAGE_KURZ[jetzt.get(java.util.Calendar.DAY_OF_WEEK) - 1];
-            datumText = wochentag + ", " + kurzDatum(jetzt);
+            ansicht.setViewVisibility(R.id.datum, android.view.View.VISIBLE);
+            String datumText;
+            if (daten == null) {
+                datumText = "Soldaten Dashboard";
+            } else {
+                String wochentag = WOCHENTAGE_KURZ[jetzt.get(java.util.Calendar.DAY_OF_WEEK) - 1];
+                datumText = wochentag + ", " + kurzDatum(jetzt);
+            }
+            ansicht.setTextViewText(R.id.datum, datumText);
+            ansicht.setTextColor(R.id.datum, textFarbe);
         }
-        if (daten == null) {
-            datumText = "Soldaten Dashboard";
-        }
-        ansicht.setTextViewText(R.id.datum, datumText);
-        ansicht.setTextColor(R.id.datum, textFarbe);
 
         StringBuilder zusatz = new StringBuilder();
         int kw = jetzt.get(java.util.Calendar.WEEK_OF_YEAR);
