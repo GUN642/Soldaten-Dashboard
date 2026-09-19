@@ -1,6 +1,6 @@
 {
   "name": "soldaten-dashboard",
-  "version": "10.22.0-beta",
+  "version": "10.23.0-beta",
   "description": "Soldaten Dashboard — Urlaub, Überstunden, Lehrgänge, Kalender",
   "private": true,
   "scripts": {
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0",
-    "@capacitor/assets": "^3.0.5"
+    "@capacitor/assets": "^3.0.5",
+    "playwright": "^1.63.0"
   }
 }

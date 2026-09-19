@@ -115,6 +115,24 @@ Führt das komplette JavaScript der App in einer nachgebauten
 Browser-Umgebung aus und meldet synchrone wie verzögerte Fehler. Vor jeder
 Änderung an `www/index.html` ausführen.
 
+### Kalender-Regressionstest
+
+```bash
+npx playwright install chromium   # einmalig
+node scripts/kalender-pruefen.js
+```
+
+Lädt die echte `www/index.html` in einem echten Browser (Playwright) und
+prüft mehrere Testfälle rund um Wiederholungsregeln, ganztägige Termine und
+das Monatsraster — jeweils genau die Fehlerarten, die in früheren Versionen
+tatsächlich aufgetreten sind (Datums-Drift bei monatlicher Wiederholung über
+Monate mit weniger Tagen, ignoriertes INTERVAL bei wöchentlicher Wiederholung
+mit BYDAY, ganztägige Termine mit Millisekunden-Versatz am Ende, sowie
+Laufzeitfehler beim Zeichnen des Monatsrasters). Läuft unabhängig vom Netz
+(blockiert eigene Netzanfragen der App). Sinnvoll nach jeder Änderung an den
+Kalenderfunktionen in `www/index.html` (`expandiereEvent`, `ganztagsSpanne`,
+`renderKalender` und Umfeld).
+
 ## Bekannte Stolperfallen (bitte beachten)
 
 - **Ganztägige Termine**: Kalender-Anbieter legen Mitternacht mal in UTC,
