@@ -1797,7 +1797,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.24 Beta &middot; Stand 19.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.25 Beta &middot; Stand 19.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1881,6 +1881,19 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.25 Beta <span class="cl-date">19.09.2026</span></div>
+        <ul>
+          <li>Anhänge bei Dokumenten, Aufgaben und Terminen liegen in der App jetzt als
+            echte Dateien im Gerätespeicher statt eingebettet in der begrenzten
+            WebView-Ablage (ca. 4-5 MB insgesamt) - damit lassen sich deutlich mehr und
+            größere Fotos hinterlegen, ohne dass andere Bereiche der App aus Platzmangel
+            leiden. Bestehende Anhänge bleiben unverändert nutzbar und werden beim
+            nächsten Speichern des jeweiligen Eintrags automatisch umgestellt.</li>
+          <li>Die automatische Sicherung ins Google-Konto sowie die manuelle Sicherung
+            (Export/Import als .json) schließen diese Anhang-Dateien jetzt mit ein.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.24 Beta <span class="cl-date">19.09.2026</span></div>
         <ul>
@@ -4748,7 +4761,7 @@
         + "vollständig zu laden:\n\n• " + namen.join("\n• ")
         + "\n\nDie Daten liegen weiterhin sicher im Hintergrund und werden NICHT gelöscht. "
         + "Bitte in den betroffenen Bereichen große Bildanhänge entfernen oder verkleinern "
-        + "(z. B. in der Akte) und die App danach neu starten.");
+        + "(z. B. bei Dokumenten, Terminen oder Aufgaben) und die App danach neu starten.");
     }, 800);
   }
 
@@ -5784,6 +5797,7 @@
   if(!Array.isArray(dokumente)) dokumente = [];
   let dokEditId = null;
   let dokDateien = [];   // Kopien des gerade bearbeiteten Dokuments
+  const dokAnhangSitzung = anhangSitzung();   // siehe anhangSitzung() weiter unten (ANHÄNGE ALS ECHTE DATEIEN)
 
   function saveDokumente(){ saveJSON(DOK_KEY, dokumente); }
 
@@ -5874,17 +5888,18 @@
   const dokBildName = document.getElementById("dokBildName");
   const dokBildOeffnen = document.getElementById("dokBildOeffnen");
 
-  function dokKopieZeigen(a){
+  async function dokKopieZeigen(a){
     if(!a) return;
+    const quelle = await anhangQuelle(a);
     if(/^image\//.test(a.typ || "")){
-      dokBildAnzeige.src = a.daten;
+      dokBildAnzeige.src = quelle;
       dokBildAnzeige.style.display = "block";
     }else{
       dokBildAnzeige.removeAttribute("src");
       dokBildAnzeige.style.display = "none";
     }
     dokBildName.textContent = a.name + " · " + groesseText(a.groesse);
-    dokBildOeffnen.href = a.daten;
+    dokBildOeffnen.href = quelle;
     dokBildOeffnen.setAttribute("download", a.name);
     dokBildOverlay.style.display = "flex";
   }
@@ -5906,8 +5921,9 @@
       feld.title = a.name + " · " + groesseText(a.groesse);
       if(/^image\//.test(a.typ || "")){
         const bild = document.createElement("img");
-        bild.src = a.daten;
         bild.alt = a.name;
+        if(a.daten) bild.src = a.daten;
+        else anhangQuelle(a).then(src => { if(src) bild.src = src; });
         feld.appendChild(bild);
       }else{
         const text = document.createElement("div");
@@ -5934,8 +5950,9 @@
   dokDatei.addEventListener("change", () => {
     const datei = dokDatei.files[0];
     if(!datei) return;
-    dokDateiEinlesen(datei).then(eintrag => {
+    dokDateiEinlesen(datei).then(eintrag => anhangAblegen(eintrag)).then(eintrag => {
       dokDateien.push(eintrag);
+      dokAnhangSitzung.hinzugefuegt(eintrag.dateiname);
       dokDateienZeichnen();
       dokDatei.value = "";
     }).catch(e => {
@@ -5971,7 +5988,9 @@
     dokForm.reset();
     dokDauerEinheit.value = "J";
     dokEditId = null;
+    dokAnhangSitzung.abgebrochen();   // löscht evtl. in dieser Sitzung frisch abgelegte Anhang-Dateien wieder
     dokDateien = [];
+    dokAnhangSitzung.start(dokDateien);
     dokDateienZeichnen();
     dokSubmitBtn.textContent = "+ Dokument hinzufügen";
     dokFormTitle.textContent = "Neues Dokument";
@@ -5995,6 +6014,7 @@
     dokBis.value = e.gueltigBis || "";
     dokNotiz.value = e.notiz || "";
     dokDateien = Array.isArray(e.dateien) ? e.dateien.slice() : [];
+    dokAnhangSitzung.start(dokDateien);
     dokDateienZeichnen();
     dokSubmitBtn.textContent = "Änderungen speichern";
     dokFormTitle.textContent = "Dokument bearbeiten";
@@ -6003,7 +6023,7 @@
     dokFormOeffnen();
   }
 
-  dokForm.addEventListener("submit", (ev) => {
+  dokForm.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     if(!dokArt.value.trim()){ dokArt.focus(); return; }
     if(dokVon.value.trim() && !parseDateDE(dokVon.value)){
@@ -6032,13 +6052,14 @@
       dokumente.push(payload);
     }
     saveDokumente();
+    await dokAnhangSitzung.gespeichert(payload.dateien);
     dokFormZuruecksetzen();
     dokFormSchliessen();
     renderDokumente();
     renderDashboard();
   });
 
-  function dokEntfernen(id){
+  async function dokEntfernen(id){
     const e = dokumente.find(x => x.id === id);
     const anzahl = e && Array.isArray(e.dateien) ? e.dateien.length : 0;
     if(!confirm("Dieses Dokument wirklich löschen?"
@@ -6048,6 +6069,7 @@
     saveDokumente();
     renderDokumente();
     renderDashboard();
+    if(e) anhaengeDateienLoeschen(e.dateien);
   }
 
   function renderDokumente(){
@@ -6105,8 +6127,9 @@
         feld.title = datei.name + " · " + groesseText(datei.groesse);
         if(/^image\//.test(datei.typ || "")){
           const bild = document.createElement("img");
-          bild.src = datei.daten;
           bild.alt = datei.name;
+          if(datei.daten) bild.src = datei.daten;
+          else anhangQuelle(datei).then(src => { if(src) bild.src = src; });
           feld.appendChild(bild);
         }else{
           const text = document.createElement("div");
@@ -6156,6 +6179,8 @@
   const tAnhangDatei = document.getElementById("tAnhangDatei");
   const tAnhangListe = document.getElementById("tAnhangListe");
   let tAnhaenge = [];
+  const tAnhangSitzung = anhangSitzung();   // siehe anhangSitzung() (ANHÄNGE ALS ECHTE DATEIEN)
+  tAnhangSitzung.start(tAnhaenge);
 
   // Schnellauswahl für das Fälligkeitsdatum
   function tagVersetzt(n){
@@ -6191,8 +6216,9 @@
     // Wie bei den Dokumenten: Bilder werden auf eine sparsame Größe gerechnet
     // statt roh gespeichert zu werden - sonst füllt sich der Speicher schnell
     // (siehe dokDateiEinlesen()).
-    dokDateiEinlesen(datei).then(eintrag => {
+    dokDateiEinlesen(datei).then(eintrag => anhangAblegen(eintrag)).then(eintrag => {
       tAnhaenge.push(eintrag);
+      tAnhangSitzung.hinzugefuegt(eintrag.dateiname);
       tRenderAnhaenge();
       tAnhangDatei.value = "";
     }).catch(e => {
@@ -6219,7 +6245,9 @@
     tUhrzeit.value = t.uhrzeit || "";
     tPrio.value = t.prio || "mittel";
     tNotiz.value = t.notiz || "";
+    tAnhangSitzung.abgebrochen();   // löscht evtl. noch offene, nicht übernommene Anhänge der zuvor bearbeiteten Aufgabe
     tAnhaenge = t.anhaenge ? t.anhaenge.slice() : [];
+    tAnhangSitzung.start(tAnhaenge);
     tRenderAnhaenge();
 
     // Eingabebereich aufklappen und Beschriftung anpassen
@@ -6235,7 +6263,7 @@
     if(senden) senden.textContent = todoBearbeitet ? "✓ Änderungen übernehmen" : "+ Aufgabe hinzufügen";
   }
 
-  todoForm.addEventListener("submit", (ev) => {
+  todoForm.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const text = tText.value.trim();
     if(!text){ tText.focus(); return; }
@@ -6273,9 +6301,10 @@
       });
     }
     saveTodos();
+    await tAnhangSitzung.gespeichert(tAnhaenge);
     todoForm.reset();
     tPrio.value = "mittel";
-    tAnhaenge = []; tRenderAnhaenge();
+    tAnhaenge = []; tAnhangSitzung.start(tAnhaenge); tRenderAnhaenge();
     todoBeschriften();
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
@@ -6310,18 +6339,22 @@
     mitRueckgaengigLoeschen('Aufgabe „' + (entfernt.text || "(ohne Titel)") + '“ gelöscht', () => {
       todos.eintraege.splice(Math.min(idx, todos.eintraege.length), 0, entfernt);
       nachAktualisieren();
+    }, () => {
+      // Erst jetzt wirklich endgültig (Rückgängig-Frist abgelaufen) - siehe mitRueckgaengigLoeschen
+      anhaengeDateienLoeschen(entfernt.anhaenge);
     });
   }
   document.getElementById("todoClearDoneBtn").addEventListener("click", () => {
-    const anzahl = todos.eintraege.filter(t => t.erledigt).length;
-    if(!anzahl){ alert("Es sind keine erledigten Aufgaben vorhanden."); return; }
-    if(!confirm("Alle " + anzahl + " erledigten Aufgaben wirklich löschen?")) return;
+    const erledigte = todos.eintraege.filter(t => t.erledigt);
+    if(!erledigte.length){ alert("Es sind keine erledigten Aufgaben vorhanden."); return; }
+    if(!confirm("Alle " + erledigte.length + " erledigten Aufgaben wirklich löschen?")) return;
     todos.eintraege = todos.eintraege.filter(t => !t.erledigt);
     saveTodos();
     renderTodos();
     if(typeof renderKalender === "function") renderKalender();
     if(typeof renderDashboard === "function") renderDashboard();
     if(typeof widgetAktualisieren === "function") widgetAktualisieren();
+    erledigte.forEach(t => anhaengeDateienLoeschen(t.anhaenge));
   });
 
   const PRIO_RANG = { hoch: 0, mittel: 1, niedrig: 2 };
@@ -6368,10 +6401,12 @@
     if(anzAnh){
       t.anhaenge.forEach(a => {
         const link = document.createElement("a");
-        link.href = a.daten; link.download = a.name;
+        link.download = a.name;
         link.className = "btn small";
         link.style.cssText = "margin:5px 6px 0 0;display:inline-block;";
         link.textContent = "↓ " + a.name;
+        if(a.daten) link.href = a.daten;
+        else anhangQuelle(a).then(src => { if(src) link.href = src; });
         anhEl.appendChild(link);
       });
     }
@@ -7878,10 +7913,12 @@
           zeile.querySelector(".anhang-name").textContent = a.name;
           zeile.querySelector(".anhang-groesse").textContent = groesseText(a.groesse);
           const link = document.createElement("a");
-          link.href = a.daten; link.download = a.name;
+          link.download = a.name;
           link.className = "btn small";
           link.textContent = "↓ Öffnen";
           link.style.flexShrink = "0";
+          if(a.daten) link.href = a.daten;
+          else anhangQuelle(a).then(src => { if(src) link.href = src; });
           zeile.appendChild(link);
           box.appendChild(zeile);
         });
@@ -8042,6 +8079,8 @@
 
   let nvGanztags = true;
   let nvAnhaenge = [];
+  const nvAnhangSitzung = anhangSitzung();   // siehe anhangSitzung() (ANHÄNGE ALS ECHTE DATEIEN)
+  nvAnhangSitzung.start(nvAnhaenge);
 
   function updateGanztagUI(){
     nvGanztagToggle.classList.toggle("active", nvGanztags);
@@ -8075,6 +8114,7 @@
       nvVon.value = toDEString(d);
     }
     nvAnhaenge = [];
+    nvAnhangSitzung.start(nvAnhaenge);
     renderAnhaenge();
     fuelleKalenderAuswahl();
     nvAnrechnung = "keine"; nvGeplant = true;
@@ -8141,6 +8181,7 @@
     nvOrt.value = termin.ort || "";
     nvNotiz.value = termin.notiz || (eigener ? eigener.notiz : "") || "";
     nvAnhaenge = eigener && eigener.anhaenge ? eigener.anhaenge.slice() : [];
+    nvAnhangSitzung.start(nvAnhaenge);
     renderAnhaenge();
 
     fuelleKalenderAuswahl();
@@ -8188,6 +8229,9 @@
   function terminMaskeSchliessen(){
     nvOverlay.classList.remove("offen");
     document.body.style.overflow = "";
+    /* Nach erfolgreichem Speichern wurde nvAnhangSitzung.gespeichert() bereits
+       aufgerufen (leert "neu") - hier also nur beim echten Abbrechen wirksam. */
+    nvAnhangSitzung.abgebrochen();
   }
   document.getElementById("nvSchliessen").addEventListener("click", terminMaskeSchliessen);
   document.getElementById("nvAbbrechen").addEventListener("click", terminMaskeSchliessen);
@@ -8248,8 +8292,9 @@
     // Wie bei den Dokumenten: Bilder werden auf eine sparsame Größe gerechnet
     // statt roh gespeichert zu werden - sonst füllt sich der Speicher schnell
     // (siehe dokDateiEinlesen()).
-    dokDateiEinlesen(datei).then(eintrag => {
+    dokDateiEinlesen(datei).then(eintrag => anhangAblegen(eintrag)).then(eintrag => {
       nvAnhaenge.push(eintrag);
+      nvAnhangSitzung.hinzugefuegt(eintrag.dateiname);
       renderAnhaenge();
       nvAnhangDatei.value = "";
     }).catch(e => {
@@ -8457,6 +8502,7 @@
         }
 
         knopf.textContent = alterText; knopf.disabled = false;
+        await nvAnhangSitzung.gespeichert(felder.anhaenge);
         terminMaskeSchliessen();
         nvBearbeitet = null;
 
@@ -8500,7 +8546,8 @@
 
     nvTitel.value = ""; nvVon.value = ""; nvBis.value = "";
     nvOrt.value = ""; nvNotiz.value = "";
-    nvAnhaenge = []; renderAnhaenge();
+    await nvAnhangSitzung.gespeichert(felder.anhaenge);
+    nvAnhaenge = []; nvAnhangSitzung.start(nvAnhaenge); renderAnhaenge();
     terminMaskeSchliessen();
     renderEigene();
 
@@ -8571,6 +8618,9 @@
       mitRueckgaengigLoeschen('Termin „' + (entfernt.titel || "(ohne Titel)") + '“ gelöscht', () => {
         kalender.eigene.splice(Math.min(idxEigen, kalender.eigene.length), 0, entfernt);
         terminAktualisieren();
+      }, () => {
+        // Erst jetzt wirklich endgültig (Rückgängig-Frist abgelaufen) - siehe mitRueckgaengigLoeschen
+        anhaengeDateienLoeschen(entfernt.anhaenge);
       });
       return;
     }else{
@@ -8581,6 +8631,7 @@
     if(istApp && t.nativId) await nativTerminLoeschen(basisEventId(t.nativId));
     kalender.eigene = kalender.eigene.filter(x => x.id !== id);
     saveKalender();
+    anhaengeDateienLoeschen(t.anhaenge);
     if(typeof benPlanen === "function") benPlanen();
     renderEigene();
 
@@ -8670,6 +8721,151 @@
   const istApp = !!(Cap && typeof Cap.isNativePlatform === "function" && Cap.isNativePlatform());
   function calPlugin(){
     return (Cap && Cap.Plugins && Cap.Plugins.CapacitorCalendar) || window.CapacitorCalendar || null;
+  }
+
+  /* =========================================================
+     ANHÄNGE ALS ECHTE DATEIEN (Dokumente, Aufgaben, Termine)
+     Bis v10.24 lag jeder Anhang als Base64-Data-URL (Feld "daten") direkt
+     in den Datensätzen und damit auch im nativen Spiegel und in der
+     Sicherungsdatei - schnell mehrere MB, während localStorage im WebView
+     nur ca. 4-5 MB fasst. In der App liegen neue Anhänge deshalb jetzt als
+     echte Dateien unter Directory "DATA" (Capacitor Filesystem), im
+     Datensatz bleibt nur noch ein Verweis ("dateiname") übrig. Im Browser
+     (kein Filesystem-Plugin, z. B. beim Testen) bleibt "daten" wie bisher
+     inline - dort gibt es keine echte Datei, in die ausgelagert werden
+     könnte. Ältere, vor dieser Umstellung gespeicherte Anhänge behalten
+     ebenfalls einfach ihr "daten"-Feld; es gibt keine automatische
+     Migration bestehender Anhänge, sie werden aber beim nächsten Bearbeiten
+     des jeweiligen Eintrags (erneutes Speichern) automatisch umgestellt,
+     weil renderAnhaenge/dokDateienZeichnen/buildTodoRow für die Anzeige
+     ohnehin über anhangQuelle() gehen und ein erneutes Speichern die Liste
+     unverändert durchreicht (kein "daten" -> kein Auslagern nötig, es
+     bleibt beim alten, funktionierenden Inline-Verweis).
+     ========================================================= */
+  function fsPlugin(){
+    return (Cap && Cap.Plugins && Cap.Plugins.Filesystem) || null;
+  }
+  const ANHANG_ORDNER = "anhaenge";
+  let anhangLaufNr = 0;
+  function anhangEndung(typ){
+    if(/^image\//.test(typ || "")) return "jpg";   // dokDateiEinlesen wandelt Bilder immer in JPEG um
+    if(typ === "application/pdf") return "pdf";
+    return "bin";
+  }
+  function anhangNeuerDateiname(typ){
+    anhangLaufNr++;
+    return ANHANG_ORDNER + "/" + Date.now() + "_" + anhangLaufNr + "_"
+      + Math.random().toString(36).slice(2, 8) + "." + anhangEndung(typ);
+  }
+
+  /* Legt einen frisch eingelesenen Anhang (siehe dokDateiEinlesen, .daten
+     ist noch Base64) in der App als echte Datei ab und liefert die
+     persistierbare Form OHNE .daten zurück (nur noch .dateiname als
+     Verweis). Im Browser unverändert zurückgegeben (siehe oben). */
+  async function anhangAblegen(eintrag){
+    const FS = fsPlugin();
+    if(!istApp || !FS || !eintrag || !eintrag.daten) return eintrag;
+    const dateiname = anhangNeuerDateiname(eintrag.typ);
+    const nutzlast = eintrag.daten.slice(eintrag.daten.indexOf(",") + 1);
+    await FS.writeFile({ path: dateiname, data: nutzlast, directory: "DATA", recursive: true });
+    return { name: eintrag.name, groesse: eintrag.groesse, typ: eintrag.typ, dateiname: dateiname };
+  }
+
+  /* Liefert eine data:-URL zum Anzeigen/Herunterladen/Drucken - unabhängig
+     davon, ob der Anhang (alt oder im Browser) sein Base64 noch inline
+     trägt oder (neu, in der App) nur per Dateiname verwiesen wird. */
+  async function anhangQuelle(eintrag){
+    if(!eintrag) return "";
+    if(eintrag.daten) return eintrag.daten;
+    const FS = fsPlugin();
+    if(!FS || !eintrag.dateiname) return "";
+    try{
+      const gelesen = await FS.readFile({ path: eintrag.dateiname, directory: "DATA" });
+      return "data:" + (eintrag.typ || "application/octet-stream") + ";base64," + gelesen.data;
+    }catch(e){ return ""; }
+  }
+
+  /* Löscht die Datei eines Anhangs, falls vorhanden. Bei alten/Browser-
+     Anhängen (nur .daten, kein .dateiname) gibt es nichts zu löschen.
+     Fehler werden bewusst verschluckt: die Datei ist ohnehin nicht mehr
+     referenziert, ein Rest auf der Platte ist unschön, aber kein
+     Datenverlust. */
+  async function anhangDateiLoeschen(eintrag){
+    if(!eintrag || !eintrag.dateiname) return;
+    const FS = fsPlugin();
+    if(!FS) return;
+    try{ await FS.deleteFile({ path: eintrag.dateiname, directory: "DATA" }); }catch(e){}
+  }
+  async function anhaengeDateienLoeschen(liste){
+    for(const a of (liste || [])) await anhangDateiLoeschen(a);
+  }
+
+  /* Für die manuelle Sicherung (Export/Import, siehe exportBtn/importFile):
+     eine Sicherungsdatei soll für sich allein stehen und auf einem anderen
+     Gerät ohne die App-eigenen Dateien wiederherstellbar sein. Beim Export
+     bekommt deshalb jeder Anhang sein Base64 zurück (aus der Datei gelesen,
+     falls nötig) - die LIVE-Daten der App bleiben dabei unverändert, es wird
+     nur eine Kopie der Liste gebaut. Beim Import werden Anhänge mit Base64
+     umgekehrt wieder als echte Datei abgelegt (siehe anhangAblegen), damit
+     ein Import in der App nicht wieder alles inline in localStorage zurück-
+     schreibt. */
+  async function anhaengeFuerExport(liste){
+    const ergebnis = [];
+    for(const a of (liste || [])){
+      const daten = a.daten || await anhangQuelle(a);
+      ergebnis.push({ name: a.name, groesse: a.groesse, typ: a.typ, daten: daten });
+    }
+    return ergebnis;
+  }
+  async function anhaengeAusImport(liste){
+    const ergebnis = [];
+    for(const a of (liste || [])){
+      ergebnis.push(a && a.daten ? await anhangAblegen(a) : a);
+    }
+    return ergebnis;
+  }
+
+  /* Verwaltet den Lebenszyklus der Anhang-Dateien während EINES
+     Bearbeitungsvorgangs (Dokumente/Aufgaben/Termine benutzen je eine
+     eigene Instanz). Grund: ein neu ausgewählter Anhang wird sofort als
+     Datei abgelegt (siehe change-Handler je Modul), lange bevor das
+     Formular gespeichert wird - bricht der Nutzer stattdessen ab, oder
+     entfernt er den Anhang per ✕ wieder, muss diese Datei verschwinden,
+     ohne beim Abbrechen an einem BESTEHENDEN (schon gespeicherten) Anhang
+     etwas zu löschen, den der Nutzer nur vorübergehend entfernt hatte.
+       - start(vorhandene): beim Öffnen des Formulars aufrufen (auch bei
+         "neu anlegen" mit leerer Liste).
+       - hinzugefuegt(dateiname): nach jedem frisch abgelegten Anhang.
+       - abgebrochen(): beim Abbrechen/Schließen ohne Speichern - löscht
+         alle in dieser Sitzung frisch abgelegten Dateien wieder.
+       - gespeichert(aktuelleListe): beim erfolgreichen Speichern - löscht
+         alle Dateien aus Start- oder Neu-Bestand, die in der letztlich
+         gespeicherten Liste nicht mehr vorkommen (per ✕ entfernt, egal ob
+         vorher schon vorhanden oder erst in dieser Sitzung hinzugefügt). */
+  function anhangSitzung(){
+    let start = new Set();
+    let neu = [];
+    return {
+      start(vorhandene){
+        start = new Set((vorhandene || []).map(a => a.dateiname).filter(Boolean));
+        neu = [];
+      },
+      hinzugefuegt(dateiname){
+        if(dateiname) neu.push(dateiname);
+      },
+      async abgebrochen(){
+        const lokaleNeu = neu.slice();
+        neu = [];
+        for(const dateiname of lokaleNeu) await anhangDateiLoeschen({ dateiname });
+      },
+      async gespeichert(aktuelleListe){
+        const behalten = new Set((aktuelleListe || []).map(a => a.dateiname).filter(Boolean));
+        const kandidaten = new Set([...start, ...neu]);
+        const entfernt = [...kandidaten].filter(d => !behalten.has(d));
+        neu = [];
+        for(const dateiname of entfernt) await anhangDateiLoeschen({ dateiname });
+      }
+    };
   }
 
   // Reihenfolge der Gruppen in der Liste
@@ -9771,13 +9967,22 @@
      Ersetzt an den drei Stellen (Aufgaben, Notizen, rein lokale Termine) den
      bisherigen confirm()-Dialog vor dem Löschen. Ist bereits ein Hinweis
      sichtbar, wird dessen Löschen sofort endgültig (nur eine Rückgängig-
-     Chance gleichzeitig, sonst verwechseln sich mehrere schnelle Löschungen). */
+     Chance gleichzeitig, sonst verwechseln sich mehrere schnelle Löschungen) -
+     dabei wird auch für den verdrängten Vorgang "endgueltig" ausgelöst, falls
+     vorhanden, denn auch dessen Rückgängig-Chance ist damit vorbei.
+     Der optionale dritte Parameter "endgueltig" wird NUR ausgelöst, wenn die
+     Zeit ohne Rückgängig abläuft (oder ein weiteres Löschen diesen Vorgang
+     verdrängt) — nicht bei Rückgängig selbst. Damit lassen sich z. B. Anhang-
+     Dateien erst löschen, wenn das Löschen wirklich endgültig ist (siehe
+     removeTodo/eigenenTerminLoeschen). */
   let rueckgaengigAktiv = null;
-  function mitRueckgaengigLoeschen(beschriftung, wiederherstellen){
+  function mitRueckgaengigLoeschen(beschriftung, wiederherstellen, endgueltig){
     if(rueckgaengigAktiv){
       clearTimeout(rueckgaengigAktiv.timer);
       if(rueckgaengigAktiv.toast.parentNode) rueckgaengigAktiv.toast.parentNode.removeChild(rueckgaengigAktiv.toast);
+      const verdraengt = rueckgaengigAktiv;
       rueckgaengigAktiv = null;
+      if(verdraengt.endgueltig) verdraengt.endgueltig();
     }
 
     const toast = document.createElement("div");
@@ -9795,14 +10000,17 @@
       if(toast.parentNode) toast.parentNode.removeChild(toast);
       if(rueckgaengigAktiv && rueckgaengigAktiv.toast === toast) rueckgaengigAktiv = null;
     };
-    const timer = setTimeout(schliessen, 6000);
+    const timer = setTimeout(() => {
+      schliessen();
+      if(endgueltig) endgueltig();
+    }, 6000);
     knopf.addEventListener("click", () => {
       clearTimeout(timer);
       schliessen();
       wiederherstellen();
     });
 
-    rueckgaengigAktiv = { timer, toast };
+    rueckgaengigAktiv = { timer, toast, endgueltig };
   }
 
   /* Gehört dieser Termin zu einer Serie? Entweder trägt er die Regel mit,
@@ -9999,7 +10207,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.24-beta";
+  const APP_VERSION = "10.25-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
@@ -10130,9 +10338,29 @@
 
   document.getElementById("exportBtn").addEventListener("click", async () => {
     try{
+      /* Anhänge liegen in der App inzwischen als echte Dateien (siehe
+         ANHÄNGE ALS ECHTE DATEIEN weiter oben) - für die Sicherungsdatei
+         werden Kopien mit wieder eingebettetem Base64 gebaut, damit die
+         Datei für sich allein steht (siehe anhaengeFuerExport). Die
+         eigentlichen, in der App verwendeten Listen bleiben unverändert. */
+      const dokumenteExport = [];
+      for(const e of dokumente){
+        dokumenteExport.push(Object.assign({}, e, { dateien: await anhaengeFuerExport(e.dateien) }));
+      }
+      const todosExport = { eintraege: [] };
+      for(const t of (todos.eintraege || [])){
+        todosExport.eintraege.push(Object.assign({}, t, { anhaenge: await anhaengeFuerExport(t.anhaenge) }));
+      }
+      const kalenderEigeneExport = [];
+      for(const t of (kalender.eigene || [])){
+        kalenderEigeneExport.push(Object.assign({}, t, { anhaenge: await anhaengeFuerExport(t.anhaenge) }));
+      }
+      const kalenderExport = Object.assign({}, kalender, { eigene: kalenderEigeneExport });
+
       const payload = {
         app: "Soldaten Dashboard", version: APP_VERSION, exportedAt: new Date().toISOString(),
-        ablaufregister: eintraege, dokumente, urlaub, ueberstunden, todos, notizen, kalender, dashboard,
+        ablaufregister: eintraege, dokumente: dokumenteExport, urlaub, ueberstunden,
+        todos: todosExport, notizen, kalender: kalenderExport, dashboard,
         checklisten, widget, avz,
         medizin, feiertagsLand
       };
@@ -10158,10 +10386,25 @@
     const file = importFile.files[0];
     if(!file) return;
     const leser = new FileReader();
-    leser.onload = () => {
+    leser.onload = async () => {
       try{
         const payload = JSON.parse(leser.result);
         let etwas = false;
+
+        /* Anhänge, die als Base64 mitkommen (jede bisherige Sicherung sowie
+           jede aus dem Browser), in der App wieder als echte Dateien ablegen
+           - siehe anhaengeAusImport / ANHÄNGE ALS ECHTE DATEIEN weiter oben.
+           Verändert payload direkt (frisch geparst, sonst von niemandem
+           mehr referenziert). */
+        if(Array.isArray(payload.dokumente)){
+          for(const e of payload.dokumente){ if(e) e.dateien = await anhaengeAusImport(e.dateien); }
+        }
+        if(payload.todos && typeof payload.todos === "object" && Array.isArray(payload.todos.eintraege)){
+          for(const t of payload.todos.eintraege){ if(t) t.anhaenge = await anhaengeAusImport(t.anhaenge); }
+        }
+        if(payload.kalender && typeof payload.kalender === "object" && Array.isArray(payload.kalender.eigene)){
+          for(const t of payload.kalender.eigene){ if(t) t.anhaenge = await anhaengeAusImport(t.anhaenge); }
+        }
 
         if(Array.isArray(payload.ablaufregister)){ eintraege = payload.ablaufregister; etwas = true; }
         if(Array.isArray(payload.dokumente)){ dokumente = payload.dokumente; etwas = true; }

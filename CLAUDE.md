@@ -149,14 +149,32 @@ Kalenderfunktionen in `www/index.html` (`expandiereEvent`, `ganztagsSpanne`,
   Rückfallebene, falls der WebView-Speicher geleert wird. Beim Start
   versucht `speicherZurueckholen()`, die reichhaltigere der beiden Fassungen
   zu übernehmen (nicht nur bei komplett fehlendem Schlüssel).
-- **Bilder im Speicher**: Anhänge liegen als Data-URL mitten in den Daten und
-  landen damit auch im nativen Spiegel und in der Sicherungsdatei. Ein
-  unbearbeitetes Handyfoto hat schnell 5 MB und sprengt das. Bei den
-  Dokumentkopien rechnet `dokDateiEinlesen()` deshalb jedes Bild vor dem
+- **Anhänge (Dokumente, Aufgaben, Termine)**: Nur diese drei Bereiche haben
+  Anhänge; Akte und Ablaufregister haben trotz gelegentlich anderslautender
+  Texte keine Datei-Anhänge im Code. Ein neuer Anhang läuft immer zuerst durch
+  die eine gemeinsame Funktion `dokDateiEinlesen()`: Bilder werden vor dem
   Speichern über ein Canvas auf max. 1600 px lange Kante und JPEG-Qualität
-  0,78 herunter (aus 5 MB werden typisch 200–400 KB). Neue Bildfelder sollen
-  denselben Weg nehmen — die älteren Anhänge bei Terminen und Aufgaben
-  lehnen stattdessen nur alles über 2 MB ab.
+  0,78 heruntergerechnet (aus 5 MB werden typisch 200–400 KB), andere Dateien
+  (PDF) bleiben unverändert, aber auf 2 MB begrenzt — für alle drei Bereiche
+  gleich, es gibt keine strengere oder losere Variante mehr.
+  In der App (`istApp`) legt `anhangAblegen()` das Ergebnis anschließend als
+  echte Datei unter Capacitor `Directory.DATA` (Ordner `anhaenge/`) ab; im
+  Datensatz bleibt nur noch `dateiname` als Verweis stehen, kein Base64 mehr
+  im WebView-Speicher. Anzeige/Download läuft über `anhangQuelle()`, das bei
+  Bedarf aus der Datei liest. Im Browser (kein Filesystem-Plugin) bleibt ein
+  Anhang wie bisher inline als Data-URL (Feld `daten`) — beide Formen kommen
+  nebeneinander vor und werden überall gleich behandelt (`if(a.daten) … else
+  anhangQuelle(a)…`). `anhangSitzung()` verwaltet pro Formular, welche Dateien
+  in der aktuellen Bearbeitung neu hinzugekommen sind, damit ein Abbrechen sie
+  wieder löscht, ohne an einem nur vorübergehend entfernten, aber bereits
+  gespeicherten Anhang etwas anzutasten. Löschen des ganzen Eintrags löscht
+  auch dessen Anhang-Dateien — bei Aufgaben und rein lokalen Terminen (siehe
+  `mitRueckgaengigLoeschen()`) immer erst NACH Ablauf der Rückgängig-Frist,
+  nie sofort. Die manuelle Sicherung (Export/Import) bettet Anhänge beim
+  Export wieder als Base64 ein und legt sie beim Import erneut als Datei an
+  (`anhaengeFuerExport()`/`anhaengeAusImport()`); die Android-Sicherung deckt
+  den Ordner `anhaenge/` über eine eigene `<include domain="file">`-Regel in
+  `backup_regeln.xml`/`datenregeln.xml` ab (zusätzlich zu `domain="sharedpref"`).
 - **Standardwerte beim Start**: Fast jeder Bereich schreibt beim ersten
   Aufbau seine Voreinstellung in `localStorage` (Urlaubskonto, Akte,
   Kalender u. a.). Wer prüfen will, ob eine Installation *neu* ist, muss das
@@ -170,7 +188,8 @@ Kalenderfunktionen in `www/index.html` (`expandiereEvent`, `ganztagsSpanne`,
   das in `widget-einrichten.py` über zwei Regeldateien: `backup_regeln.xml`
   (bis Android 11) und `datenregeln.xml` (ab Android 12) — **beide** sind
   nötig, sonst fehlt die Abdeckung auf einem Teil der Geräte. Gesichert wird
-  ausdrücklich nur `domain="sharedpref"`, also der native Spiegel; die
+  `domain="sharedpref"` (der native Spiegel) sowie `domain="file"` nur für den
+  Ordner `anhaenge` (die Anhang-Dateien, siehe Abschnitt "Anhänge" oben); die
   WebView-Ablage (`app_webview`) ist ausgeschlossen, weil eine
   zurückgespielte LevelDB inkonsistent werden kann — sie wird von
   `speicherZurueckholen()` ohnehin aus dem Spiegel neu aufgebaut.
