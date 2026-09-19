@@ -6,15 +6,18 @@
   Uebertragung beim Einrichten eines neuen Handys (device-transfer).
 
   Begruendung der Auswahl siehe backup_regeln.xml: gesichert wird der
-  Preferences-Spiegel, nicht die WebView-Datenbank.
+  Preferences-Spiegel und der Anhaenge-Ordner (domain="file", Capacitor
+  Directory.DATA), nicht die WebView-Datenbank.
 -->
 <data-extraction-rules>
     <cloud-backup>
         <include domain="sharedpref" path="." />
+        <include domain="file" path="anhaenge" />
         <exclude domain="file" path="app_webview" />
     </cloud-backup>
     <device-transfer>
         <include domain="sharedpref" path="." />
+        <include domain="file" path="anhaenge" />
         <exclude domain="file" path="app_webview" />
     </device-transfer>
 </data-extraction-rules>

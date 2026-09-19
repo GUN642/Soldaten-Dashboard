@@ -2,9 +2,14 @@
 <!--
   Sicherungsregeln fuer Android 11 und aelter (fullBackupContent).
 
-  Gesichert werden ausdruecklich NUR die SharedPreferences. Dort liegt der
-  vollstaendige Spiegel aller App-Daten, den die App bei jeder Aenderung
-  mitschreibt (siehe speicherSpiegeln/saveJSON in www/index.html).
+  Gesichert werden die SharedPreferences (dort liegt der vollstaendige
+  Spiegel aller App-Daten, den die App bei jeder Aenderung mitschreibt,
+  siehe speicherSpiegeln/saveJSON in www/index.html) sowie der Ordner
+  "anhaenge" im internen Dateispeicher (domain="file", entspricht
+  Capacitor Directory.DATA) - dort liegen seit der Umstellung auf
+  Filesystem-Anhaenge (siehe anhangSchreiben in www/index.html) die
+  Bilddateien zu Akte, Dokumenten, Lehrgaengen, Terminen und Aufgaben,
+  statt wie frueher als Base64 mitten in den SharedPreferences.
 
   Die WebView-Ablage (app_webview/Local Storage) wird bewusst NICHT
   mitgesichert: Das ist eine LevelDB-Datenbank, die beim Zurueckspielen
@@ -14,6 +19,7 @@
 -->
 <full-backup-content>
     <include domain="sharedpref" path="." />
+    <include domain="file" path="anhaenge" />
     <exclude domain="file" path="app_webview" />
     <exclude domain="external" path="." />
 </full-backup-content>
