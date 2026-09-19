@@ -790,6 +790,25 @@
     display:none;align-items:center;justify-content:center;
     -webkit-tap-highlight-color:transparent;
   }
+
+  /* Rückgängig-Hinweis nach einem Löschen (siehe mitRueckgaengigLoeschen) —
+     dieselbe Höhe über der Reiterleiste wie .kal-fab, damit nichts verdeckt wird. */
+  .rueckgaengig-toast{
+    position:fixed;left:14px;right:14px;
+    bottom:calc(78px + env(safe-area-inset-bottom, 0px));
+    background:var(--panel);border:1px solid var(--border);border-radius:8px;
+    box-shadow:var(--modal-shadow);
+    padding:10px 6px 10px 14px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    z-index:250;font-size:13px;color:var(--text);
+    animation:rueckgaengig-ein .18s ease-out;
+  }
+  .rueckgaengig-toast span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rueckgaengig-toast button{
+    background:none;border:none;color:var(--amber);font-weight:600;font-size:13px;
+    padding:6px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0;
+  }
+  @keyframes rueckgaengig-ein{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
   .kal-fab:active{transform:scale(0.93);}
 
   .kal-modal-overlay{
@@ -1778,7 +1797,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.23 Beta &middot; Stand 19.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.24 Beta &middot; Stand 19.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1862,6 +1881,17 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.24 Beta <span class="cl-date">19.09.2026</span></div>
+        <ul>
+          <li>Aufgaben und Notizen löschen jetzt sofort, mit kurzer „Rückgängig"-Möglichkeit
+            danach, statt vorher extra nachzufragen.</li>
+          <li>Selbst angelegte Termine, die nicht mit dem Gerätekalender verknüpft sind,
+            ebenso: sofort löschen mit „Rückgängig". Termine, die auch im Gerätekalender
+            stehen, fragen weiterhin vorher nach, da deren Löschung dort nicht rückgängig
+            zu machen ist.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.23 Beta <span class="cl-date">19.09.2026</span></div>
         <ul>
@@ -6266,13 +6296,21 @@
     if(typeof widgetAktualisieren === "function") widgetAktualisieren();
   }
   function removeTodo(id){
-    if(!confirm("Diese Aufgabe wirklich löschen?")) return;
-    todos.eintraege = todos.eintraege.filter(t => t.id !== id);
-    saveTodos();
-    renderTodos();
-    if(typeof renderKalender === "function") renderKalender();
-    if(typeof renderDashboard === "function") renderDashboard();
-    if(typeof widgetAktualisieren === "function") widgetAktualisieren();
+    const idx = todos.eintraege.findIndex(t => t.id === id);
+    if(idx === -1) return;
+    const [entfernt] = todos.eintraege.splice(idx, 1);
+    const nachAktualisieren = () => {
+      saveTodos();
+      renderTodos();
+      if(typeof renderKalender === "function") renderKalender();
+      if(typeof renderDashboard === "function") renderDashboard();
+      if(typeof widgetAktualisieren === "function") widgetAktualisieren();
+    };
+    nachAktualisieren();
+    mitRueckgaengigLoeschen('Aufgabe „' + (entfernt.text || "(ohne Titel)") + '“ gelöscht', () => {
+      todos.eintraege.splice(Math.min(idx, todos.eintraege.length), 0, entfernt);
+      nachAktualisieren();
+    });
   }
   document.getElementById("todoClearDoneBtn").addEventListener("click", () => {
     const anzahl = todos.eintraege.filter(t => t.erledigt).length;
@@ -6453,12 +6491,18 @@
     nTitel.focus();
   }
   function removeNotiz(id){
-    if(!confirm("Diese Notiz wirklich löschen?")) return;
-    notizen.eintraege = notizen.eintraege.filter(n => n.id !== id);
+    const idx = notizen.eintraege.findIndex(n => n.id === id);
+    if(idx === -1) return;
+    const [entfernt] = notizen.eintraege.splice(idx, 1);
     delete notizOffen[id];
     if(notizEditId === id) resetNotizForm();
     saveNotizen();
     renderNotizen();
+    mitRueckgaengigLoeschen('Notiz „' + (entfernt.titel || "(ohne Titel)") + '“ gelöscht', () => {
+      notizen.eintraege.splice(Math.min(idx, notizen.eintraege.length), 0, entfernt);
+      saveNotizen();
+      renderNotizen();
+    });
   }
 
   function renderNotizen(){
@@ -8508,10 +8552,29 @@
         if(typeof widgetAktualisieren === "function") widgetAktualisieren();
         return;
       }
+    }else if(!(istApp && t.nativId)){
+      /* Rein lokaler Termin, nicht mit dem Gerätekalender verknüpft — hier
+         ist das Löschen vollständig folgenlos rückgängig zu machen, deshalb
+         sofort löschen mit kurzer Rückgängig-Chance statt Rückfrage. */
+      const idxEigen = kalender.eigene.findIndex(x => x.id === id);
+      if(idxEigen === -1) return;
+      const [entfernt] = kalender.eigene.splice(idxEigen, 1);
+      const terminAktualisieren = () => {
+        saveKalender();
+        if(typeof benPlanen === "function") benPlanen();
+        renderEigene();
+        renderKalender();
+        if(typeof renderDashboard === "function") renderDashboard();
+        if(typeof widgetAktualisieren === "function") widgetAktualisieren();
+      };
+      terminAktualisieren();
+      mitRueckgaengigLoeschen('Termin „' + (entfernt.titel || "(ohne Titel)") + '“ gelöscht', () => {
+        kalender.eigene.splice(Math.min(idxEigen, kalender.eigene.length), 0, entfernt);
+        terminAktualisieren();
+      });
+      return;
     }else{
-      const frage = (istApp && t.nativId)
-        ? 'Termin „' + t.titel + '" wirklich löschen?\n\nEr wird auch aus dem Gerätekalender entfernt.'
-        : 'Termin „' + t.titel + '" aus dieser Liste entfernen?\n\nHinweis: Ein bereits gespeicherter Termin wird dadurch nicht aus dem Kalender gelöscht.';
+      const frage = 'Termin „' + t.titel + '" wirklich löschen?\n\nEr wird auch aus dem Gerätekalender entfernt.';
       if(!confirm(frage)) return;
     }
 
@@ -9701,6 +9764,47 @@
     });
   }
 
+  /* Soft-Delete mit Rückgängig-Option: der Aufrufer entfernt das Element
+     bereits VOR diesem Aufruf (aus Array, Speicher, Anzeige) — hier wird nur
+     kurz ein Hinweis mit "Rückgängig" eingeblendet. Tippt niemand darauf,
+     bleibt es beim Löschen; sonst ruft der Aufrufer "wiederherstellen" auf.
+     Ersetzt an den drei Stellen (Aufgaben, Notizen, rein lokale Termine) den
+     bisherigen confirm()-Dialog vor dem Löschen. Ist bereits ein Hinweis
+     sichtbar, wird dessen Löschen sofort endgültig (nur eine Rückgängig-
+     Chance gleichzeitig, sonst verwechseln sich mehrere schnelle Löschungen). */
+  let rueckgaengigAktiv = null;
+  function mitRueckgaengigLoeschen(beschriftung, wiederherstellen){
+    if(rueckgaengigAktiv){
+      clearTimeout(rueckgaengigAktiv.timer);
+      if(rueckgaengigAktiv.toast.parentNode) rueckgaengigAktiv.toast.parentNode.removeChild(rueckgaengigAktiv.toast);
+      rueckgaengigAktiv = null;
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "rueckgaengig-toast";
+    const text = document.createElement("span");
+    text.textContent = beschriftung;
+    const knopf = document.createElement("button");
+    knopf.type = "button";
+    knopf.textContent = "Rückgängig";
+    toast.appendChild(text);
+    toast.appendChild(knopf);
+    document.body.appendChild(toast);
+
+    const schliessen = () => {
+      if(toast.parentNode) toast.parentNode.removeChild(toast);
+      if(rueckgaengigAktiv && rueckgaengigAktiv.toast === toast) rueckgaengigAktiv = null;
+    };
+    const timer = setTimeout(schliessen, 6000);
+    knopf.addEventListener("click", () => {
+      clearTimeout(timer);
+      schliessen();
+      wiederherstellen();
+    });
+
+    rueckgaengigAktiv = { timer, toast };
+  }
+
   /* Gehört dieser Termin zu einer Serie? Entweder trägt er die Regel mit,
      oder seine Kennung ist eine aufgelöste (siehe basisEventId). */
   function istSerienTermin(t){
@@ -9895,7 +9999,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.23-beta";
+  const APP_VERSION = "10.24-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
