@@ -1797,7 +1797,7 @@
         Urlaub: Werktage Mo–Fr, Feiertage <span id="hinweisLand">Baden-Württemberg</span> ausgenommen.<br>
         Lehrgänge und Dokumente: Warnstufe „gelb" ab 6 Monate vor Ablauf.<br>
         Alle Angaben ohne Gewähr, ersetzen keine offizielle Nachweisführung.<br><br>
-        Version 10.25 Beta &middot; Stand 19.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
+        Version 10.26 Beta &middot; Stand 23.09.2026 &middot; Daten liegen nur auf diesem Gerät (Gerätespeicher)<br>
         Kontakt: GUN &middot; <a href="mailto:gun_642@proton.me">gun_642@proton.me</a>
       </div>
     </div>
@@ -1881,6 +1881,14 @@
       <button class="btn" id="closeChangelogBtn" type="button">&times; Schließen</button>
     </div>
     <div class="changelog-body">
+      <div class="cl-entry">
+        <div class="cl-version">v10.26 Beta <span class="cl-date">23.09.2026</span></div>
+        <ul>
+          <li>Verwaiste Anhang-Dateien (etwa weil das Aufgaben-Formular ohne Speichern
+            verlassen oder das Anlegen eines Termins im Gerätekalender fehlgeschlagen
+            war) werden jetzt beim nächsten App-Start automatisch entfernt.</li>
+        </ul>
+      </div>
       <div class="cl-entry">
         <div class="cl-version">v10.25 Beta <span class="cl-date">19.09.2026</span></div>
         <ul>
@@ -8825,6 +8833,44 @@
     return ergebnis;
   }
 
+  /* Räumt beim Start verwaiste Anhang-Dateien auf. anhangSitzung() (siehe
+     unten) fängt das Abbrechen EINES Formulars ab, kann aber nicht jeden Weg
+     abdecken, auf dem eine bereits abgelegte Datei nie in einem gespeicherten
+     Eintrag landet: das Aufgaben-Formular hat z. B. keinen eigenen
+     Abbrechen-Knopf (nur Speichern oder das Sammelfeld einfach verlassen),
+     und scheitert das Anlegen eines Termins am Gerätekalender, bleibt die
+     schon abgelegte Anhang-Datei liegen, bis die Maske geschlossen wird -
+     schließt der Nutzer stattdessen nur die App oder beendet Android den
+     Prozess im Hintergrund (auf Android üblich), verliert die Sitzung
+     (anhangSitzung ist reiner Arbeitsspeicher) jede Kenntnis davon. Deshalb
+     hier zusätzlich, unabhängig von einzelnen Formularen: läuft einmal beim
+     Start, sammelt alle tatsächlich noch referenzierten Dateinamen aus den
+     drei Bereichen mit Anhängen (Dokumente, Aufgaben, Termine) und löscht
+     jede Datei im Anhänge-Ordner, die in keinem davon mehr vorkommt. */
+  async function verwaisteAnhaengeAufraeumen(){
+    const FS = fsPlugin();
+    if(!istApp || !FS) return;
+    try{
+      const inhalt = await FS.readdir({ path: ANHANG_ORDNER, directory: "DATA" });
+      const vorhanden = (inhalt.files || []).map(f => (typeof f === "string" ? f : f.name)).filter(Boolean);
+      if(!vorhanden.length) return;
+
+      const referenziert = new Set();
+      const sammeln = (liste, feld) => (liste || []).forEach(eintrag => {
+        (eintrag && eintrag[feld] || []).forEach(a => {
+          if(a && a.dateiname) referenziert.add(a.dateiname.split("/").pop());
+        });
+      });
+      sammeln(dokumente, "dateien");
+      sammeln(todos.eintraege, "anhaenge");
+      sammeln(kalender.eigene, "anhaenge");
+
+      for(const dateiname of vorhanden){
+        if(!referenziert.has(dateiname)) await anhangDateiLoeschen({ dateiname: ANHANG_ORDNER + "/" + dateiname });
+      }
+    }catch(e){ /* Ordner existiert evtl. noch nicht (keine Anhänge bisher) - dann nichts zu tun */ }
+  }
+
   /* Verwaltet den Lebenszyklus der Anhang-Dateien während EINES
      Bearbeitungsvorgangs (Dokumente/Aufgaben/Termine benutzen je eine
      eigene Instanz). Grund: ein neu ausgewählter Anhang wird sofort als
@@ -10207,7 +10253,7 @@
   /* =========================================================
      SICHERUNG: EXPORT / IMPORT (alle Daten)
      ========================================================= */
-  const APP_VERSION = "10.25-beta";
+  const APP_VERSION = "10.26-beta";
   if(versionTagEl) versionTagEl.textContent = "v" + APP_VERSION.replace(/-beta$/i, "");
 
   /* Datei ausgeben — in der App über den Gerätespeicher und das Teilen-Menü,
@@ -15182,6 +15228,9 @@
   bftBewerten();
   renderDashboard();
   sicherungStandZeigen();
+  // Erst nach dem eigentlichen Start, im Hintergrund - keine Eile, und die
+  // Dateiliste soll nicht mit dem ersten Zeichnen um Zeit konkurrieren.
+  if(istApp) setTimeout(verwaisteAnhaengeAufraeumen, 2000);
 
   /* Assistent nur beim allerersten Start. Wer die App schon benutzt hat,
      bekommt ihn nicht zu sehen — der Stand wird dann still als erledigt

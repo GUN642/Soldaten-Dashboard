@@ -26,9 +26,10 @@
  * Aufruf:  node scripts/kalender-pruefen.js
  * Einmalig vorher nötig:  npm install  &&  npx playwright install chromium
  *
- * Optional: KALENDER_TEST_CHROMIUM=/pfad/zu/chrome node scripts/kalender-pruefen.js
+ * Optional: PRUEFUNG_CHROMIUM=/pfad/zu/chrome node scripts/kalender-pruefen.js
  * erzwingt eine bestimmte Chromium-Programmdatei statt der von Playwright
- * verwalteten (z. B. in Umgebungen mit vorinstalliertem Browser).
+ * verwalteten (z. B. in Umgebungen mit vorinstalliertem Browser) - dieselbe
+ * Variable wie bei scripts/anhaenge-pruefen.js.
  */
 const path = require("path");
 
@@ -295,8 +296,8 @@ async function testLeererKalender(browser) {
 
 (async () => {
   const launchOptions = { args: ["--no-sandbox"] };
-  if (process.env.KALENDER_TEST_CHROMIUM) {
-    launchOptions.executablePath = process.env.KALENDER_TEST_CHROMIUM;
+  if (process.env.PRUEFUNG_CHROMIUM) {
+    launchOptions.executablePath = process.env.PRUEFUNG_CHROMIUM;
   }
   const browser = await chromium.launch(launchOptions);
   try {

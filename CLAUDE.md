@@ -133,6 +133,25 @@ Laufzeitfehler beim Zeichnen des Monatsrasters). Läuft unabhängig vom Netz
 Kalenderfunktionen in `www/index.html` (`expandiereEvent`, `ganztagsSpanne`,
 `renderKalender` und Umfeld).
 
+### Anhänge-Regressionstest
+
+```bash
+npx playwright install chromium   # einmalig, falls nicht schon geschehen
+node scripts/anhaenge-pruefen.js
+```
+
+Lädt die echte `www/index.html` gegen eine nachgebaute Capacitor-Filesystem-
+und -Preferences-Bridge (rein im Arbeitsspeicher) und prüft den kompletten
+Lebenszyklus der Anhänge bei Dokumenten, Aufgaben und Terminen: Ablegen als
+Datei, Anzeige aus der Datei, Löschen des Eintrags samt Datei, Abbrechen
+nach Auswahl (löscht die verwaiste Datei wieder), verzögertes Löschen der
+Datei bei Aufgaben/lokalen Terminen mit Rückgängig-Option, Sicherung-Export
+(bettet Base64 wieder ein) und -Import (legt wieder eine Datei an), sowie
+das Aufräumen verwaister Anhang-Dateien beim Start (`verwaisteAnhaengeAufraeumen()`).
+Sinnvoll nach jeder Änderung an den Anhang-Funktionen in `www/index.html`
+(`anhangAblegen`, `anhangQuelle`, `anhangSitzung`, `verwaisteAnhaengeAufraeumen`
+und Umfeld).
+
 ## Bekannte Stolperfallen (bitte beachten)
 
 - **Ganztägige Termine**: Kalender-Anbieter legen Mitternacht mal in UTC,
@@ -175,6 +194,13 @@ Kalenderfunktionen in `www/index.html` (`expandiereEvent`, `ganztagsSpanne`,
   (`anhaengeFuerExport()`/`anhaengeAusImport()`); die Android-Sicherung deckt
   den Ordner `anhaenge/` über eine eigene `<include domain="file">`-Regel in
   `backup_regeln.xml`/`datenregeln.xml` ab (zusätzlich zu `domain="sharedpref"`).
+  `anhangSitzung()` fängt nur das Abbrechen EINES offenen Formulars ab; Wege
+  daran vorbei (Aufgaben-Formular hat keinen eigenen Abbrechen-Knopf, ein
+  Termin scheitert beim Anlegen am Gerätekalender, die App wird im
+  Hintergrund von Android beendet) lässt `verwaisteAnhaengeAufraeumen()`
+  beim nächsten Start abräumen: sammelt alle tatsächlich noch referenzierten
+  Dateinamen aus Dokumenten/Aufgaben/Terminen und löscht jede Datei im
+  Anhänge-Ordner, die in keinem davon mehr vorkommt.
 - **Standardwerte beim Start**: Fast jeder Bereich schreibt beim ersten
   Aufbau seine Voreinstellung in `localStorage` (Urlaubskonto, Akte,
   Kalender u. a.). Wer prüfen will, ob eine Installation *neu* ist, muss das
